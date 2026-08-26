@@ -30,9 +30,48 @@ export async function getFreeTrialStatus(userId: string): Promise<{ used: boolea
   return { used: entitlement.freeTrialUsed };
 }
 
+/**
+ * A subscription's `status` is only ever flipped by a webhook/verify
+ * call (see lib/payments/orders.ts) — nothing proactively downgrades it
+ * when `currentPeriodEnd` passes, since HUMANORA doesn't auto-renew.
+ * So "is this plan actually still usable right now" always needs both
+ * checks: status must be active AND the paid period must not have
+ * lapsed. Centralized here so no caller can forget the second half.
+ */
+/** Exported for unit testing (lib/db/entitlement.test.ts) — pure function, no I/O. */
+export function isPeriodStillValid(currentPeriodEnd: Date | null): boolean {
+  return currentPeriodEnd === null || currentPeriodEnd.getTime() > Date.now();
+}
+
+/** Exported for unit testing — pure function, no I/O. */
+export function resolvePlan(sub: { plan: string; status: string; currentPeriodEnd: Date | null }): PlanId {
+  if (sub.status !== "active") return "free";
+  if (sub.plan !== "free" && !isPeriodStillValid(sub.currentPeriodEnd)) return "free";
+  return sub.plan as PlanId;
+}
+
 export async function getUserPlan(userId: string): Promise<PlanId> {
   const sub = await getOrCreateSubscription(userId);
-  return sub.status === "active" ? (sub.plan as PlanId) : "free";
+  return resolvePlan(sub);
+}
+
+export interface SubscriptionSummary {
+  plan: PlanId;
+  /** The plan actually usable right now (accounts for period expiry — see resolvePlan). */
+  effectivePlan: PlanId;
+  currentPeriodEnd: Date | null;
+  isExpired: boolean;
+}
+
+/** For account/billing UI — the raw stored plan alongside the resolved, currently-usable one. */
+export async function getSubscriptionSummary(userId: string): Promise<SubscriptionSummary> {
+  const sub = await getOrCreateSubscription(userId);
+  return {
+    plan: sub.plan as PlanId,
+    effectivePlan: resolvePlan(sub),
+    currentPeriodEnd: sub.currentPeriodEnd,
+    isExpired: sub.plan !== "free" && !isPeriodStillValid(sub.currentPeriodEnd),
+  };
 }
 
 // Both getOrCreate* helpers below use INSERT ... ON CONFLICT DO NOTHING
@@ -67,7 +106,7 @@ async function getOrCreateEntitlement(userId: string) {
  */
 export async function checkEntitlement(userId: string, inputChars: number): Promise<EntitlementDecision> {
   const sub = await getOrCreateSubscription(userId);
-  const plan = sub.status === "active" ? (sub.plan as PlanId) : "free";
+  const plan = resolvePlan(sub);
 
   if (plan === "free") {
     const entitlement = await getOrCreateEntitlement(userId);

@@ -104,6 +104,9 @@ export const verification = pgTable(
 
 export const planEnum = ["free", "essential", "pro", "ultra"] as const;
 export type Plan = (typeof planEnum)[number];
+// Same three paid plans, without "free" — payment_order can only ever
+// exist for something a user actually paid for.
+const PAID_PLAN_ENUM = ["essential", "pro", "ultra"] as const;
 
 /**
  * One row per user per billing period (calendar month, for now — no
@@ -228,7 +231,7 @@ export const subscription = pgTable("subscription", {
   userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
   plan: text("plan", { enum: planEnum }).notNull().default("free"),
   status: text("status", { enum: subscriptionStatusEnum }).notNull().default("active"),
-  provider: text("provider"), // e.g. "lemonsqueezy" — null while on free plan
+  provider: text("provider"), // "razorpay" — null while on free plan
   providerCustomerId: text("provider_customer_id"),
   providerSubscriptionId: text("provider_subscription_id"),
   currency: text("currency"), // the currency the customer actually pays in
@@ -249,3 +252,34 @@ export const webhookEvent = pgTable("webhook_event", {
   type: text("type").notNull(),
   processedAt: timestamp("processed_at").notNull().defaultNow(),
 });
+
+export const paymentOrderStatusEnum = ["created", "paid", "failed"] as const;
+export type PaymentOrderStatus = (typeof paymentOrderStatusEnum)[number];
+
+/**
+ * One row per Razorpay order HUMANORA creates. The Razorpay order id
+ * IS the primary key — it's globally unique (Razorpay's own id space),
+ * so there's no separate internal id to keep in sync, and every payment
+ * verification/webhook lookup is a direct, unambiguous key lookup.
+ *
+ * `amountInPaise`/`planId` are captured HERE, server-side, at order
+ * creation time — never re-derived from anything the client sends
+ * later. Verification (see lib/payments/orders.ts) checks Razorpay's
+ * own payment record against THESE stored values, not against
+ * whatever the browser claims it paid.
+ */
+export const paymentOrder = pgTable(
+  "payment_order",
+  {
+    id: text("id").primaryKey(), // Razorpay order id, e.g. "order_ABC123"
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    planId: text("plan_id", { enum: PAID_PLAN_ENUM }).notNull(),
+    amountInPaise: integer("amount_in_paise").notNull(),
+    currency: text("currency").notNull().default("INR"),
+    status: text("status", { enum: paymentOrderStatusEnum }).notNull().default("created"),
+    razorpayPaymentId: text("razorpay_payment_id"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    verifiedAt: timestamp("verified_at"),
+  },
+  (table) => [index("payment_order_user_idx").on(table.userId, table.createdAt)]
+);

@@ -1,26 +1,29 @@
 /**
- * HUMANORA pricing configuration.
+ * HUMANORA marketing pricing display. Prices themselves are NEVER
+ * redefined here — `monthlyPrice` below is read directly from
+ * lib/config/plans.ts (the one authoritative, server-enforced config)
+ * so the marketing page can never drift from what checkout actually
+ * charges. Only display copy (audience, feature bullets, icon, badge)
+ * lives here.
  *
- * This is placeholder product configuration, not a billing integration.
- * No payments are processed in this phase. Values here are the single
- * source of truth for the pricing section and the plan comparison table —
- * do not duplicate them in JSX.
- *
- * Supersedes the earlier ₹-denominated Free/Student/Pro/Team lineup with
- * a USD Free/Essential/Pro/Ultra lineup per the latest product direction.
+ * There is no annual billing plan in the current Razorpay integration
+ * (one-time orders per BILLING_PERIOD_DAYS — see lib/payments/orders.ts)
+ * — a previous version of this page showed a discounted annual price
+ * that nothing could actually charge; that toggle has been removed
+ * rather than shown as a real option that doesn't exist yet.
  */
+
+import { PLANS, type PlanId } from "@/lib/config/plans";
 
 export interface PricingFeature {
   label: string;
 }
 
 export interface PricingPlan {
-  id: "free" | "essential" | "pro" | "ultra";
+  id: PlanId;
   name: string;
   icon: "sprout" | "pen" | "star" | "bolt";
   monthlyPrice: number;
-  /** Per-month price when billed annually (already discounted). */
-  annualMonthlyPrice: number;
   audience: string;
   features: PricingFeature[];
   ctaLabel: string;
@@ -33,16 +36,12 @@ export const pricingPlans: PricingPlan[] = [
     id: "free",
     name: "Free",
     icon: "sprout",
-    monthlyPrice: 0,
-    annualMonthlyPrice: 0,
+    monthlyPrice: PLANS.free.monthlyPriceInr,
     audience: "For people exploring HUMANORA.",
     features: [
-      { label: "5 humanizations per month" },
-      { label: "Up to 500 words per request" },
-      { label: "1 output variation" },
+      { label: "One complimentary humanization, ever" },
+      { label: "Up to 200 characters" },
       { label: "Natural mode" },
-      { label: "Basic rewriting controls" },
-      { label: "Limited history" },
       { label: "No credit card required" },
     ],
     ctaLabel: "Get Started",
@@ -51,18 +50,15 @@ export const pricingPlans: PricingPlan[] = [
     id: "essential",
     name: "Essential",
     icon: "pen",
-    monthlyPrice: 12,
-    annualMonthlyPrice: 9,
+    monthlyPrice: PLANS.essential.monthlyPriceInr,
     audience: "For students and everyday writers.",
     features: [
-      { label: "100 humanizations per month" },
-      { label: "Up to 1,500 words per request" },
-      { label: "2 output variations" },
+      { label: `${PLANS.essential.monthlyHumanizations} humanizations per month` },
+      { label: `Up to ${Math.round(PLANS.essential.maxInputChars / 6).toLocaleString()} words per request` },
+      { label: `${PLANS.essential.outputVariations} output variations` },
       { label: "Natural, Academic & Professional modes" },
-      { label: "Tone controls" },
-      { label: "Writing intensity controls" },
+      { label: "My Voice (preview)" },
       { label: "Full writing history" },
-      { label: "Standard processing" },
     ],
     ctaLabel: "Choose Essential",
   },
@@ -70,19 +66,14 @@ export const pricingPlans: PricingPlan[] = [
     id: "pro",
     name: "Pro",
     icon: "star",
-    monthlyPrice: 18,
-    annualMonthlyPrice: 14,
+    monthlyPrice: PLANS.pro.monthlyPriceInr,
     audience: "For creators, professionals and frequent writers.",
     features: [
-      { label: "300 humanizations per month" },
-      { label: "Up to 3,000 words per request" },
-      { label: "3 output variations" },
+      { label: `${PLANS.pro.monthlyHumanizations} humanizations per month` },
+      { label: `Up to ${Math.round(PLANS.pro.maxInputChars / 6).toLocaleString()} words per request` },
+      { label: `${PLANS.pro.outputVariations} output variations` },
       { label: "All 6 writing modes" },
-      { label: "Advanced tone controls" },
-      { label: "Advanced rewrite intensity" },
-      { label: "My Voice" },
-      { label: "Saved preferences" },
-      { label: "Document upload" },
+      { label: "My Voice — full profile & apply to rewrites" },
       { label: "Priority processing & support" },
     ],
     ctaLabel: "Choose Pro",
@@ -93,20 +84,14 @@ export const pricingPlans: PricingPlan[] = [
     id: "ultra",
     name: "Ultra",
     icon: "bolt",
-    monthlyPrice: 36,
-    annualMonthlyPrice: 27,
+    monthlyPrice: PLANS.ultra.monthlyPriceInr,
     audience: "For power users and high-volume workflows.",
     features: [
       { label: "Unlimited humanizations*" },
-      { label: "Up to 5,000 words per request" },
-      { label: "5 output variations" },
+      { label: `Up to ${Math.round(PLANS.ultra.maxInputChars / 6).toLocaleString()} words per request` },
+      { label: `${PLANS.ultra.outputVariations} output variations` },
       { label: "Everything in Pro" },
-      { label: "Advanced My Voice profiles" },
-      { label: "Multiple voice profiles" },
-      { label: "Batch rewriting" },
-      { label: "Long-document processing" },
-      { label: "Export options" },
-      { label: "Early access to experimental features" },
+      { label: "My Voice — full profile & apply to rewrites" },
       { label: "Premium support" },
     ],
     ctaLabel: "Choose Ultra",
@@ -134,15 +119,22 @@ export const comparisonCategories: ComparisonCategory[] = [
   {
     title: "Pricing",
     rows: [
-      { label: "Monthly price", values: ["$0", "$12", "$18", "$36"] },
-      { label: "Annual price", values: ["$0/mo", "$9/mo", "$14/mo", "$27/mo"] },
+      {
+        label: "Monthly price",
+        values: [
+          `₹${PLANS.free.monthlyPriceInr}`,
+          `₹${PLANS.essential.monthlyPriceInr}`,
+          `₹${PLANS.pro.monthlyPriceInr}`,
+          `₹${PLANS.ultra.monthlyPriceInr}`,
+        ],
+      },
     ],
   },
   {
     title: "Usage",
     rows: [
-      { label: "Humanizations", values: ["5/mo", "100/mo", "300/mo", "Unlimited*"] },
-      { label: "Words per request", values: ["500", "1,500", "3,000", "5,000"] },
+      { label: "Humanizations", values: ["1 (lifetime)", "100/mo", "300/mo", "Unlimited*"] },
+      { label: "Words per request", values: ["~35", "1,500", "3,000", "5,000"] },
       { label: "Output variations", values: ["1", "2", "3", "5"] },
       { label: "History", values: ["Limited", "Full", "Full", "Full"] },
     ],
@@ -161,21 +153,7 @@ export const comparisonCategories: ComparisonCategory[] = [
   {
     title: "Personalization",
     rows: [
-      { label: "Tone control", values: [DASH, CHECK, CHECK, CHECK] },
-      { label: "Rewrite intensity", values: ["Basic", CHECK, "Advanced", "Advanced"] },
-      { label: "Saved preferences", values: [DASH, DASH, CHECK, CHECK] },
-      { label: "My Voice", values: [DASH, DASH, CHECK, CHECK] },
-      { label: "Multiple voice profiles", values: [DASH, DASH, DASH, CHECK] },
-    ],
-  },
-  {
-    title: "Workflow",
-    rows: [
-      { label: "Document upload", values: [DASH, DASH, CHECK, CHECK] },
-      { label: "Long-document processing", values: [DASH, DASH, DASH, CHECK] },
-      { label: "Batch rewriting", values: [DASH, DASH, DASH, CHECK] },
-      { label: "Export", values: [DASH, DASH, DASH, CHECK] },
-      { label: "Priority processing", values: [DASH, DASH, CHECK, CHECK] },
+      { label: "My Voice", values: [DASH, "Preview", "Full", "Full"] },
     ],
   },
   {
@@ -183,7 +161,6 @@ export const comparisonCategories: ComparisonCategory[] = [
     rows: [
       { label: "Standard support", values: [CHECK, CHECK, CHECK, CHECK] },
       { label: "Priority support", values: [DASH, DASH, CHECK, CHECK] },
-      { label: "Premium support", values: [DASH, DASH, DASH, CHECK] },
     ],
   },
 ];
