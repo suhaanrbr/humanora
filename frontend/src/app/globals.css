@@ -87,6 +87,9 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
+  /* Defensive guard: decorative absolutely-positioned elements (hero glow,
+     orbit ring) must never introduce a horizontal scrollbar. */
+  overflow-x: hidden;
 }
 
 /* Ambient background glow used behind hero/showcase sections */
@@ -136,4 +139,54 @@ body {
 ::selection {
   background: var(--color-brand-purple);
   color: white;
+}
+
+/* ==========================================================================
+   Restrained motion — used only under motion-safe: (see Tailwind classes).
+   Anyone with prefers-reduced-motion enabled sees these elements static.
+   ========================================================================== */
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes ellipsis {
+  0% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-spin-slow {
+    animation: spin-slow 40s linear infinite;
+  }
+  .animate-pulse-slow {
+    animation: pulse-slow 6s ease-in-out infinite;
+  }
+  .animate-pulse-slower {
+    animation: pulse-slow 8s ease-in-out infinite 1s;
+  }
+  .animate-ellipsis {
+    animation: ellipsis 1.6s ease-in-out infinite;
+  }
 }
