@@ -1,17 +1,12 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, lt, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
-import { usagePeriod, type Plan } from "@/lib/db/schema";
+import { usagePeriod } from "@/lib/db/schema";
+import { PLANS, type PlanId } from "@/lib/config/plans";
 import { randomUUID } from "crypto";
 
-/** Server-side plan limits — the ONLY source of truth for quota
- * enforcement. Never trust a limit or usage count supplied by the
- * client; always re-derive from this table. */
-export const PLAN_LIMITS: Record<Plan, { humanizations: number; maxChars: number }> = {
-  free: { humanizations: 5, maxChars: 500 * 6 }, // ~500 words
-  essential: { humanizations: 100, maxChars: 1500 * 6 },
-  pro: { humanizations: 300, maxChars: 3000 * 6 },
-  ultra: { humanizations: 2000, maxChars: 5000 * 6 }, // "unlimited*" fair-use cap, not literally infinite
-};
+// Quota numbers live in lib/config/plans.ts (the single authoritative
+// source) — this module only tracks and enforces consumption against
+// that config, never redefines the numbers.
 
 function currentPeriodBounds(now = new Date()) {
   const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -19,22 +14,32 @@ function currentPeriodBounds(now = new Date()) {
   return { periodStart, periodEnd };
 }
 
-async function getOrCreateCurrentPeriod(userId: string) {
+async function getOrCreateCurrentPeriod(userId: string, plan: PlanId) {
   const db = getDb();
   const { periodStart, periodEnd } = currentPeriodBounds();
 
-  const [existing] = await db
+  // INSERT ... ON CONFLICT DO NOTHING against the (userId, periodStart)
+  // unique index, then SELECT — safe under concurrent first-requests for
+  // a new billing period (the naive select-then-insert version let
+  // concurrent callers create duplicate period rows; see entitlement.ts
+  // for the same class of bug and why this pattern fixes it).
+  await db
+    .insert(usagePeriod)
+    .values({ id: randomUUID(), userId, periodStart, periodEnd, plan })
+    .onConflictDoNothing();
+
+  const [row] = await db
     .select()
     .from(usagePeriod)
     .where(and(eq(usagePeriod.userId, userId), eq(usagePeriod.periodStart, periodStart)));
 
-  if (existing) return existing;
-
-  const [created] = await db
-    .insert(usagePeriod)
-    .values({ id: randomUUID(), userId, periodStart, periodEnd, plan: "free" })
-    .returning();
-  return created;
+  // Keep the period's recorded plan current — it's a denormalized label
+  // for reporting, never the source of truth (subscription is).
+  if (row.plan !== plan) {
+    await db.update(usagePeriod).set({ plan }).where(eq(usagePeriod.id, row.id));
+    return { ...row, plan };
+  }
+  return row;
 }
 
 export interface QuotaCheckResult {
@@ -42,42 +47,58 @@ export interface QuotaCheckResult {
   reason?: "quota_exceeded";
   remaining: number;
   limit: number;
-  plan: Plan;
+  plan: PlanId;
 }
 
-/** Server-side-only check — call this before running an AI request for
- * an authenticated user, never after. */
-export async function checkAndReserveQuota(userId: string): Promise<QuotaCheckResult> {
+/**
+ * Server-side-only, concurrency-safe quota reservation for PAID plans.
+ * Same pattern as the free-trial reservation in entitlement.ts: a
+ * single conditional UPDATE (`WHERE humanize_count < limit`) — Postgres'
+ * row lock during the UPDATE means concurrent callers serialize and
+ * each re-checks the committed count, so usage can never overshoot the
+ * plan limit under concurrent requests.
+ */
+export async function checkAndReserveQuota(userId: string, plan: PlanId): Promise<QuotaCheckResult> {
   const db = getDb();
-  const period = await getOrCreateCurrentPeriod(userId);
-  const limit = PLAN_LIMITS[period.plan].humanizations;
+  const limit = PLANS[plan].monthlyHumanizations;
+  const period = await getOrCreateCurrentPeriod(userId, plan);
 
-  if (period.humanizeCount >= limit) {
-    return { allowed: false, reason: "quota_exceeded", remaining: 0, limit, plan: period.plan };
+  const [updated] = await db
+    .update(usagePeriod)
+    .set({ humanizeCount: sql`${usagePeriod.humanizeCount} + 1`, updatedAt: new Date() })
+    .where(and(eq(usagePeriod.id, period.id), lt(usagePeriod.humanizeCount, limit)))
+    .returning({ humanizeCount: usagePeriod.humanizeCount });
+
+  if (!updated) {
+    return { allowed: false, reason: "quota_exceeded", remaining: 0, limit, plan };
   }
-
-  await db
-    .update(usagePeriod)
-    .set({ humanizeCount: period.humanizeCount + 1, updatedAt: new Date() })
-    .where(eq(usagePeriod.id, period.id));
-
-  return { allowed: true, remaining: limit - period.humanizeCount - 1, limit, plan: period.plan };
+  return { allowed: true, remaining: limit - updated.humanizeCount, limit, plan };
 }
 
-export async function recordWordsProcessed(userId: string, words: number) {
+/** Compensating action if a reserved quota unit's Gemini call fails. */
+export async function releaseQuotaUnit(userId: string, plan: PlanId): Promise<void> {
   const db = getDb();
-  const period = await getOrCreateCurrentPeriod(userId);
+  const period = await getOrCreateCurrentPeriod(userId, plan);
   await db
     .update(usagePeriod)
-    .set({ wordsProcessed: period.wordsProcessed + words, updatedAt: new Date() })
+    .set({ humanizeCount: sql`GREATEST(${usagePeriod.humanizeCount} - 1, 0)`, updatedAt: new Date() })
     .where(eq(usagePeriod.id, period.id));
 }
 
-export async function getUsageSummary(userId: string) {
-  const period = await getOrCreateCurrentPeriod(userId);
-  const limit = PLAN_LIMITS[period.plan].humanizations;
+export async function recordWordsProcessed(userId: string, plan: PlanId, words: number) {
+  const db = getDb();
+  const period = await getOrCreateCurrentPeriod(userId, plan);
+  await db
+    .update(usagePeriod)
+    .set({ wordsProcessed: sql`${usagePeriod.wordsProcessed} + ${words}`, updatedAt: new Date() })
+    .where(eq(usagePeriod.id, period.id));
+}
+
+export async function getUsageSummary(userId: string, plan: PlanId) {
+  const period = await getOrCreateCurrentPeriod(userId, plan);
+  const limit = PLANS[plan].monthlyHumanizations;
   return {
-    plan: period.plan,
+    plan,
     humanizeCount: period.humanizeCount,
     humanizeLimit: limit,
     wordsProcessed: period.wordsProcessed,

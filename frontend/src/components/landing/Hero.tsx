@@ -27,7 +27,7 @@ export function Hero() {
             sounds like you.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href="/#try-it" variant="primary" size="lg">
+            <ButtonLink href="/dashboard/humanize" variant="primary" size="lg">
               Humanize Text Now
               <ArrowRightIcon className="h-4 w-4" />
             </ButtonLink>

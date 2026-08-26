@@ -102,7 +102,7 @@ export function PricingCard({ plan, period }: PricingCardProps) {
       </ul>
 
       <ButtonLink
-        href={isFree ? "/#try-it" : "/login"}
+        href={isFree ? "/dashboard/humanize" : "/login"}
         variant={plan.highlighted ? "primary" : "secondary"}
         className="mt-8 w-full"
       >

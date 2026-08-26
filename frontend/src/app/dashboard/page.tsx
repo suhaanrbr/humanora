@@ -9,6 +9,7 @@ import { SignOutButton } from "@/components/dashboard/SignOutButton";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
 import { getOrCreateVoiceProfile, computeCompleteness } from "@/lib/db/voice";
+import { getUserPlan, getFreeTrialStatus } from "@/lib/db/entitlement";
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
@@ -17,13 +18,15 @@ export default async function DashboardPage() {
   // guaranteed non-null here.
   const session = (await auth.api.getSession({ headers: await headers() }))!;
   const userId = session.user.id;
+  const plan = await getUserPlan(userId);
 
   // Each data source degrades independently — a database hiccup on one
   // (e.g. usage) shouldn't take down the whole dashboard.
-  const [usage, history, voice] = await Promise.allSettled([
-    getUsageSummary(userId),
+  const [usage, history, voice, freeTrial] = await Promise.allSettled([
+    getUsageSummary(userId, plan),
     getHistoryForUser(userId, 10),
     getOrCreateVoiceProfile(userId),
+    getFreeTrialStatus(userId),
   ]);
 
   return (
@@ -34,7 +37,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
         </div>
         <div className="flex items-center gap-3">
-          <ButtonLink href="/#try-it" variant="primary" size="sm">
+          <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
             Humanize text
           </ButtonLink>
           <SignOutButton />
@@ -46,31 +49,59 @@ export default async function DashboardPage() {
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
           Usage this month
         </h2>
-        {usage.status === "fulfilled" ? (
+        {usage.status === "fulfilled" && freeTrial.status === "fulfilled" ? (
           <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-foreground-muted">Humanizations</p>
-                <p className="mt-1 text-2xl font-bold text-foreground">
-                  {usage.value.humanizeCount} / {usage.value.humanizeLimit}
+            {plan === "free" ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-foreground-muted">Complimentary humanization</p>
+                    <p className="mt-1 text-2xl font-bold text-foreground">
+                      {freeTrial.value.used ? "Used" : "Available"}
+                    </p>
+                  </div>
+                  <Badge variant="brand">Free plan</Badge>
+                </div>
+                <p className="mt-3 text-xs text-foreground-subtle">
+                  {freeTrial.value.used
+                    ? "You've used your one complimentary transformation. Upgrade to keep writing with HUMANORA."
+                    : `Every account gets one complimentary humanization, up to 200 characters.`}
                 </p>
-              </div>
-              <Badge variant="brand" className="capitalize">
-                {usage.value.plan} plan
-              </Badge>
-            </div>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full border border-border">
-              <div
-                className="bg-brand-gradient h-full rounded-full"
-                style={{
-                  width: `${Math.min(100, (usage.value.humanizeCount / usage.value.humanizeLimit) * 100)}%`,
-                }}
-              />
-            </div>
-            <p className="mt-3 text-xs text-foreground-subtle">
-              {usage.value.wordsProcessed} words processed this period. Resets{" "}
-              {usage.value.periodEnd.toLocaleDateString()}.
-            </p>
+                {freeTrial.value.used && (
+                  <div className="mt-4">
+                    <ButtonLink href="/#pricing" variant="primary" size="sm">
+                      View plans
+                    </ButtonLink>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-foreground-muted">Humanizations</p>
+                    <p className="mt-1 text-2xl font-bold text-foreground">
+                      {usage.value.humanizeCount} / {usage.value.humanizeLimit}
+                    </p>
+                  </div>
+                  <Badge variant="brand" className="capitalize">
+                    {usage.value.plan} plan
+                  </Badge>
+                </div>
+                <div className="mt-4 h-2 w-full overflow-hidden rounded-full border border-border">
+                  <div
+                    className="bg-brand-gradient h-full rounded-full"
+                    style={{
+                      width: `${Math.min(100, (usage.value.humanizeCount / usage.value.humanizeLimit) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <p className="mt-3 text-xs text-foreground-subtle">
+                  {usage.value.wordsProcessed} words processed this period. Resets{" "}
+                  {usage.value.periodEnd.toLocaleDateString()}.
+                </p>
+              </>
+            )}
           </Card>
         ) : (
           <ErrorCard message="Couldn't load usage right now." />
@@ -122,7 +153,7 @@ export default async function DashboardPage() {
                 Your recent HUMANORA transformations will appear here.
               </p>
               <div className="mt-4 flex justify-center">
-                <ButtonLink href="/#try-it" variant="secondary" size="sm">
+                <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm">
                   Humanize your first draft
                 </ButtonLink>
               </div>

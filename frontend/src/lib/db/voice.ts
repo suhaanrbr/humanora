@@ -17,14 +17,12 @@ import { randomUUID } from "crypto";
  */
 export async function getOrCreateVoiceProfile(userId: string) {
   const db = getDb();
-  const [existing] = await db.select().from(voiceProfile).where(eq(voiceProfile.userId, userId));
-  if (existing) return existing;
-
-  const [created] = await db
-    .insert(voiceProfile)
-    .values({ id: randomUUID(), userId })
-    .returning();
-  return created;
+  // Conflict-safe upsert against the unique userId constraint — see
+  // entitlement.ts for why "select then insert if missing" races under
+  // concurrent first requests.
+  await db.insert(voiceProfile).values({ id: randomUUID(), userId }).onConflictDoNothing();
+  const [row] = await db.select().from(voiceProfile).where(eq(voiceProfile.userId, userId));
+  return row;
 }
 
 export function computeCompleteness(sampleCount: number): number {
