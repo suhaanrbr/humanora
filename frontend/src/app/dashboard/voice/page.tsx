@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getVerifiedSession } from "@/lib/auth-session";
 import { Container } from "@/components/ui/Container";
 import { getUserPlan } from "@/lib/db/entitlement";
 import { listVoiceSamples, getOrCreateVoiceProfile } from "@/lib/db/voice";
@@ -9,8 +9,12 @@ import { VoiceWorkspace } from "@/components/dashboard/VoiceWorkspace";
 export const metadata = { title: "My Voice — HUMANORA" };
 
 export default async function VoicePage() {
-  const session = (await auth.api.getSession({ headers: await headers() }))!;
-  const userId = session.user.id;
+  // Request-memoized — reuses the layout's session lookup, no extra DB call.
+  const result = await getVerifiedSession();
+  if (result.status !== "authenticated") {
+    redirect("/login");
+  }
+  const userId = result.session.user.id;
 
   const [plan, samples, profileRow] = await Promise.all([
     getUserPlan(userId),

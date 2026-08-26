@@ -1,6 +1,6 @@
-import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth";
+import { getVerifiedSession } from "@/lib/auth-session";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -16,9 +16,16 @@ import { PLANS } from "@/lib/config/plans";
 export const metadata = { title: "Dashboard — HUMANORA" };
 
 export default async function DashboardPage() {
-  // Layout already redirected if there's no valid session — this is
-  // guaranteed non-null here.
-  const session = (await auth.api.getSession({ headers: await headers() }))!;
+  // getVerifiedSession() is request-memoized (see lib/auth-session.ts) —
+  // this reuses the exact same lookup the layout already made, no
+  // second DB round trip. The layout already redirects on "unauthenticated"
+  // and renders its own error state on "error", but this branch is kept
+  // as a defensive fallback rather than assuming that can never reach here.
+  const result = await getVerifiedSession();
+  if (result.status !== "authenticated") {
+    redirect("/login");
+  }
+  const session = result.session;
   const userId = session.user.id;
   const plan = await getUserPlan(userId);
 
@@ -47,8 +54,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Usage */}
-      <section>
+      {/* Usage / Billing */}
+      <section id="billing" className="scroll-mt-24">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
           Usage this month
         </h2>

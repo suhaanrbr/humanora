@@ -28,7 +28,23 @@ export function getDb() {
     );
   }
 
-  const sql = postgres(url, { max: 1 });
+  const sql = postgres(url, {
+    max: 1,
+    // Serverless-safe connection lifecycle: a module-level client like
+    // this one is reused across invocations on a warm Vercel function
+    // instance, but the underlying TCP socket can go stale while the
+    // instance is frozen between requests (Neon closes idle server-side
+    // connections; a frozen container has no chance to notice). Without
+    // these, the FIRST query after such a gap throws a connection error
+    // — which, upstream, auth's fail-closed session check was treating
+    // identically to "not logged in" and bouncing valid users to
+    // /login. Closing idle connections proactively and recycling
+    // long-lived ones means postgres.js reconnects on its own before
+    // that happens, instead of handing the app a dead-socket error.
+    idle_timeout: 20,
+    connect_timeout: 10,
+    max_lifetime: 30 * 60,
+  });
   cached = drizzle(sql, { schema });
   return cached;
 }

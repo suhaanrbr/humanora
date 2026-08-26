@@ -5,28 +5,19 @@ import {
   MAX_SAMPLE_WORDS,
   MIN_SAMPLE_WORDS,
 } from "@/lib/db/voice";
-
-async function requireUserId(req: NextRequest): Promise<string | null> {
-  try {
-    const { auth } = await import("@/lib/auth");
-    const session = await auth.api.getSession({ headers: req.headers });
-    return session?.user.id ?? null;
-  } catch {
-    return null;
-  }
-}
+import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
 export async function GET(req: NextRequest) {
-  const userId = await requireUserId(req);
-  if (!userId) return NextResponse.json({ error: "Please log in." }, { status: 401 });
+  const auth = await resolveAuthenticatedUserId(req);
+  if (auth.status !== "ok") return authErrorResponse(auth.status);
 
-  const samples = await listVoiceSamples(userId);
+  const samples = await listVoiceSamples(auth.userId);
   return NextResponse.json({ samples });
 }
 
 export async function POST(req: NextRequest) {
-  const userId = await requireUserId(req);
-  if (!userId) return NextResponse.json({ error: "Please log in." }, { status: 401 });
+  const auth = await resolveAuthenticatedUserId(req);
+  if (auth.status !== "ok") return authErrorResponse(auth.status);
 
   let body: unknown;
   try {
@@ -40,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please provide a writing sample." }, { status: 400 });
   }
 
-  const result = await addVoiceSample(userId, content);
+  const result = await addVoiceSample(auth.userId, content);
   if (!result.ok) {
     const messages: Record<typeof result.reason, string> = {
       too_short: `That sample is too short — add at least ${MIN_SAMPLE_WORDS} words so HUMANORA has enough to learn from.`,

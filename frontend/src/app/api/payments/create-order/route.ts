@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { createOrderForPlan } from "@/lib/payments/orders";
-
-async function requireUserId(req: NextRequest): Promise<string | null> {
-  try {
-    const { auth } = await import("@/lib/auth");
-    const session = await auth.api.getSession({ headers: req.headers });
-    return session?.user.id ?? null;
-  } catch {
-    return null;
-  }
-}
+import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
 // Guards against rapid repeat-click order spam — Razorpay orders don't
 // charge anything on their own, but there's no reason to let one
@@ -18,10 +9,12 @@ async function requireUserId(req: NextRequest): Promise<string | null> {
 const BURST_LIMIT = { requests: 10, windowMs: 60 * 1000 };
 
 export async function POST(req: NextRequest) {
-  const userId = await requireUserId(req);
-  if (!userId) {
-    return NextResponse.json({ error: "Please log in to choose a plan.", code: "AUTH_REQUIRED" }, { status: 401 });
-  }
+  const auth = await resolveAuthenticatedUserId(req);
+  // NOT 401 for a lookup failure — that isn't proof the user is logged
+  // out, and reporting it as AUTH_REQUIRED is what previously sent an
+  // already-authenticated user back to /login (see lib/api-auth.ts).
+  if (auth.status !== "ok") return authErrorResponse(auth.status);
+  const userId = auth.userId;
 
   const burst = checkRateLimit(`payments-create-order:${userId}`, BURST_LIMIT.requests, BURST_LIMIT.windowMs);
   if (!burst.allowed) {

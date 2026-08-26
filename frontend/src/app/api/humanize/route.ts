@@ -7,6 +7,7 @@ import { saveHumanization } from "@/lib/db/history";
 import { getEffectiveVoiceProfile } from "@/lib/db/voice";
 import { buildStyleDirectives } from "@/lib/ai/voiceAnalysis";
 import { FREE_TRIAL_MAX_CHARS, PLANS } from "@/lib/config/plans";
+import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
 // A short-window burst guard on top of the entitlement system — this is
 // NOT the quota (the database is), it just stops one account from
@@ -29,27 +30,13 @@ function wordCount(text: string) {
 }
 
 export async function POST(req: NextRequest) {
-  // Compulsory authentication — there is no anonymous path. `auth` is
-  // dynamically imported so a missing DATABASE_URL degrades to a clean
-  // 401 rather than crashing this route's import entirely.
-  let userId: string | null = null;
-  try {
-    const { auth } = await import("@/lib/auth");
-    const session = await auth.api.getSession({ headers: req.headers });
-    userId = session?.user.id ?? null;
-  } catch {
-    return NextResponse.json(
-      { error: "The service is temporarily unavailable. Please try again shortly." },
-      { status: 503 }
-    );
-  }
-
-  if (!userId) {
-    return NextResponse.json(
-      { error: "Please log in to use HUMANORA.", code: "AUTH_REQUIRED" },
-      { status: 401 }
-    );
-  }
+  // Compulsory authentication — there is no anonymous path. A lookup
+  // FAILURE (transient DB hiccup) returns 503, not 401 — reporting it as
+  // AUTH_REQUIRED would incorrectly read as "you're logged out" to any
+  // caller that treats 401 as a login prompt. See lib/api-auth.ts.
+  const auth = await resolveAuthenticatedUserId(req);
+  if (auth.status !== "ok") return authErrorResponse(auth.status);
+  const userId = auth.userId;
 
   const burst = checkRateLimit(`humanize-burst:${userId}`, BURST_LIMIT.requests, BURST_LIMIT.windowMs);
   if (!burst.allowed) {
