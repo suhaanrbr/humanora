@@ -19,14 +19,11 @@ export default function CookiePolicyPage() {
         <h2 className="text-lg font-semibold text-foreground">What we currently store</h2>
         <ul className="mt-3 flex flex-col gap-2">
           <li>
-            <strong className="text-foreground">Theme preference</strong> (
-            <span className="font-mono text-xs">humanora-theme</span> in
-            <code className="font-mono text-xs"> localStorage</code>) —
-            remembers whether you chose Light, Dark, or System. This is
-            not a cookie in the strict sense (it&apos;s local storage,
-            not sent to our server on every request), never expires
-            automatically, and can be cleared via your browser&apos;s
-            site data settings at any time.
+            <strong className="text-foreground">Session cookie</strong> (set on
+            login, used to keep you signed in) and, while you&apos;re actively
+            using the workspace, a temporary draft of unsaved text in your
+            browser&apos;s <code className="font-mono text-xs">sessionStorage</code>,
+            cleared automatically when you close the tab.
           </li>
         </ul>
       </section>

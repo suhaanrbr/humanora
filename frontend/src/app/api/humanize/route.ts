@@ -6,6 +6,8 @@ import { checkAndReserveQuota, releaseQuotaUnit, recordWordsProcessed } from "@/
 import { saveHumanization } from "@/lib/db/history";
 import { getEffectiveVoiceProfile } from "@/lib/db/voice";
 import { buildStyleDirectives } from "@/lib/ai/voiceAnalysis";
+import { checkMeaningPreservation } from "@/lib/ai/meaningCheck";
+import { scoreReadability } from "@/lib/ai/readability";
 import { FREE_TRIAL_MAX_CHARS, PLANS } from "@/lib/config/plans";
 import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
@@ -136,7 +138,13 @@ export async function POST(req: NextRequest) {
   // --- Call Gemini. On ANY failure, release the reservation — the
   // entitlement is only spent on a genuinely delivered result. ---
   try {
-    const result = await humanize({ text: trimmed, mode: safeMode, strength: safeStrength, styleDirectives });
+    const result = await humanize({
+      text: trimmed,
+      mode: safeMode,
+      strength: safeStrength,
+      styleDirectives,
+      variations: PLANS[plan].outputVariations,
+    });
     const words = wordCount(trimmed);
 
     await recordWordsProcessed(userId, plan, words);
@@ -149,7 +157,15 @@ export async function POST(req: NextRequest) {
       wordCount: words,
     });
 
-    return NextResponse.json({ output: result.output });
+    // Deterministic, non-AI safety net — never another model call, just
+    // pattern matching to flag numbers/percentages/dates/URLs/quotes
+    // from the input that don't show up in the output. Informational
+    // only; it never blocks a result, just tells the user what to
+    // double-check.
+    const meaningCheck = checkMeaningPreservation(trimmed, result.output);
+    const readability = scoreReadability(result.output);
+
+    return NextResponse.json({ output: result.output, outputs: result.outputs, meaningCheck, readability });
   } catch (err) {
     if (plan === "free") {
       await releaseFreeTrial(userId);

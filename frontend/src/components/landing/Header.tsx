@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/ButtonLink";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { useSession, signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
@@ -156,7 +155,6 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <ThemeToggle />
           {isPending ? (
             <div className="h-9 w-24" aria-hidden="true" />
           ) : session ? (
@@ -251,12 +249,7 @@ export function Header() {
             Developers
           </Link>
 
-          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-            <span className="text-sm text-foreground-muted">Theme</span>
-            <ThemeToggle />
-          </div>
-
-          <div className="mt-1 flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
             {!isPending && session ? (
               <>
                 <ButtonLink href="/dashboard" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
