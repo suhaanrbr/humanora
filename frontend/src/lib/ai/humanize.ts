@@ -33,10 +33,25 @@ export interface HumanizeRequest {
    * (see lib/ai/voiceAnalysis.ts#buildStyleDirectives) — never raw
    * sample text. Omit for the plain, voice-agnostic rewrite. */
   styleDirectives?: string;
+  /** How many independent rewrite candidates to request (default 1) —
+   * driven by the caller's plan (PLANS[plan].outputVariations), never a
+   * client-supplied number. Made as SEPARATE sequential requests, not
+   * via Gemini's candidateCount — gemini-3.6-flash rejects
+   * candidateCount > 1 outright ("Multiple candidates is not enabled
+   * for this model"), discovered when this first shipped. Costs more
+   * AI-provider requests proportional to `variations`, which is the
+   * honest tradeoff for a real multi-output feature on this model. */
+  variations?: number;
 }
 
 export interface HumanizeResult {
+  /** The first candidate — kept for every existing caller that only
+   * expects one result; always equal to outputs[0]. */
   output: string;
+  /** All distinct candidates actually produced (length >= 1, and <=
+   * the requested `variations` — a later request can return text
+   * identical to an earlier one, which is de-duplicated here). */
+  outputs: string[];
 }
 
 export class HumanizeError extends Error {
@@ -67,7 +82,7 @@ const strengthInstructions: Record<RewriteStrength, string> = {
   strong: "Rewrite more freely for maximum naturalness, while preserving meaning.",
 };
 
-function buildPrompt(req: HumanizeRequest): string {
+function buildPrompt(req: HumanizeRequest, variationIndex: number): string {
   return [
     "You are HUMANORA, a writing assistant that rewrites AI-assisted or stiff drafts into more natural, human-sounding writing.",
     "",
@@ -82,30 +97,22 @@ function buildPrompt(req: HumanizeRequest): string {
     ...(req.styleDirectives
       ? ["", `Match the writer's own voice as closely as the mode/strength above allow: ${req.styleDirectives}`]
       : []),
+    ...(variationIndex > 0
+      ? ["", `Produce a genuinely different phrasing from a typical rewrite — vary sentence structure and word choice, while following every rule above.`]
+      : []),
     "",
     "Original text:",
     req.text,
   ].join("\n");
 }
 
-export async function humanize(req: HumanizeRequest): Promise<HumanizeResult> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new HumanizeError(
-      "GEMINI_API_KEY is not configured.",
-      "config"
-    );
-  }
-
+async function requestOneCandidate(req: HumanizeRequest, apiKey: string, variationIndex: number, temperature: number): Promise<string> {
   const response = await fetch(`${API_URL}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(req) }] }],
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 1024,
-      },
+      contents: [{ parts: [{ text: buildPrompt(req, variationIndex) }] }],
+      generationConfig: { temperature, maxOutputTokens: 1024 },
     }),
   });
 
@@ -123,15 +130,46 @@ export async function humanize(req: HumanizeRequest): Promise<HumanizeResult> {
   }
 
   const data = await response.json();
-  const output: string | undefined =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  const text: string | undefined = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  return text?.trim() ?? "";
+}
 
-  if (!output || !output.trim()) {
-    throw new HumanizeError(
-      "The AI provider returned an empty result.",
-      "empty_output"
-    );
+export async function humanize(req: HumanizeRequest): Promise<HumanizeResult> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new HumanizeError("GEMINI_API_KEY is not configured.", "config");
   }
 
-  return { output: output.trim() };
+  const variationCount = Math.min(Math.max(req.variations ?? 1, 1), 5);
+
+  // First candidate uses the same temperature as before (unchanged
+  // behavior for every plan that only ever requested one variation).
+  // Additional candidates run sequentially (not in parallel) to stay
+  // within the free-tier per-minute rate limit for a single request,
+  // and use a slightly higher temperature + an explicit "vary this"
+  // instruction so they're not near-duplicates of the first.
+  const outputs: string[] = [];
+  for (let i = 0; i < variationCount; i++) {
+    const temperature = i === 0 ? 0.6 : 0.85;
+    try {
+      const text = await requestOneCandidate(req, apiKey, i, temperature);
+      if (text) outputs.push(text);
+    } catch (err) {
+      // The FIRST candidate failing is a real failure (matches every
+      // existing single-variation caller's behavior exactly). A later
+      // variation failing (rate limit, transient upstream hiccup)
+      // shouldn't cost the user the successful result(s) they already
+      // got — skip it and keep going.
+      if (i === 0) throw err;
+      console.error(`[humanize] variation ${i + 1}/${variationCount} failed, continuing with fewer`, err);
+    }
+  }
+
+  const unique = Array.from(new Set(outputs));
+
+  if (unique.length === 0) {
+    throw new HumanizeError("The AI provider returned an empty result.", "empty_output");
+  }
+
+  return { output: unique[0], outputs: unique };
 }

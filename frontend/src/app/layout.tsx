@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Sora, Inter, Geist_Mono } from "next/font/google";
-import { ThemeProvider, themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 // Sora: geometric, confident display face for headings — reads as
@@ -29,20 +28,17 @@ export const metadata: Metadata = {
     "HUMANORA transforms AI-assisted writing into clearer, more natural writing while preserving meaning, facts, and citations.",
 };
 
+// HUMANORA is dark-mode only by deliberate product decision — there is
+// no theme toggle and no Light/System option anywhere in the app.
+// globals.css's `:root` (with no data-theme attribute at all) already
+// resolves to the same dark palette that `:root[data-theme="dark"]`
+// does, so simply never setting the attribute keeps every page dark,
+// with no init script, no flash-of-wrong-theme concern, and no
+// hydration-mismatch risk to guard against.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${sora.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <head>
-        {/* Sets data-theme before first paint — see lib/theme.tsx. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+    <html lang="en" className={`${sora.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

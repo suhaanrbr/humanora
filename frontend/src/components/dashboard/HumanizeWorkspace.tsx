@@ -12,6 +12,8 @@ import { writingModes } from "@/lib/config/modes";
 import { PLANS, PAID_PLAN_IDS, FREE_TRIAL_MAX_CHARS, type PlanId } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
 import type { RewriteStrength, WritingMode } from "@/lib/ai/humanize";
+import type { MeaningCheckResult } from "@/lib/ai/meaningCheck";
+import type { ReadabilityScore } from "@/lib/ai/readability";
 
 const DRAFT_STORAGE_KEY = "humanora-draft";
 const MAX_CHARS = 5000 * 6; // Ultra's ceiling — the API enforces the real per-plan limit server-side
@@ -45,8 +47,12 @@ export function HumanizeWorkspace({
   const [strength, setStrength] = useState<RewriteStrength>("balanced");
   const [state, setState] = useState<WorkspaceState>("idle");
   const [output, setOutput] = useState("");
+  const [outputs, setOutputs] = useState<string[]>([]);
+  const [activeVariation, setActiveVariation] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [meaningCheck, setMeaningCheck] = useState<MeaningCheckResult | null>(null);
+  const [readability, setReadability] = useState<ReadabilityScore | null>(null);
 
   const voiceAvailable = plan !== "free" && hasVoiceProfile;
   const [useVoice, setUseVoice] = useState(false);
@@ -59,7 +65,8 @@ export function HumanizeWorkspace({
   /* eslint-disable react-hooks/set-state-in-effect --
      Deliberate: restoring browser-only sessionStorage state can't happen
      during SSR or the initial client render without a hydration
-     mismatch (same reasoning as lib/theme.tsx's reduced-motion check). */
+     mismatch (the standard "sync from a browser-only API after
+     hydration" pattern used throughout this codebase). */
   useEffect(() => {
     try {
       const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
@@ -106,6 +113,10 @@ export function HumanizeWorkspace({
       }
 
       setOutput(data.output as string);
+      setOutputs((data.outputs as string[]) ?? [data.output as string]);
+      setActiveVariation(0);
+      setMeaningCheck((data.meaningCheck as MeaningCheckResult) ?? null);
+      setReadability((data.readability as ReadabilityScore) ?? null);
       setState("done");
       // A delivered result means the draft no longer needs to survive
       // a redirect round-trip.
@@ -123,13 +134,17 @@ export function HumanizeWorkspace({
   function reset() {
     setState("idle");
     setOutput("");
+    setOutputs([]);
+    setActiveVariation(0);
     setErrorMessage("");
     setCopied(false);
+    setMeaningCheck(null);
+    setReadability(null);
   }
 
   async function copyResult() {
     try {
-      await navigator.clipboard.writeText(output);
+      await navigator.clipboard.writeText(outputs[activeVariation] ?? output);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -259,10 +274,36 @@ export function HumanizeWorkspace({
 
             {state === "done" && (
               <>
+                {outputs.length > 1 && (
+                  <div className="mb-4 flex flex-wrap gap-1.5">
+                    {outputs.map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => setActiveVariation(i)}
+                        className={cn(
+                          "focus-ring press-feedback cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                          activeVariation === i
+                            ? "bg-brand-gradient text-white"
+                            : "border border-border bg-surface text-foreground-muted hover:text-foreground"
+                        )}
+                      >
+                        Variation {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <p className="animate-fade-in-up whitespace-pre-wrap text-lg leading-relaxed text-foreground">
-                  {output}
+                  {outputs[activeVariation] ?? output}
                 </p>
-                <p className="mt-3 text-xs text-foreground-subtle">{wordCount(output)} words</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-foreground-subtle">
+                  <span>{wordCount(outputs[activeVariation] ?? output)} words</span>
+                  {readability && activeVariation === 0 && (
+                    <span title={`Flesch Reading Ease: ${readability.score}/100`}>
+                      · Readability: {readability.label} ({readability.score})
+                    </span>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={copyResult}
@@ -274,6 +315,10 @@ export function HumanizeWorkspace({
             )}
           </div>
         </div>
+
+        {state === "done" && meaningCheck && meaningCheck.items.length > 0 && (
+          <MeaningCheckPanel result={meaningCheck} />
+        )}
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background-elevated px-5 py-5 sm:px-7">
           <p className="text-xs text-foreground-subtle">
@@ -297,6 +342,54 @@ export function HumanizeWorkspace({
         </div>
       </Card>
     </Container>
+  );
+}
+
+const MEANING_TYPE_LABEL: Record<MeaningCheckResult["items"][number]["type"], string> = {
+  number: "Number",
+  percentage: "Percentage",
+  date: "Date",
+  url: "Link",
+  quote: "Quote",
+};
+
+/**
+ * A deterministic (non-AI) pass over the input/output flagging whether
+ * numbers, percentages, dates, links, and quotes survived the rewrite.
+ * Purely informational — it never blocks the result, just tells the
+ * user exactly what to double-check rather than asking them to trust
+ * the rewrite blindly.
+ */
+function MeaningCheckPanel({ result }: { result: MeaningCheckResult }) {
+  const changed = result.items.filter((i) => !i.preserved);
+
+  return (
+    <div className="border-t border-border px-5 py-4 sm:px-7">
+      <div className="flex items-center gap-2">
+        <span className={cn("h-1.5 w-1.5 rounded-full", result.allPreserved ? "bg-success" : "bg-warning")} />
+        <p className="text-xs font-medium text-foreground">
+          {result.allPreserved
+            ? "Meaning check: all facts preserved"
+            : `Meaning check: ${changed.length} item${changed.length === 1 ? "" : "s"} may have changed — review recommended`}
+        </p>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {result.items.map((item, i) => (
+          <span
+            key={`${item.type}-${item.value}-${i}`}
+            title={item.preserved ? "Found in the result" : "Not found in the result — please check"}
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px]",
+              item.preserved
+                ? "border-border bg-surface text-foreground-muted"
+                : "border-warning/40 bg-warning/10 text-warning"
+            )}
+          >
+            {item.preserved ? "✓" : "!"} {MEANING_TYPE_LABEL[item.type]}: {item.value}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 

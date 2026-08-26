@@ -157,9 +157,16 @@ export default async function DashboardPage() {
 
       {/* History */}
       <section>
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-          Recent history
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+            Recent history
+          </h2>
+          {history.status === "fulfilled" && history.value.length > 0 && (
+            <Link href="/dashboard/history" className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground">
+              View all
+            </Link>
+          )}
+        </div>
         {history.status === "fulfilled" ? (
           history.value.length === 0 ? (
             <Card className="p-8 text-center">
