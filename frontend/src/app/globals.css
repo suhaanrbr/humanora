@@ -2,34 +2,53 @@
 
 /* ==========================================================================
    HUMANORA Design Tokens
-   Dark, premium SaaS surface with purple/indigo brand gradient.
-   Single source of truth for color, spacing, radius and shadow tokens.
+   Two themes — HUMANORA Dark (default) and HUMANORA Light — built on the
+   same semantic variable names so components never ask "am I dark mode?";
+   they just consume --color-background, --color-surface, etc. Switching
+   themes is a matter of which block below is active, driven by
+   `data-theme` on <html> (see lib/theme.tsx + the inline init script in
+   layout.tsx). Single source of truth for color, radius and shadow tokens.
    ========================================================================== */
 
-:root {
-  /* Surfaces */
-  --color-background: #08080f;
-  --color-background-elevated: #0e0e1a;
-  --color-surface: #121223;
-  --color-surface-hover: #171730;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-strong: rgba(255, 255, 255, 0.14);
+:root,
+:root[data-theme="dark"] {
+  /* Surfaces — deep near-black navy, darker than before, so the cyan/
+     violet/magenta spectrum below reads as neon light against true
+     darkness rather than sitting on a mid-navy grey. */
+  --color-background: #060812;
+  --color-background-elevated: #0c0f1e;
+  --color-surface: #11142a;
+  --color-surface-subtle: #0c0f1e;
+  --color-surface-hover: #171b38;
+  --color-surface-active: #1f2447;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.2);
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-grid-dot: rgba(255, 255, 255, 0.06);
 
   /* Text */
-  --color-foreground: #f5f5fa;
-  --color-foreground-muted: #a4a4bd;
-  --color-foreground-subtle: #6f6f8c;
+  --color-foreground: #f8f8fc;
+  --color-foreground-muted: #c6c6e0;
+  --color-foreground-subtle: #9d9dc0;
 
-  /* Brand */
-  --color-brand-indigo: #6366f1;
+  /* Brand — cyan → blue → violet → magenta spectrum, replacing the
+     narrower indigo/purple pairing with a wider, more electric range. */
+  --color-brand-indigo: #3b82f6;
   --color-brand-purple: #a855f7;
   --color-brand-violet: #8b5cf6;
-  --color-brand-pink: #ec4899;
+  --color-brand-pink: #d946ef;
+  --color-brand-cyan: #22d3ee;
 
   /* Status */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
+  --color-info: #22d3ee;
+
+  /* Accent — used sparingly for pricing/plan hierarchy, not the whole site */
+  --color-accent-amber: #eab676;
+  --color-surface-warm: #f6f1e7;
+  --color-surface-warm-foreground: #1c1a16;
 
   /* Radius */
   --radius-sm: 0.5rem;
@@ -41,16 +60,78 @@
   --shadow-glow-sm: 0 0 24px -8px rgba(139, 92, 246, 0.45);
   --shadow-glow-md: 0 0 48px -12px rgba(139, 92, 246, 0.55);
   --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
-    0 8px 24px -12px rgba(0, 0, 0, 0.6);
+    0 8px 24px -12px rgba(0, 0, 0, 0.7);
+
+  color-scheme: dark;
+}
+
+/* ---- HUMANORA Light: "Aurora Intelligence" ----
+   Codename Aurora Glass. A luminous, almost-white environment that reads
+   as lit from underneath by faint indigo/violet/blue light, not a flat
+   white-background-plus-purple-button SaaS default. Readability comes
+   first: every text token here is tuned to clear WCAG AA against both
+   --color-background and --color-surface before anything decorative.
+   The Pro pricing highlight uses a bright pearl card with a violet
+   border + soft glow rather than Dark Mode's ink-flip — a large colored
+   card fill would fight this theme's restrained, mostly-neutral field. */
+:root[data-theme="light"] {
+  --color-background: #fafaff;
+  --color-background-elevated: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f1effe;
+  --color-surface-hover: #f2f0fd;
+  --color-surface-active: #e8e4fb;
+  --color-border: rgba(18, 17, 26, 0.1);
+  --color-border-strong: rgba(18, 17, 26, 0.18);
+  --color-line: rgba(18, 17, 26, 0.11);
+  --color-grid-dot: rgba(18, 17, 26, 0.055);
+
+  /* Text — near-black graphite, never pale lavender for real copy. */
+  --color-foreground: #12111a;
+  --color-foreground-muted: #4c4a5c;
+  --color-foreground-subtle: #67647a;
+
+  /* Brand — Indigo → Electric Violet → Orchid, HUMANORA's light-theme
+     spectrum. Most of the interface stays neutral so this reads as
+     meaningful wherever it appears, rather than tinting everything. */
+  --color-brand-indigo: #5b5ff5;
+  --color-brand-purple: #8b2fe0;
+  --color-brand-violet: #7c3aed;
+  --color-brand-pink: #c2379a;
+  --color-brand-cyan: #0891b2;
+
+  --color-success: #157a3d;
+  --color-warning: #a85a06;
+  --color-danger: #d1352c;
+  --color-info: #0b74b8;
+
+  --color-accent-amber: #a06423;
+  /* Pro's spotlight card in Light Mode stays a bright pearl surface with
+     a violet border + soft glow (see PricingCard) rather than Dark
+     Mode's ink-flip — a "huge colored card background" would fight the
+     luminous Aurora Intelligence direction this theme is built around. */
+  --color-surface-warm: #ffffff;
+  --color-surface-warm-foreground: #171525;
+
+  --shadow-glow-sm: 0 0 22px -10px rgba(109, 74, 255, 0.3);
+  --shadow-glow-md: 0 0 40px -12px rgba(109, 74, 255, 0.32);
+  --shadow-card: 0 1px 2px rgba(23, 21, 42, 0.05),
+    0 10px 26px -16px rgba(23, 21, 42, 0.22);
+
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--color-background);
   --color-background-elevated: var(--color-background-elevated);
   --color-surface: var(--color-surface);
+  --color-surface-subtle: var(--color-surface-subtle);
   --color-surface-hover: var(--color-surface-hover);
+  --color-surface-active: var(--color-surface-active);
   --color-border: var(--color-border);
   --color-border-strong: var(--color-border-strong);
+  --color-line: var(--color-line);
+  --color-grid-dot: var(--color-grid-dot);
 
   --color-foreground: var(--color-foreground);
   --color-foreground-muted: var(--color-foreground-muted);
@@ -60,10 +141,16 @@
   --color-brand-purple: var(--color-brand-purple);
   --color-brand-violet: var(--color-brand-violet);
   --color-brand-pink: var(--color-brand-pink);
+  --color-brand-cyan: var(--color-brand-cyan);
 
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
+  --color-info: var(--color-info);
+
+  --color-accent-amber: var(--color-accent-amber);
+  --color-surface-warm: var(--color-surface-warm);
+  --color-surface-warm-foreground: var(--color-surface-warm-foreground);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -74,16 +161,88 @@
   --shadow-glow-md: var(--shadow-glow-md);
   --shadow-card: var(--shadow-card);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
 }
 
+:root[data-theme="dark"] {
+  /* Deep navy-black base, matching the reference's near-black stage — the
+     cyan/violet/magenta mesh below is what supplies all the color. */
+  --gradient-body-top: #0a0d1f;
+  --gradient-body-mid: #05060f;
+  --gradient-body-bottom: #0a0818;
+
+  --mesh-1: rgba(59, 130, 246, 0.3);
+  --mesh-2: rgba(168, 85, 247, 0.28);
+  --mesh-3: rgba(217, 70, 239, 0.22);
+  --mesh-4: rgba(34, 211, 238, 0.22);
+}
+:root[data-theme="light"] {
+  --gradient-body-top: #fafaff;
+  --gradient-body-mid: #fafaff;
+  --gradient-body-bottom: #f6f5ff;
+
+  /* Kept faint on purpose — Aurora Intelligence reads as an almost-white
+     surface lit from underneath, not a colored wash over the page.
+     Individual sections (Hero, My Voice, Preserve Meaning) add their own
+     confined, masked aurora blooms on top of this near-neutral base —
+     see .bg-ambient-glow below. */
+  --mesh-1: rgba(91, 95, 245, 0.055);
+  --mesh-2: rgba(124, 58, 237, 0.045);
+  --mesh-3: rgba(168, 85, 247, 0.035);
+  --mesh-4: rgba(120, 170, 255, 0.045);
+}
+
 html {
-  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* A brief, universal color transition — applied only for ~200ms while
+   ThemeProvider is switching themes (see lib/theme.tsx), not permanently.
+   This is what gives the theme swap its "immediate but not jarring" feel
+   without adding a transition to every element all the time. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transitioning,
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition: background-color 180ms ease, border-color 180ms ease,
+      color 180ms ease, fill 180ms ease, stroke 180ms ease !important;
+    transition-delay: 0s !important;
+  }
 }
 
 body {
-  background: var(--color-background);
+  background-color: var(--color-background);
+  /* Layers, back to front: base gradient → several confined color
+     fields → a near-invisible film-grain texture. The grain is what
+     turns a flat gradient into something that reads as "there's actual
+     depth here" on closer look, at an opacity too low to ever register
+     as a texture on its own. Fixed attachment keeps it feeling like one
+     continuous environment rather than a strip repeated per section. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E"),
+    radial-gradient(
+      50% 45% at 8% 0%,
+      var(--mesh-1) 0%,
+      transparent 60%
+    ),
+    radial-gradient(45% 40% at 95% 8%, var(--mesh-2) 0%, transparent 60%),
+    radial-gradient(55% 50% at 15% 60%, var(--mesh-3) 0%, transparent 65%),
+    radial-gradient(50% 45% at 85% 75%, var(--mesh-4) 0%, transparent 60%),
+    radial-gradient(70% 60% at 50% 105%, var(--mesh-2) 0%, transparent 65%),
+    linear-gradient(
+      180deg,
+      var(--gradient-body-top) 0%,
+      var(--gradient-body-mid) 55%,
+      var(--gradient-body-bottom) 100%
+    );
+  background-attachment: fixed;
   color: var(--color-foreground);
   font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
@@ -92,18 +251,226 @@ body {
   overflow-x: hidden;
 }
 
-/* Ambient background glow used behind hero/showcase sections */
+/* Headings get HUMANORA's display face (Sora) — a geometric, confident
+   voice distinct from the Inter body copy, applied globally so no
+   component needs to remember to opt in. */
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display), var(--font-sans), ui-sans-serif,
+    system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 640px) {
+  body {
+    /* Fixed backgrounds can jank on mobile scroll (repaint per frame on
+       some devices) — scroll normally there, still fully vibrant. */
+    background-attachment: scroll;
+  }
+}
+
+/* Ambient background glow used behind hero/showcase sections. Uses the
+   same theme-tuned mesh tokens as the body so hero-strength glow and the
+   rest-of-page glow always feel like one palette. (Dark Mode geometry —
+   unchanged from the approved design.) */
 .bg-ambient-glow {
+  background-image: radial-gradient(65% 60% at 12% 0%, var(--mesh-1) 0%, transparent 62%),
+    radial-gradient(60% 55% at 88% 15%, var(--mesh-2) 0%, transparent 62%),
+    radial-gradient(45% 40% at 70% 75%, var(--mesh-3) 0%, transparent 60%),
+    radial-gradient(40% 35% at 25% 90%, var(--mesh-4) 0%, transparent 62%);
+}
+
+/* Softer, single-glow variant for sections lower on the page — light
+   emerging from the dark rather than a second hero-strength wash. */
+.bg-ambient-glow-soft {
+  background-image: radial-gradient(45% 40% at 50% 0%, var(--mesh-1) 0%, transparent 65%);
+}
+
+/* Aurora Intelligence — Light Mode's own restrained geometry for the same two
+   utility classes above. Several small, corner-confined light sources
+   (upper-right lavender, lower-left blush, lower-right icy blue) rather
+   than one large wash bleeding across the whole section — the center
+   stays close to clean pearl so headline/body text never sits on top of
+   compounding color. This never touches Dark Mode's rules above. */
+:root[data-theme="light"] .bg-ambient-glow {
+  /* color-mix bakes the transparency into the gradient's own paint layer
+     — deliberately NOT an `opacity` on the section, which would also
+     fade the readable content sitting on top of it. */
   background-image: radial-gradient(
-      60% 50% at 15% 0%,
-      rgba(99, 102, 241, 0.16) 0%,
-      transparent 60%
+      32% 38% at 88% 6%,
+      color-mix(in srgb, var(--color-brand-violet) 13%, transparent) 0%,
+      transparent 72%
     ),
     radial-gradient(
-      50% 40% at 85% 10%,
-      rgba(168, 85, 247, 0.14) 0%,
-      transparent 60%
+      28% 32% at 6% 96%,
+      color-mix(in srgb, var(--color-brand-pink) 9%, transparent) 0%,
+      transparent 74%
+    ),
+    radial-gradient(
+      30% 34% at 92% 88%,
+      color-mix(in srgb, var(--color-info) 11%, transparent) 0%,
+      transparent 74%
     );
+}
+
+:root[data-theme="light"] .bg-ambient-glow-soft {
+  background-image: radial-gradient(
+    38% 30% at 50% 0%,
+    color-mix(in srgb, var(--color-brand-violet) 8%, transparent) 0%,
+    transparent 75%
+  );
+}
+
+/* Faint dot-grid texture. Extremely low opacity — a hint of structure
+   behind content, not a visible pattern.
+   IMPORTANT: this renders on a ::before, not the section itself. A
+   mask-image applied directly to a section would mask/fade its actual
+   content (headline, buttons, everything) toward transparent at the
+   edges, not just the decorative background — exactly the kind of
+   accidental content-opacity bug that makes a hero read as "washed
+   out". Keeping it on a separate, non-content pseudo-element confines
+   the fade to the dots alone. */
+.bg-grid-texture {
+  position: relative;
+}
+.bg-grid-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(60% 60% at 50% 30%, black 0%, transparent 100%);
+}
+
+/* ==========================================================================
+   3D perspective floor — a genuine CSS 3D plane (real perspective/rotateX,
+   not a flat illusion) receding beneath the hero, like a lit floor in a
+   studio rather than a wallpaper pattern. Sits behind all content via
+   z-index/DOM order and fades to transparent via mask so it never
+   competes with text. A very slow drift is the only motion, gated by
+   prefers-reduced-motion.
+   ========================================================================== */
+.bg-3d-floor {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 65%;
+  overflow: hidden;
+  pointer-events: none;
+  perspective: 700px;
+  perspective-origin: 50% 0%;
+  mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
+}
+.bg-3d-floor::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: rotateX(62deg);
+  transform-origin: 50% 0%;
+  background-image: linear-gradient(var(--color-border-strong) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border-strong) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.5;
+  mask-image: radial-gradient(65% 75% at 50% 0%, black 0%, transparent 78%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bg-3d-floor::before {
+    animation: floor-drift 14s linear infinite;
+  }
+}
+@keyframes floor-drift {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 0 64px, 64px 0;
+  }
+}
+
+/* ==========================================================================
+   Pearl Glass — HUMANORA's Light Mode elevated-surface material.
+   White/translucent, a whisper of lavender, a thin visible border, a
+   soft multi-layer shadow, and a 1px internal highlight along the top
+   edge (like light catching the rim of glass). Used selectively — hero
+   cards, pricing cards, the My Voice panel, dropdowns, tooltips — not
+   applied to every surface on the page. In Dark Mode this resolves to
+   the existing card surface unchanged (no glass effect needed there).
+   ========================================================================== */
+.pearl-glass {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+/* Faint violet-tinted surface — used only for the "after"/result side of
+   a before/after comparison (hero visual, live demo), so the transformed
+   state reads as distinct without resorting to a saturated fill. */
+.surface-violet-tint {
+  background-color: color-mix(in srgb, var(--color-brand-violet) 6%, var(--color-surface));
+}
+:root[data-theme="light"] .surface-violet-tint {
+  background-color: color-mix(in srgb, var(--color-brand-violet) 5%, var(--color-surface));
+}
+
+:root[data-theme="light"] .pearl-glass {
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(252, 250, 255, 0.92) 100%
+  );
+  background-color: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), var(--shadow-card);
+}
+/* Higher specificity than either rule alone, so combining the two
+   classes reliably shows the tinted glass rather than plain glass. */
+:root[data-theme="light"] .pearl-glass.surface-violet-tint {
+  background-color: color-mix(in srgb, var(--color-brand-violet) 7%, rgba(255, 255, 255, 0.86));
+}
+
+/* Light Mode section-rhythm tints — alternating subtle surfaces so Pearl
+   Aurora doesn't read as one endless white canvas. No-op in Dark Mode
+   (that palette already has its own established rhythm via
+   .bg-ambient-glow-soft / .section-glow-top, left untouched). */
+:root[data-theme="light"] .section-tint-lavender {
+  background-color: color-mix(in srgb, var(--color-brand-violet) 3%, var(--color-background));
+}
+:root[data-theme="light"] .section-tint-violet {
+  background-color: color-mix(in srgb, var(--color-brand-violet) 5%, var(--color-background));
+}
+:root[data-theme="light"] .section-tint-cool {
+  background-color: color-mix(in srgb, var(--color-info) 4%, var(--color-background));
+}
+
+/* Hairline gradient edge — used to fade a section's top/bottom border
+   into the background instead of a hard-stop border line. */
+.border-fade-top {
+  position: relative;
+}
+.border-fade-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-border-strong) 50%,
+    transparent
+  );
+}
+
+/* Theme-aware placeholder "line of text" used in mockup UIs (mini editors,
+   before/after cards). Replaces literal bg-white/10, which disappears
+   against a light background. */
+.bg-line {
+  background-color: var(--color-line);
 }
 
 /* Brand gradient text (wordmark accent, headline highlight) */
@@ -118,12 +485,21 @@ body {
   color: transparent;
 }
 
+/* Extremely subtle glow on the gradient portion of the hero headline —
+   Light Mode only, where a hairline lift helps the violet gradient sit
+   forward against a pale pearl background. Dark Mode's gradient already
+   pops against the near-black surface without help. */
+:root[data-theme="light"] .text-brand-gradient-glow {
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--color-brand-violet) 22%, transparent));
+}
+
 /* Brand gradient fill (logo mark, solid CTAs) */
 .bg-brand-gradient {
   background-image: linear-gradient(
     135deg,
-    var(--color-brand-indigo),
-    var(--color-brand-purple)
+    var(--color-brand-indigo) 0%,
+    var(--color-brand-violet) 55%,
+    var(--color-brand-purple) 100%
   );
 }
 
@@ -152,6 +528,12 @@ body {
   }
 }
 
+@keyframes spin-slow-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
 @keyframes pulse-slow {
   0%,
   100% {
@@ -176,9 +558,75 @@ body {
   }
 }
 
+@keyframes float-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* A genuine 3D tilt (rotateX/Y with perspective) rather than a flat
+   left-right slide — used on the hero's HUMANORA core so it reads as a
+   floating dimensional object, not a sticker. */
+@keyframes tilt-3d {
+  0%,
+  100% {
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  25% {
+    transform: rotateY(8deg) rotateX(-3deg);
+  }
+  75% {
+    transform: rotateY(-8deg) rotateX(3deg);
+  }
+}
+
+@keyframes drift-particle {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: var(--drift-to, translate(0, -120px));
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .animate-spin-slow {
     animation: spin-slow 40s linear infinite;
+  }
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 32s linear infinite;
   }
   .animate-pulse-slow {
     animation: pulse-slow 6s ease-in-out infinite;
@@ -189,4 +637,195 @@ body {
   .animate-ellipsis {
     animation: ellipsis 1.6s ease-in-out infinite;
   }
+  .animate-float-gentle {
+    animation: float-gentle 5s ease-in-out infinite;
+  }
+  .animate-float-gentle-delayed {
+    animation: float-gentle 5s ease-in-out infinite 1.2s;
+  }
+  .animate-tilt-3d {
+    animation: tilt-3d 9s ease-in-out infinite;
+    transform-style: preserve-3d;
+  }
+  .animate-drift-particle {
+    animation: drift-particle 3.2s ease-in infinite;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out both;
+  }
+  .animate-bar-grow {
+    animation: bar-grow 1s ease-out both;
+    transform-origin: left;
+  }
+}
+
+/* Section-to-section continuity glow. A faint radial wash positioned at
+   the top of a section so it reads as light bleeding in from the section
+   above, rather than a hard visual stop between blocks. */
+.section-glow-top {
+  position: relative;
+}
+.section-glow-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(900px, 90%);
+  height: 240px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(139, 92, 246, 0.1) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Fluid hero headline sizing — scales smoothly between breakpoints
+   instead of jumping between fixed text-4xl/5xl/6xl steps. */
+.text-hero {
+  font-size: clamp(2.25rem, 1.55rem + 3.2vw, 3.75rem);
+  line-height: 1.08;
+}
+
+/* Reusable hover-lift for interactive surfaces (cards, panels). */
+.hover-lift {
+  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hover-lift:hover {
+    transform: translateY(-3px);
+  }
+}
+.hover-lift:hover {
+  border-color: var(--color-border-strong);
+}
+
+/* ==========================================================================
+   Scroll reveal system (see components/ui/Reveal.tsx).
+   Elements start hidden/offset and are un-hidden by adding `.is-visible`
+   once an IntersectionObserver reports them in view. Reduced-motion users
+   never receive the hidden state to begin with (handled in JS), so this
+   CSS only ever animates for users who allow motion.
+   ========================================================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  filter: blur(4px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* Flowing dashed connector — used for the "language changes, protected
+   info stays" and How-It-Works progress lines. */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-flow-dash {
+    animation: flow-dash 1.4s linear infinite;
+  }
+}
+
+/* Button press feedback */
+.press-feedback {
+  transition: transform 120ms ease;
+}
+.press-feedback:active {
+  transform: scale(0.97);
+}
+
+/* A hairline of internal light along the top edge of HUMANORA's primary
+   CTA — what makes it read as "illuminated from within" rather than a
+   flat gradient rectangle. Subtle enough to disappear at a glance. */
+.btn-primary-illuminate {
+  position: relative;
+  isolation: isolate;
+  /* A soft bevel: a bright rim on top, a darker floor underneath — the
+     "raised glass button" read, layered under the caller's own
+     shadow-glow-* utility rather than replacing it. */
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.18);
+}
+.btn-primary-illuminate::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto 1px;
+  height: 40%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+/* A diagonal light sweep that glides across on hover — restrained, one
+   pass, never looping. Purely decorative (::after, no text inside it),
+   so it can never interfere with label contrast. */
+.btn-primary-illuminate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.22) 35%,
+    transparent 50%
+  );
+  background-size: 250% 100%;
+  background-position: 120% 0;
+  pointer-events: none;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary-illuminate::after {
+    transition: background-position 700ms ease;
+  }
+  .btn-primary-illuminate:hover::after {
+    background-position: -20% 0;
+  }
+}
+.btn-primary-illuminate > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Lighter companion treatment for secondary/outline buttons — just the
+   top-edge glass highlight, no sweep (that stays reserved for the
+   primary CTA so it keeps a distinct, more important feel). */
+.btn-glass-edge {
+  position: relative;
+  isolation: isolate;
+}
+.btn-glass-edge::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px auto 1px;
+  height: 45%;
+  border-radius: inherit;
+  /* Light reflecting off glass reads as bright regardless of theme —
+     unlike the surface underneath, this highlight is never tinted by
+     --color-foreground. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+.btn-glass-edge > * {
+  position: relative;
+  z-index: 1;
 }

@@ -1,83 +1,73 @@
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+"use client";
+
+import { useState } from "react";
 import { Container } from "@/components/ui/Container";
-import { pricingPlans } from "@/lib/config/pricing";
-import { cn } from "@/lib/cn";
+import { Reveal } from "@/components/ui/Reveal";
+import { FAQAccordion } from "@/components/ui/FAQAccordion";
+import { BillingToggle, type BillingPeriod } from "@/components/pricing/BillingToggle";
+import { PricingCard } from "@/components/pricing/PricingCard";
+import { PlanComparison } from "@/components/pricing/PlanComparison";
+import { pricingPlans, ultraFairUseNote } from "@/lib/config/pricing";
+import { pricingFaq } from "@/lib/config/faq";
 
 /**
- * Pricing section, rendered entirely from the `pricingPlans` configuration
- * (see src/lib/config/pricing.ts). No plan data is duplicated here.
+ * Pricing — one of the strongest sections on the page. Cards + billing
+ * toggle are rendered entirely from `pricingPlans` (see
+ * lib/config/pricing.ts); a full comparison table and FAQ follow below.
  */
 export function Pricing() {
+  const [period, setPeriod] = useState<BillingPeriod>("monthly");
+
   return (
-    <section id="pricing" className="py-24 sm:py-32">
+    <section id="pricing" className="section-glow-top py-20 sm:py-28">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <Reveal as="div" className="mx-auto max-w-2xl text-center">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Simple, transparent pricing
           </h2>
-          <p className="mt-4 text-base text-foreground-muted">
+          <p className="mt-4 text-lg text-foreground-muted">
             Start free. Upgrade as your writing needs grow.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {pricingPlans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={cn(
-                "relative flex flex-col p-6",
-                plan.highlighted && "border-brand-purple/50 shadow-glow-md"
-              )}
-            >
-              {plan.badge && (
-                <Badge variant="brand" className="absolute -top-3 left-6">
-                  {plan.badge}
-                </Badge>
-              )}
+        <Reveal as="div" delay={80} className="mt-8">
+          <BillingToggle period={period} onChange={setPeriod} savingsLabel="25%" />
+        </Reveal>
 
-              <p className="text-sm font-medium text-foreground-muted">{plan.name}</p>
-              <div className="mt-3 flex items-baseline gap-1">
-                <span className="text-3xl font-bold tracking-tight text-foreground">
-                  {plan.price}
-                </span>
-                <span className="text-sm text-foreground-subtle">{plan.billingPeriod}</span>
-              </div>
-              <p className="mt-3 text-sm text-foreground-muted">{plan.description}</p>
-
-              <ul className="mt-6 flex flex-1 flex-col gap-2.5">
-                {plan.features.map((feature) => (
-                  <li key={feature.label} className="flex items-start gap-2 text-sm text-foreground-muted">
-                    <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-purple" />
-                    <span>{feature.label}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                variant={plan.highlighted ? "primary" : "secondary"}
-                className="mt-8 w-full"
-              >
-                {plan.ctaLabel}
-              </Button>
-            </Card>
+        <div className="mx-auto mt-12 grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {pricingPlans.map((plan, i) => (
+            <Reveal key={plan.id} as="div" delay={i * 80}>
+              <PricingCard plan={plan} period={period} />
+            </Reveal>
           ))}
         </div>
 
-        <p className="mx-auto mt-10 max-w-2xl text-center text-xs text-foreground-subtle">
-          Pricing shown reflects current product configuration and may change
-          as HUMANORA evolves. No payment is collected yet.
+        <p className="mx-auto mt-6 max-w-2xl text-center text-xs text-foreground-subtle">
+          {ultraFairUseNote} Plans and usage limits are provisional product
+          configuration and are subject to change while HUMANORA is under
+          development. No payment is collected yet.
         </p>
+
+        {/* Full plan comparison */}
+        <Reveal as="div" className="mx-auto mt-24 max-w-5xl">
+          <h3 className="text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Compare HUMANORA plans
+          </h3>
+          <div className="mt-10">
+            <PlanComparison />
+          </div>
+        </Reveal>
+
+        {/* Pricing FAQ */}
+        <Reveal as="div" className="mx-auto mt-24 max-w-2xl">
+          <h3 className="text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Pricing questions
+          </h3>
+          <div className="mt-8">
+            <FAQAccordion items={pricingFaq} />
+          </div>
+        </Reveal>
       </Container>
     </section>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="m4 10 4 4 8-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
