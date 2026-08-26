@@ -29,6 +29,10 @@ export interface HumanizeRequest {
   text: string;
   mode: WritingMode;
   strength: RewriteStrength;
+  /** Optional short style directives from the caller's My Voice profile
+   * (see lib/ai/voiceAnalysis.ts#buildStyleDirectives) — never raw
+   * sample text. Omit for the plain, voice-agnostic rewrite. */
+  styleDirectives?: string;
 }
 
 export interface HumanizeResult {
@@ -75,6 +79,9 @@ function buildPrompt(req: HumanizeRequest): string {
     "",
     `Mode: ${req.mode} — ${modeInstructions[req.mode]}`,
     `Strength: ${req.strength} — ${strengthInstructions[req.strength]}`,
+    ...(req.styleDirectives
+      ? ["", `Match the writer's own voice as closely as the mode/strength above allow: ${req.styleDirectives}`]
+      : []),
     "",
     "Original text:",
     req.text,
