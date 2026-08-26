@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   HUMANORA Design Tokens
+   Dark, premium SaaS surface with purple/indigo brand gradient.
+   Single source of truth for color, spacing, radius and shadow tokens.
+   ========================================================================== */
+
+:root {
+  /* Surfaces */
+  --color-background: #08080f;
+  --color-background-elevated: #0e0e1a;
+  --color-surface: #121223;
+  --color-surface-hover: #171730;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Text */
+  --color-foreground: #f5f5fa;
+  --color-foreground-muted: #a4a4bd;
+  --color-foreground-subtle: #6f6f8c;
+
+  /* Brand */
+  --color-brand-indigo: #6366f1;
+  --color-brand-purple: #a855f7;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-pink: #ec4899;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  /* Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Shadows / glow */
+  --shadow-glow-sm: 0 0 24px -8px rgba(139, 92, 246, 0.45);
+  --shadow-glow-md: 0 0 48px -12px rgba(139, 92, 246, 0.55);
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 8px 24px -12px rgba(0, 0, 0, 0.6);
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-background-elevated: var(--color-background-elevated);
+  --color-surface: var(--color-surface);
+  --color-surface-hover: var(--color-surface-hover);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-foreground: var(--color-foreground);
+  --color-foreground-muted: var(--color-foreground-muted);
+  --color-foreground-subtle: var(--color-foreground-subtle);
+
+  --color-brand-indigo: var(--color-brand-indigo);
+  --color-brand-purple: var(--color-brand-purple);
+  --color-brand-violet: var(--color-brand-violet);
+  --color-brand-pink: var(--color-brand-pink);
+
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+
+  --shadow-glow-sm: var(--shadow-glow-sm);
+  --shadow-glow-md: var(--shadow-glow-md);
+  --shadow-card: var(--shadow-card);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+}
+
+/* Ambient background glow used behind hero/showcase sections */
+.bg-ambient-glow {
+  background-image: radial-gradient(
+      60% 50% at 15% 0%,
+      rgba(99, 102, 241, 0.16) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      50% 40% at 85% 10%,
+      rgba(168, 85, 247, 0.14) 0%,
+      transparent 60%
+    );
+}
+
+/* Brand gradient text (wordmark accent, headline highlight) */
+.text-brand-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-brand-indigo),
+    var(--color-brand-purple)
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Brand gradient fill (logo mark, solid CTAs) */
+.bg-brand-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-brand-indigo),
+    var(--color-brand-purple)
+  );
+}
+
+/* Consistent, accessible focus ring across custom primitives */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-brand-purple);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--color-brand-purple);
+  color: white;
+}

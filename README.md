@@ -31,4 +31,23 @@ Project is in early foundation stage. Follow the phased development plan in `HUM
 
 ## Setup
 
-Setup instructions will be added as each phase introduces runnable code (frontend scaffold, backend scaffold, database, etc.).
+### Frontend
+
+The frontend is a Next.js (App Router) + TypeScript + Tailwind CSS project.
+
+```bash
+cd frontend
+npm install
+npm run dev      # start local dev server (http://localhost:3000)
+npm run lint      # run ESLint
+npm run build     # production build
+```
+
+Design tokens (colors, radii, shadows) live in `frontend/src/app/globals.css`.
+Reusable UI primitives (Button, Input, Card, Badge, Container, Logo) live in
+`frontend/src/components/`. The home page (`frontend/src/app/page.tsx`) is
+currently a temporary design-system preview, not the final landing page.
+
+### Backend
+
+Not yet scaffolded — added in a later phase.
