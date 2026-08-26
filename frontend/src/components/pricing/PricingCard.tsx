@@ -2,13 +2,13 @@ import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { Card } from "@/components/ui/Card";
 import { PlanIcon } from "@/components/pricing/PlanIcon";
+import { CheckoutButton } from "@/components/payments/CheckoutButton";
 import { cn } from "@/lib/cn";
 import type { PricingPlan } from "@/lib/config/pricing";
-import type { BillingPeriod } from "@/components/pricing/BillingToggle";
+import type { PaidPlanId } from "@/lib/config/plans";
 
 export interface PricingCardProps {
   plan: PricingPlan;
-  period: BillingPeriod;
 }
 
 /**
@@ -17,9 +17,8 @@ export interface PricingCardProps {
  * unimportant: a warm-ivory card in Dark Mode, a bright pearl card with
  * a violet border and soft glow in Light Mode (see --color-surface-warm).
  */
-export function PricingCard({ plan, period }: PricingCardProps) {
-  const price = period === "yearly" ? plan.annualMonthlyPrice : plan.monthlyPrice;
-  const isFree = plan.monthlyPrice === 0;
+export function PricingCard({ plan }: PricingCardProps) {
+  const isFree = plan.id === "free";
 
   return (
     <Card
@@ -59,23 +58,19 @@ export function PricingCard({ plan, period }: PricingCardProps) {
 
       <div className="mt-2 flex items-baseline gap-1">
         <span
-          key={`${plan.id}-${period}`}
           className={cn(
-            "animate-fade-in-up text-4xl font-bold tracking-tight",
+            "text-4xl font-bold tracking-tight",
             plan.highlighted ? "text-surface-warm-foreground" : "text-foreground"
           )}
         >
-          ${price}
+          ₹{plan.monthlyPrice}
         </span>
-        <span className={cn("text-sm", plan.highlighted ? "text-surface-warm-foreground/60" : "text-foreground-subtle")}>
-          /month
-        </span>
+        {!isFree && (
+          <span className={cn("text-sm", plan.highlighted ? "text-surface-warm-foreground/60" : "text-foreground-subtle")}>
+            /month
+          </span>
+        )}
       </div>
-      {!isFree && period === "yearly" && (
-        <p className={cn("mt-1 text-xs", plan.highlighted ? "text-surface-warm-foreground/60" : "text-foreground-subtle")}>
-          billed annually
-        </p>
-      )}
 
       <p className={cn("mt-4 text-sm", plan.highlighted ? "text-surface-warm-foreground/75" : "text-foreground-muted")}>
         {plan.audience}
@@ -101,13 +96,19 @@ export function PricingCard({ plan, period }: PricingCardProps) {
         ))}
       </ul>
 
-      <ButtonLink
-        href={isFree ? "/dashboard/humanize" : "/login"}
-        variant={plan.highlighted ? "primary" : "secondary"}
-        className="mt-8 w-full"
-      >
-        {plan.ctaLabel}
-      </ButtonLink>
+      {isFree ? (
+        <ButtonLink href="/dashboard/humanize" variant={plan.highlighted ? "primary" : "secondary"} className="mt-8 w-full">
+          {plan.ctaLabel}
+        </ButtonLink>
+      ) : (
+        <CheckoutButton
+          planId={plan.id as PaidPlanId}
+          variant={plan.highlighted ? "primary" : "secondary"}
+          className="mt-8 w-full"
+        >
+          {plan.ctaLabel}
+        </CheckoutButton>
+      )}
     </Card>
   );
 }

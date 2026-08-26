@@ -9,7 +9,9 @@ import { SignOutButton } from "@/components/dashboard/SignOutButton";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
 import { getOrCreateVoiceProfile, computeCompleteness } from "@/lib/db/voice";
-import { getUserPlan, getFreeTrialStatus } from "@/lib/db/entitlement";
+import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
+import { BillingActions } from "@/components/dashboard/BillingActions";
+import { PLANS } from "@/lib/config/plans";
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
@@ -22,11 +24,12 @@ export default async function DashboardPage() {
 
   // Each data source degrades independently — a database hiccup on one
   // (e.g. usage) shouldn't take down the whole dashboard.
-  const [usage, history, voice, freeTrial] = await Promise.allSettled([
+  const [usage, history, voice, freeTrial, billing] = await Promise.allSettled([
     getUsageSummary(userId, plan),
     getHistoryForUser(userId, 10),
     getOrCreateVoiceProfile(userId),
     getFreeTrialStatus(userId),
+    getSubscriptionSummary(userId),
   ]);
 
   return (
@@ -49,31 +52,29 @@ export default async function DashboardPage() {
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
           Usage this month
         </h2>
-        {usage.status === "fulfilled" && freeTrial.status === "fulfilled" ? (
+        {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
           <Card className="p-6">
             {plan === "free" ? (
               <>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-foreground-muted">Complimentary humanization</p>
+                    <p className="text-sm text-foreground-muted">
+                      {billing.value.isExpired ? `Your ${PLANS[billing.value.plan].name} plan` : "Complimentary humanization"}
+                    </p>
                     <p className="mt-1 text-2xl font-bold text-foreground">
-                      {freeTrial.value.used ? "Used" : "Available"}
+                      {billing.value.isExpired ? "Ended" : freeTrial.value.used ? "Used" : "Available"}
                     </p>
                   </div>
                   <Badge variant="brand">Free plan</Badge>
                 </div>
                 <p className="mt-3 text-xs text-foreground-subtle">
-                  {freeTrial.value.used
-                    ? "You've used your one complimentary transformation. Upgrade to keep writing with HUMANORA."
-                    : `Every account gets one complimentary humanization, up to 200 characters.`}
+                  {billing.value.isExpired
+                    ? `Your access ended on ${billing.value.currentPeriodEnd?.toLocaleDateString()}. Choose a plan below to continue.`
+                    : freeTrial.value.used
+                      ? "You've used your one complimentary transformation. Choose a plan to keep writing with HUMANORA."
+                      : "Every account gets one complimentary humanization, up to 200 characters."}
                 </p>
-                {freeTrial.value.used && (
-                  <div className="mt-4">
-                    <ButtonLink href="/#pricing" variant="primary" size="sm">
-                      View plans
-                    </ButtonLink>
-                  </div>
-                )}
+                {(freeTrial.value.used || billing.value.isExpired) && <BillingActions />}
               </>
             ) : (
               <>
@@ -97,8 +98,9 @@ export default async function DashboardPage() {
                   />
                 </div>
                 <p className="mt-3 text-xs text-foreground-subtle">
-                  {usage.value.wordsProcessed} words processed this period. Resets{" "}
-                  {usage.value.periodEnd.toLocaleDateString()}.
+                  {usage.value.wordsProcessed} words processed.{" "}
+                  {billing.value.currentPeriodEnd &&
+                    `Access renews or ends on ${billing.value.currentPeriodEnd.toLocaleDateString()}.`}
                 </p>
               </>
             )}

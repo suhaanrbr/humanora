@@ -2,20 +2,20 @@ import type { FAQItem } from "@/components/ui/FAQAccordion";
 
 export const pricingFaq: FAQItem[] = [
   {
+    question: "How does billing work?",
+    answer: "Each paid plan is a single payment via Razorpay that unlocks 30 days of access at that plan's limits. There's no recurring auto-charge — when your 30 days end, you choose a plan again to continue.",
+  },
+  {
     question: "Can I switch plans?",
-    answer: "Yes. You'll be able to move between plans at any time once billing is live; your new plan's limits apply from your next billing cycle.",
+    answer: "Yes. Choosing a different paid plan starts a new 30-day period at that plan's price and limits right away.",
   },
   {
     question: "What happens when I reach my monthly allowance?",
-    answer: "You'll be notified as you approach your limit. You can upgrade to a higher plan, or wait for your allowance to reset next cycle.",
+    answer: "You'll see your usage in your dashboard as you approach your limit. You can move to a higher plan to continue humanizing within the same period.",
   },
   {
     question: "Can I cancel anytime?",
-    answer: "Yes — plans are designed to be cancellable at any time, with no long-term lock-in.",
-  },
-  {
-    question: "How does annual billing work?",
-    answer: "Annual billing charges the discounted per-month rate up front for the year. The rates shown are the current provisional pricing.",
+    answer: "Since there's no recurring subscription to cancel, there's nothing to turn off — your access simply runs for the 30 days you paid for and isn't renewed automatically.",
   },
   {
     question: "What counts as a humanization?",
@@ -23,15 +23,15 @@ export const pricingFaq: FAQItem[] = [
   },
   {
     question: "Are unused requests carried over?",
-    answer: "Not currently planned — monthly allowances reset each billing cycle rather than accumulating.",
+    answer: "No — each plan's allowance applies to its own 30-day period and doesn't carry over.",
   },
   {
     question: "What is My Voice?",
-    answer: "My Voice lets you provide writing samples so HUMANORA can better match rewrites to your personal style. It's available on Pro and Ultra.",
+    answer: "My Voice lets you provide writing samples so HUMANORA learns your writing style. Building a profile is available on any account; applying it to rewrites is available on Essential (preview) and Pro/Ultra (full).",
   },
   {
     question: "Is there a free plan?",
-    answer: "Yes — the Free plan includes 5 humanizations per month with no credit card required.",
+    answer: "Yes — every account gets one complimentary humanization, up to 200 characters, with no credit card required. It's a one-time trial, not a monthly allowance.",
   },
 ];
 

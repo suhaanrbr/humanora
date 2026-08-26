@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
+import { CheckoutButton } from "@/components/payments/CheckoutButton";
 import { writingModes } from "@/lib/config/modes";
 import { PLANS, PAID_PLAN_IDS, FREE_TRIAL_MAX_CHARS, type PlanId } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
@@ -318,16 +319,15 @@ function PaywallPanel({ onBack }: { onBack: () => void }) {
             <Card key={id} className={cn("p-6", id === "pro" && "border-brand-purple/40 shadow-glow-sm")}>
               <p className="text-sm font-medium text-foreground-muted">{plan.name}</p>
               <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-                ${plan.monthlyPriceUsd}
-                <span className="text-sm font-normal text-foreground-subtle">/month</span>
+                ₹{plan.monthlyPriceInr}
+                <span className="text-sm font-normal text-foreground-subtle">/30 days</span>
               </p>
               <p className="mt-3 text-xs text-foreground-subtle">
-                {plan.monthlyHumanizations} humanizations/month · up to {Math.round(plan.maxInputChars / 6)} words
+                {plan.monthlyHumanizations} humanizations · up to {Math.round(plan.maxInputChars / 6)} words
               </p>
-              {/* Checkout is not live yet — see docs/PAYMENTS_SETUP.md. */}
-              <Button variant={id === "pro" ? "primary" : "secondary"} className="mt-6 w-full" disabled>
-                Coming soon
-              </Button>
+              <CheckoutButton planId={id} variant={id === "pro" ? "primary" : "secondary"} className="mt-6 w-full">
+                Choose {plan.name}
+              </CheckoutButton>
             </Card>
           );
         })}
