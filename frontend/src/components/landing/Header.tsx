@@ -1,18 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
-import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/ButtonLink";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/cn";
 
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Use Cases", href: "#use-cases" },
-  { label: "Pricing", href: "#pricing" },
+interface NavItem {
+  label: string;
+  href: string;
+  soon?: boolean;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+// "/#section" links work from any route (they resolve to the home page's
+// in-page anchors). Items without a real destination are marked `soon`
+// rather than pointing at a route that doesn't exist yet.
+const productItems: NavItem[] = [
+  { label: "Humanizer", href: "/#hero" },
+  { label: "Writing Modes", href: "/#writing-modes" },
+  { label: "My Voice", href: "/#my-voice" },
+  { label: "Document Rewrite", href: "#", soon: true },
+];
+
+const solutionsItems: NavItem[] = [
+  { label: "Students", href: "/#use-cases" },
+  { label: "Professionals", href: "/#use-cases" },
+  { label: "Creators", href: "/#use-cases" },
+  { label: "Teams", href: "#", soon: true },
+];
+
+const resourcesItems: NavItem[] = [
   { label: "Blog", href: "/blog" },
-  { label: "Resources", href: "/resources" },
+  { label: "Guides", href: "#", soon: true },
+  { label: "FAQ", href: "/#pricing" },
+  { label: "Affiliates", href: "/affiliates" },
+];
+
+const navGroups: NavGroup[] = [
+  { label: "Product", items: productItems },
+  { label: "Solutions", items: solutionsItems },
 ];
 
 /**
@@ -23,36 +55,110 @@ const navLinks = [
  */
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
+  const navRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <header
+      className={cn(
+        "sticky top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-300",
+        scrolled
+          ? "border-border bg-background/90 backdrop-blur-lg shadow-card"
+          : "border-transparent bg-background/80 backdrop-blur-sm"
+      )}
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="focus-ring rounded-md" aria-label="HUMANORA home">
           <Logo size="sm" />
         </Link>
 
-        <nav
-          className="hidden items-center gap-8 lg:flex"
-          aria-label="Primary"
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="focus-ring rounded-md text-sm text-foreground-muted transition-colors hover:text-foreground"
-            >
-              {link.label}
-            </a>
+        <nav ref={navRef} className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+          {navGroups.map((group) => (
+            <div key={group.label} className="relative">
+              <button
+                type="button"
+                onClick={() => setOpenGroup((g) => (g === group.label ? null : group.label))}
+                aria-expanded={openGroup === group.label}
+                className="focus-ring flex cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
+              >
+                {group.label}
+                <ChevronIcon
+                  className={cn(
+                    "h-3.5 w-3.5 transition-transform",
+                    openGroup === group.label && "rotate-180"
+                  )}
+                />
+              </button>
+              {openGroup === group.label && (
+                <div className="absolute left-0 top-full mt-1 w-56 pearl-glass rounded-lg p-2">
+                  {group.items.map((item) => (
+                    <NavDropdownLink key={item.label} item={item} onNavigate={() => setOpenGroup(null)} />
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
+
+          <Link
+            href="/#pricing"
+            className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/api"
+            className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
+          >
+            Developers
+          </Link>
+
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setOpenGroup((g) => (g === "Resources" ? null : "Resources"))}
+              aria-expanded={openGroup === "Resources"}
+              className="focus-ring flex cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground"
+            >
+              Resources
+              <ChevronIcon className={cn("h-3.5 w-3.5 transition-transform", openGroup === "Resources" && "rotate-180")} />
+            </button>
+            {openGroup === "Resources" && (
+              <div className="absolute left-0 top-full mt-1 w-56 pearl-glass rounded-lg p-2">
+                {resourcesItems.map((item) => (
+                  <NavDropdownLink key={item.label} item={item} onNavigate={() => setOpenGroup(null)} />
+                ))}
+              </div>
+            )}
+          </div>
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Button variant="ghost" size="sm">
+          <ThemeToggle />
+          <ButtonLink href="/login" variant="ghost" size="sm">
             Log in
-          </Button>
-          <Button variant="primary" size="sm">
+          </ButtonLink>
+          <ButtonLink href="/#try-it" variant="primary" size="sm">
             Get Started Free
-          </Button>
+          </ButtonLink>
         </div>
 
         <button
@@ -90,33 +196,94 @@ export function Header() {
         id="mobile-nav"
         className={cn(
           "overflow-hidden border-t border-border bg-background transition-[max-height] duration-300 ease-in-out lg:hidden",
-          menuOpen ? "max-h-96" : "max-h-0 border-t-0"
+          menuOpen ? "max-h-[32rem] overflow-y-auto" : "max-h-0 border-t-0"
         )}
       >
-        <nav
-          className="flex flex-col gap-1 px-4 py-4 sm:px-6"
-          aria-label="Mobile"
-        >
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="focus-ring rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
-            </a>
+        <nav className="flex flex-col gap-1 px-4 py-4 sm:px-6" aria-label="Mobile">
+          {[...navGroups, { label: "Resources", items: resourcesItems }].map((group) => (
+            <div key={group.label}>
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenMobileGroup((g) => (g === group.label ? null : group.label))
+                }
+                className="focus-ring flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
+              >
+                {group.label}
+                <ChevronIcon
+                  className={cn("h-3.5 w-3.5 transition-transform", openMobileGroup === group.label && "rotate-180")}
+                />
+              </button>
+              {openMobileGroup === group.label && (
+                <div className="ml-2 flex flex-col gap-1 border-l border-border pl-3">
+                  {group.items.map((item) => (
+                    <NavDropdownLink key={item.label} item={item} onNavigate={() => setMenuOpen(false)} />
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
-          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-            <Button variant="secondary" size="md" className="w-full">
+
+          <Link
+            href="/#pricing"
+            onClick={() => setMenuOpen(false)}
+            className="focus-ring rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/api"
+            onClick={() => setMenuOpen(false)}
+            className="focus-ring rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
+          >
+            Developers
+          </Link>
+
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+            <span className="text-sm text-foreground-muted">Theme</span>
+            <ThemeToggle />
+          </div>
+
+          <div className="mt-1 flex flex-col gap-2">
+            <ButtonLink href="/login" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
               Log in
-            </Button>
-            <Button variant="primary" size="md" className="w-full">
+            </ButtonLink>
+            <ButtonLink href="/#try-it" variant="primary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
               Get Started Free
-            </Button>
+            </ButtonLink>
           </div>
         </nav>
       </div>
     </header>
+  );
+}
+
+function NavDropdownLink({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
+  if (item.soon) {
+    return (
+      <span className="flex cursor-not-allowed items-center justify-between rounded-md px-3 py-2 text-sm text-foreground-subtle">
+        {item.label}
+        <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+          Soon
+        </span>
+      </span>
+    );
+  }
+  return (
+    <a
+      href={item.href}
+      onClick={onNavigate}
+      className="focus-ring block rounded-md px-3 py-2 text-sm text-foreground-muted hover:bg-background-elevated hover:text-foreground"
+    >
+      {item.label}
+    </a>
+  );
+}
+
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <path d="m5 7.5 5 5 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

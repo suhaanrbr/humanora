@@ -3,54 +3,46 @@ import { Container } from "@/components/ui/Container";
 const principles = [
   {
     title: "Privacy-conscious",
-    description: "We aim for data minimization by design, and we don't use your documents to train systems without your explicit opt-in.",
+    description: "We aim for data minimization and don't train on your documents without opt-in.",
     icon: LockIcon,
   },
   {
     title: "Meaning preservation",
-    description: "Rewrites are checked against your original facts, numbers, and terminology so meaning isn't quietly lost.",
+    description: "Rewrites are checked against your original facts and terminology.",
     icon: CheckShieldIcon,
   },
   {
-    title: "Citation-aware rewriting",
-    description: "Quotations, citations, and URLs are treated as protected content during rewriting, not just plain text.",
+    title: "Citation safe",
+    description: "Your references and citations are treated as protected content.",
     icon: QuoteIcon,
   },
   {
-    title: "User-controlled history",
-    description: "Your document history belongs to you — review, rename, or delete it whenever you choose.",
-    icon: FolderIcon,
+    title: "Here to help",
+    description: "Reach out any time — we aim to respond as quickly as we can.",
+    icon: SupportIcon,
   },
 ];
 
 /**
- * Trust section built around real product principles rather than
- * testimonials, ratings, or company logos.
+ * Trust bar built around real product principles rather than testimonials,
+ * ratings, or company logos — no unverifiable "100%" or "24/7" claims.
  */
 export function Trust() {
   return (
-    <section className="py-24 sm:py-32">
+    <section className="border-t border-border py-12 sm:py-14">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Built around your trust
-          </h2>
-          <p className="mt-4 text-base text-foreground-muted">
-            No guarantees we can&apos;t back up — just the principles HUMANORA
-            is designed around.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-14 grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {principles.map((principle) => (
-            <div key={principle.title} className="flex flex-col items-start gap-3">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-border bg-surface text-brand-purple">
+            <div key={principle.title} className="flex items-start gap-3.5">
+              <div className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border bg-surface text-brand-purple">
                 <principle.icon className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-foreground">{principle.title}</h3>
-              <p className="text-sm leading-relaxed text-foreground-muted">
-                {principle.description}
-              </p>
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">{principle.title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                  {principle.description}
+                </p>
+              </div>
             </div>
           ))}
         </div>
@@ -87,10 +79,11 @@ function QuoteIcon({ className }: IconProps) {
   );
 }
 
-function FolderIcon({ className }: IconProps) {
+function SupportIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M4 7a2 2 0 0 1 2-2h3l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M9.5 9.5a2.5 2.5 0 0 1 4.6-1.4c.6.9.2 1.7-.6 2.3-.7.5-1.5.9-1.5 2.1M12 16.2v.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

@@ -4,42 +4,49 @@ import { Container } from "@/components/ui/Container";
 const features = [
   {
     title: "Advanced Humanizer",
-    description: "Rewrite stiff AI-assisted drafts into more natural, readable language.",
+    description: "Rewrite stiff AI-assisted drafts into more natural language.",
     icon: WandIcon,
+    accent: "text-brand-purple bg-brand-purple/10 border-brand-purple/25",
   },
   {
     title: "My Voice",
     description: "Adapt rewriting toward your own writing preferences and style.",
     icon: FingerprintIcon,
+    accent: "text-brand-indigo bg-brand-indigo/10 border-brand-indigo/25",
   },
   {
     title: "Preserve Meaning",
-    description: "Protect important facts, terminology, quotations, numbers, and citations.",
+    description: "Protect important facts, terminology, quotations, and citations.",
     icon: ShieldIcon,
+    accent: "text-success bg-success/10 border-success/25",
   },
   {
     title: "Academic Mode",
-    description: "Improve clarity and tone for academic writing while preserving citations and meaning.",
+    description: "Improve clarity and tone for academic writing, citations kept intact.",
     icon: CapIcon,
+    accent: "text-warning bg-warning/10 border-warning/25",
   },
   {
     title: "Multi-Language",
     description: "Built on an architecture designed to extend beyond English over time.",
     icon: GlobeIcon,
+    accent: "text-sky-400 bg-sky-400/10 border-sky-400/25",
   },
   {
     title: "Writing Analysis",
-    description: "Review characteristics of your writing, such as tone and sentence structure.",
+    description: "Review characteristics of your writing, such as tone and structure.",
     icon: ChartIcon,
+    accent: "text-teal-400 bg-teal-400/10 border-teal-400/25",
   },
 ];
 
 /**
- * Feature grid — "Everything you need to write naturally."
+ * Feature grid — "Everything you need to write naturally." Six compact
+ * cards, each with a distinctly colored icon treatment.
  */
 export function Features() {
   return (
-    <section id="features" className="py-24 sm:py-32">
+    <section id="features" className="section-tint-lavender section-glow-top py-16 sm:py-20">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -51,14 +58,16 @@ export function Features() {
           </p>
         </div>
 
-        <div className="mx-auto mt-14 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
             <Card
               key={feature.title}
-              className="group transition-colors duration-200 hover:border-border-strong hover:bg-surface-hover"
+              className="hover-lift group hover:shadow-glow-sm"
             >
               <CardHeader>
-                <div className="mb-2 inline-flex h-11 w-11 items-center justify-center rounded-md border border-border bg-background-elevated text-brand-purple transition-colors group-hover:border-brand-purple/40">
+                <div
+                  className={`mb-2 inline-flex h-11 w-11 items-center justify-center rounded-md border ${feature.accent}`}
+                >
                   <feature.icon className="h-5 w-5" />
                 </div>
                 <CardTitle>{feature.title}</CardTitle>
