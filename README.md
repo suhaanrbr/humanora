@@ -45,8 +45,14 @@ npm run build     # production build
 
 Design tokens (colors, radii, shadows) live in `frontend/src/app/globals.css`.
 Reusable UI primitives (Button, Input, Card, Badge, Container, Logo) live in
-`frontend/src/components/`. The home page (`frontend/src/app/page.tsx`) is
-currently a temporary design-system preview, not the final landing page.
+`frontend/src/components/ui/` and `frontend/src/components/brand/`.
+
+The home page (`frontend/src/app/page.tsx`) is the HUMANORA marketing
+landing page, assembled from the sections in
+`frontend/src/components/landing/` (Header, Hero, Features, My Voice
+preview, How It Works, Use Cases, Pricing, Trust, Final CTA, Footer).
+Pricing plan data is configuration-driven — see
+`frontend/src/lib/config/pricing.ts`.
 
 ### Backend
 
