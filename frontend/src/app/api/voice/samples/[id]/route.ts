@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteVoiceSample } from "@/lib/db/voice";
-
-async function requireUserId(req: NextRequest): Promise<string | null> {
-  try {
-    const { auth } = await import("@/lib/auth");
-    const session = await auth.api.getSession({ headers: req.headers });
-    return session?.user.id ?? null;
-  } catch {
-    return null;
-  }
-}
+import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const userId = await requireUserId(req);
-  if (!userId) return NextResponse.json({ error: "Please log in." }, { status: 401 });
+  const auth = await resolveAuthenticatedUserId(req);
+  if (auth.status !== "ok") return authErrorResponse(auth.status);
+  const userId = auth.userId;
 
   const { id } = await params;
   // deleteVoiceSample scopes its WHERE clause by userId AND id — a

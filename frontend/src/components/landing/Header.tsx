@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { AccountMenu } from "@/components/landing/AccountMenu";
+import { useSession, signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
 
 interface NavItem {
@@ -54,6 +57,7 @@ const navGroups: NavGroup[] = [
  * desktop nav.
  */
 export function Header() {
+  const { data: session, isPending } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
@@ -153,12 +157,20 @@ export function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <ThemeToggle />
-          <ButtonLink href="/login" variant="ghost" size="sm">
-            Log in
-          </ButtonLink>
-          <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
-            Get Started Free
-          </ButtonLink>
+          {isPending ? (
+            <div className="h-9 w-24" aria-hidden="true" />
+          ) : session ? (
+            <AccountMenu />
+          ) : (
+            <>
+              <ButtonLink href="/login" variant="ghost" size="sm">
+                Log in
+              </ButtonLink>
+              <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
+                Get Started Free
+              </ButtonLink>
+            </>
+          )}
         </div>
 
         <button
@@ -245,12 +257,23 @@ export function Header() {
           </div>
 
           <div className="mt-1 flex flex-col gap-2">
-            <ButtonLink href="/login" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
-              Log in
-            </ButtonLink>
-            <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
-              Get Started Free
-            </ButtonLink>
+            {!isPending && session ? (
+              <>
+                <ButtonLink href="/dashboard" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
+                  Dashboard
+                </ButtonLink>
+                <MobileSignOutLink onNavigate={() => setMenuOpen(false)} />
+              </>
+            ) : (
+              <>
+                <ButtonLink href="/login" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
+                  Log in
+                </ButtonLink>
+                <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
+                  Get Started Free
+                </ButtonLink>
+              </>
+            )}
           </div>
         </nav>
       </div>
@@ -277,6 +300,30 @@ function NavDropdownLink({ item, onNavigate }: { item: NavItem; onNavigate: () =
     >
       {item.label}
     </a>
+  );
+}
+
+function MobileSignOutLink({ onNavigate }: { onNavigate: () => void }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleSignOut() {
+    setLoading(true);
+    await signOut();
+    onNavigate();
+    router.push("/");
+    router.refresh();
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      disabled={loading}
+      className="focus-ring press-feedback w-full cursor-pointer rounded-md border border-border-strong bg-surface px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-brand-purple/40 disabled:opacity-50"
+    >
+      {loading ? "Logging out…" : "Log out"}
+    </button>
   );
 }
 
