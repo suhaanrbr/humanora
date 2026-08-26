@@ -4,7 +4,9 @@ import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { checkEntitlement, reserveFreeTrial, releaseFreeTrial } from "@/lib/db/entitlement";
 import { checkAndReserveQuota, releaseQuotaUnit, recordWordsProcessed } from "@/lib/db/usage";
 import { saveHumanization } from "@/lib/db/history";
-import { FREE_TRIAL_MAX_CHARS } from "@/lib/config/plans";
+import { getEffectiveVoiceProfile } from "@/lib/db/voice";
+import { buildStyleDirectives } from "@/lib/ai/voiceAnalysis";
+import { FREE_TRIAL_MAX_CHARS, PLANS } from "@/lib/config/plans";
 
 // A short-window burst guard on top of the entitlement system — this is
 // NOT the quota (the database is), it just stops one account from
@@ -61,7 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { text, mode, strength } = (body ?? {}) as Record<string, unknown>;
+  const { text, mode, strength, useVoice } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "Please provide some text to humanize." }, { status: 400 });
@@ -134,10 +136,20 @@ export async function POST(req: NextRequest) {
     reserved = true;
   }
 
+  // My Voice: only ever loaded for the authenticated user's own id, and
+  // only used if their plan actually includes it — a request can't ask
+  // for someone else's voice or upgrade its own entitlement by lying
+  // about `useVoice`.
+  let styleDirectives: string | undefined;
+  if (useVoice === true && PLANS[plan].myVoice !== "none") {
+    const voiceProfile = await getEffectiveVoiceProfile(userId);
+    if (voiceProfile) styleDirectives = buildStyleDirectives(voiceProfile);
+  }
+
   // --- Call Gemini. On ANY failure, release the reservation — the
   // entitlement is only spent on a genuinely delivered result. ---
   try {
-    const result = await humanize({ text: trimmed, mode: safeMode, strength: safeStrength });
+    const result = await humanize({ text: trimmed, mode: safeMode, strength: safeStrength, styleDirectives });
     const words = wordCount(trimmed);
 
     await recordWordsProcessed(userId, plan, words);

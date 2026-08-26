@@ -1,0 +1,345 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Container } from "@/components/ui/Container";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
+import { writingModes } from "@/lib/config/modes";
+import { PLANS, PAID_PLAN_IDS, FREE_TRIAL_MAX_CHARS, type PlanId } from "@/lib/config/plans";
+import { cn } from "@/lib/cn";
+import type { RewriteStrength, WritingMode } from "@/lib/ai/humanize";
+
+const DRAFT_STORAGE_KEY = "humanora-draft";
+const MAX_CHARS = 5000 * 6; // Ultra's ceiling — the API enforces the real per-plan limit server-side
+
+const strengths: { value: RewriteStrength; label: string }[] = [
+  { value: "light", label: "Light" },
+  { value: "balanced", label: "Balanced" },
+  { value: "strong", label: "Strong" },
+];
+
+type WorkspaceState = "idle" | "processing" | "done" | "error" | "paywall";
+
+function wordCount(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+export function HumanizeWorkspace({
+  plan,
+  hasVoiceProfile,
+}: {
+  plan: PlanId;
+  hasVoiceProfile: boolean;
+}) {
+  // Starts empty on both server and the client's first render (SSR-safe,
+  // no hydration mismatch), then restored from sessionStorage — see
+  // effect below — if the user was sent to the paywall and came back.
+  // Never put this in the URL or send it to analytics; sessionStorage is
+  // private to this browser tab and cleared when the tab closes.
+  const [text, setText] = useState("");
+  const [mode, setMode] = useState<WritingMode>("professional");
+  const [strength, setStrength] = useState<RewriteStrength>("balanced");
+  const [state, setState] = useState<WorkspaceState>("idle");
+  const [output, setOutput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const voiceAvailable = plan !== "free" && hasVoiceProfile;
+  const [useVoice, setUseVoice] = useState(false);
+
+  // Restore once on mount, then persist on every subsequent edit via
+  // handleTextChange below — deliberately NOT two separate effects (one
+  // keyed on `text` for persisting would race the restore effect on the
+  // very first render, immediately overwriting the just-restored value
+  // with the still-stale empty state from that same commit).
+  /* eslint-disable react-hooks/set-state-in-effect --
+     Deliberate: restoring browser-only sessionStorage state can't happen
+     during SSR or the initial client render without a hydration
+     mismatch (same reasoning as lib/theme.tsx's reduced-motion check). */
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) setText(saved);
+    } catch {
+      // sessionStorage can throw in some private-browsing contexts —
+      // not worth surfacing, the workspace just starts empty.
+    }
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  function handleTextChange(value: string) {
+    setText(value);
+    try {
+      if (value) window.sessionStorage.setItem(DRAFT_STORAGE_KEY, value);
+      else window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch {
+      // ignore — draft persistence is a nicety, not critical functionality
+    }
+  }
+
+  async function runHumanize() {
+    if (!text.trim() || state === "processing") return;
+    setState("processing");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/humanize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, mode, strength, useVoice: voiceAvailable && useVoice }),
+      });
+      const data = await response.json();
+
+      if (response.status === 402 || data?.code === "UPGRADE_REQUIRED") {
+        setState("paywall");
+        return;
+      }
+
+      if (!response.ok) {
+        setErrorMessage(data?.error ?? "Something went wrong. Please try again.");
+        setState("error");
+        return;
+      }
+
+      setOutput(data.output as string);
+      setState("done");
+      // A delivered result means the draft no longer needs to survive
+      // a redirect round-trip.
+      try {
+        window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    } catch {
+      setErrorMessage("Couldn't reach HUMANORA. Check your connection and try again.");
+      setState("error");
+    }
+  }
+
+  function reset() {
+    setState("idle");
+    setOutput("");
+    setErrorMessage("");
+    setCopied(false);
+  }
+
+  async function copyResult() {
+    try {
+      await navigator.clipboard.writeText(output);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // no error UI needed for a clipboard failure
+    }
+  }
+
+  if (state === "paywall") {
+    return (
+      <Container className="mx-auto max-w-4xl">
+        <PaywallPanel onBack={() => setState("idle")} />
+      </Container>
+    );
+  }
+
+  return (
+    <Container className="mx-auto max-w-5xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Humanize</h1>
+        <p className="mt-1 text-sm text-foreground-muted">
+          Paste your draft, choose a mode, and let HUMANORA rewrite it.
+        </p>
+      </div>
+
+      <Card className="overflow-hidden shadow-glow-md">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border bg-background-elevated px-5 py-4 sm:px-7">
+          <label className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs text-foreground-muted">
+            <span className="text-foreground-subtle">Mode:</span>
+            <select
+              value={mode}
+              onChange={(e) => setMode(e.target.value as WritingMode)}
+              className="focus-ring cursor-pointer rounded bg-transparent font-medium text-foreground"
+            >
+              {writingModes.map((m) => (
+                <option key={m.name} value={m.name.toLowerCase()} className="bg-surface text-foreground">
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1 text-xs">
+            {strengths.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                onClick={() => setStrength(s.value)}
+                className={cn(
+                  "focus-ring press-feedback cursor-pointer rounded-full px-2.5 py-1 font-medium transition-colors",
+                  strength === s.value
+                    ? "bg-brand-gradient text-white"
+                    : "text-foreground-muted hover:text-foreground"
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {voiceAvailable ? (
+            <button
+              type="button"
+              onClick={() => setUseVoice((v) => !v)}
+              className={cn(
+                "focus-ring press-feedback inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors",
+                useVoice
+                  ? "border-transparent bg-brand-gradient text-white"
+                  : "border-border bg-surface text-foreground-muted hover:text-foreground"
+              )}
+            >
+              My Voice
+            </button>
+          ) : (
+            <Link
+              href="/dashboard/voice"
+              title={plan === "free" ? "My Voice requires a paid plan" : "Build your voice profile first"}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs text-foreground-subtle opacity-70 hover:opacity-100"
+            >
+              My Voice
+              <Badge variant="neutral" className="px-1.5 py-0 text-[9px]">
+                {plan === "free" ? "Paid plans" : "Set up"}
+              </Badge>
+            </Link>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
+          <div className="p-7 sm:p-9">
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Original</p>
+              <span className="text-xs text-foreground-subtle">
+                {text.length}/{MAX_CHARS}
+              </span>
+            </div>
+            <textarea
+              value={text}
+              onChange={(e) => handleTextChange(e.target.value.slice(0, MAX_CHARS))}
+              rows={10}
+              placeholder="Paste your AI-assisted draft here..."
+              className="focus-ring w-full resize-none rounded-md bg-transparent text-lg leading-relaxed text-foreground-muted placeholder:text-foreground-subtle"
+            />
+            <p className="mt-2 text-xs text-foreground-subtle">{wordCount(text)} words</p>
+          </div>
+          <div className="relative bg-background-elevated/40 p-7 sm:p-9">
+            <p className="text-brand-gradient mb-5 text-xs font-semibold uppercase tracking-wide">
+              HUMANORA result
+            </p>
+
+            {state === "idle" && (
+              <p className="text-sm text-foreground-subtle">Click &ldquo;Humanize&rdquo; to see the result.</p>
+            )}
+
+            {state === "processing" && (
+              <div>
+                <p className="text-sm font-medium text-foreground-muted">
+                  Humanizing<span className="animate-ellipsis">...</span>
+                </p>
+                <HumanoraRibbon className="mt-4 h-10 w-full max-w-[220px] opacity-60" animated />
+              </div>
+            )}
+
+            {state === "error" && (
+              <p className="rounded-md border border-danger/30 bg-danger/10 p-4 text-sm text-foreground-muted">
+                {errorMessage}
+              </p>
+            )}
+
+            {state === "done" && (
+              <>
+                <p className="animate-fade-in-up whitespace-pre-wrap text-lg leading-relaxed text-foreground">
+                  {output}
+                </p>
+                <p className="mt-3 text-xs text-foreground-subtle">{wordCount(output)} words</p>
+                <button
+                  type="button"
+                  onClick={copyResult}
+                  className="focus-ring press-feedback absolute right-5 top-5 inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs text-foreground-muted transition-colors hover:border-brand-purple/30 hover:text-foreground sm:right-7 sm:top-7"
+                >
+                  {copied ? "Copied" : "Copy result"}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-background-elevated px-5 py-5 sm:px-7">
+          <p className="text-xs text-foreground-subtle">
+            Your one complimentary transformation supports up to {FREE_TRIAL_MAX_CHARS} characters.
+          </p>
+          {state === "done" || state === "error" ? (
+            <Button variant="secondary" size="md" onClick={reset}>
+              Reset
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={runHumanize}
+              loading={state === "processing"}
+              disabled={!text.trim()}
+            >
+              {state === "processing" ? "Humanizing..." : "Humanize"}
+            </Button>
+          )}
+        </div>
+      </Card>
+    </Container>
+  );
+}
+
+function PaywallPanel({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="text-center">
+      <Badge variant="brand">Continue with HUMANORA</Badge>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
+        Choose a plan to keep writing
+      </h1>
+      <p className="mx-auto mt-3 max-w-lg text-base text-foreground-muted">
+        Your complimentary HUMANORA experience supports up to {FREE_TRIAL_MAX_CHARS} characters.
+        Choose a plan to work with longer writing and continue using HUMANORA.
+      </p>
+
+      <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3">
+        {PAID_PLAN_IDS.map((id) => {
+          const plan = PLANS[id];
+          return (
+            <Card key={id} className={cn("p-6", id === "pro" && "border-brand-purple/40 shadow-glow-sm")}>
+              <p className="text-sm font-medium text-foreground-muted">{plan.name}</p>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+                ${plan.monthlyPriceUsd}
+                <span className="text-sm font-normal text-foreground-subtle">/month</span>
+              </p>
+              <p className="mt-3 text-xs text-foreground-subtle">
+                {plan.monthlyHumanizations} humanizations/month · up to {Math.round(plan.maxInputChars / 6)} words
+              </p>
+              {/* Checkout is not live yet — see docs/PAYMENTS_SETUP.md. */}
+              <Button variant={id === "pro" ? "primary" : "secondary"} className="mt-6 w-full" disabled>
+                Coming soon
+              </Button>
+            </Card>
+          );
+        })}
+      </div>
+
+      <button
+        type="button"
+        onClick={onBack}
+        className="focus-ring press-feedback mt-8 cursor-pointer text-sm text-foreground-muted underline underline-offset-2 hover:text-foreground"
+      >
+        Back to your draft
+      </button>
+    </div>
+  );
+}

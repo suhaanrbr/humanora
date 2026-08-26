@@ -112,7 +112,9 @@ export default async function DashboardPage() {
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
-          <Badge variant="neutral">Foundational — full analysis coming soon</Badge>
+          <Badge variant={voice.status === "fulfilled" && voice.value.styleProfileJson ? "brand" : "neutral"}>
+            {voice.status === "fulfilled" && voice.value.styleProfileJson ? "Profile ready" : "Not set up"}
+          </Badge>
         </div>
         {voice.status === "fulfilled" ? (
           <Card className="p-6">
@@ -122,17 +124,21 @@ export default async function DashboardPage() {
                   {computeCompleteness(voice.value.sampleCount)}%
                 </span>
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-sm text-foreground">
                   {voice.value.sampleCount === 0
                     ? "No writing samples yet."
-                    : `${voice.value.sampleCount} sample(s) recorded.`}
+                    : `${voice.value.sampleCount} sample(s) · ${
+                        voice.value.styleProfileJson ? "voice profile analyzed" : "not yet analyzed"
+                      }`}
                 </p>
                 <p className="mt-1 text-xs text-foreground-subtle">
-                  Sample upload and real style analysis are not built yet —
-                  this reflects the data model only.
+                  Teach HUMANORA how you write, then apply it when humanizing text on a paid plan.
                 </p>
               </div>
+              <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
+                {voice.value.sampleCount === 0 ? "Get started" : "Open"}
+              </ButtonLink>
             </div>
           </Card>
         ) : (

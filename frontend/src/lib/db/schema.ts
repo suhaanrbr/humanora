@@ -171,6 +171,12 @@ export const voiceProfile = pgTable("voice_profile", {
   // User-supplied corrections, applied on top of the inferred profile
   // when building the style prompt. User intent always wins.
   userOverridesJson: text("user_overrides_json"),
+  // Hash of the exact sample set (ids + content) the current
+  // styleProfileJson was analyzed from — lets us skip a redundant
+  // Gemini call when the user re-opens My Voice without changing their
+  // samples. See lib/ai/voiceAnalysis.ts.
+  analyzedSamplesHash: text("analyzed_samples_hash"),
+  analyzedAt: timestamp("analyzed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
