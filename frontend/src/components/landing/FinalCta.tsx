@@ -55,7 +55,7 @@ export function FinalCta() {
               delay={550}
               className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row"
             >
-              <ButtonLink href="/#try-it" variant="primary" size="lg">
+              <ButtonLink href="/dashboard/humanize" variant="primary" size="lg">
                 Start Writing Free
               </ButtonLink>
               <a

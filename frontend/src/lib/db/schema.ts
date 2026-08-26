@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * HUMANORA database schema (Drizzle ORM, Postgres/Neon).
@@ -124,7 +124,12 @@ export const usagePeriod = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
   },
-  (table) => [index("usage_period_user_idx").on(table.userId, table.periodStart)]
+  (table) => [
+    // Unique, not just indexed — this is what makes getOrCreateCurrentPeriod's
+    // onConflictDoNothing() upsert safe under concurrent requests for the
+    // same user's first request of a new billing period.
+    uniqueIndex("usage_period_user_period_idx").on(table.userId, table.periodStart),
+  ]
 );
 
 /**
@@ -158,6 +163,83 @@ export const voiceProfile = pgTable("voice_profile", {
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }).unique(),
   sampleCount: integer("sample_count").notNull().default(0),
   totalWordsSubmitted: integer("total_words_submitted").notNull().default(0),
+  // Gemini-derived structured style profile (validated against a Zod
+  // schema before being stored — see lib/ai/voiceAnalysis.ts — never
+  // trust/store arbitrary model output). Null until at least one
+  // analysis has run.
+  styleProfileJson: text("style_profile_json"),
+  // User-supplied corrections, applied on top of the inferred profile
+  // when building the style prompt. User intent always wins.
+  userOverridesJson: text("user_overrides_json"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Individual pasted writing samples backing a Voice profile. Kept
+ * separate from voiceProfile so re-analysis can reprocess all of a
+ * user's samples without losing the originals.
+ */
+export const voiceSample = pgTable(
+  "voice_sample",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    content: text("content").notNull(),
+    wordCount: integer("word_count").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("voice_sample_user_idx").on(table.userId)]
+);
+
+/**
+ * One row per user — the authoritative record of whether the one
+ * lifetime complimentary humanization has been used. Deliberately its
+ * own table (not a column on `user`, which is Better Auth's table) and
+ * deliberately NOT reset by any process — see lib/db/entitlement.ts for
+ * the concurrency-safe consumption logic and why this must never be
+ * touched by anything except that module.
+ */
+export const userEntitlement = pgTable("user_entitlement", {
+  userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
+  freeTrialUsed: boolean("free_trial_used").notNull().default(false),
+  freeTrialUsedAt: timestamp("free_trial_used_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const subscriptionStatusEnum = ["active", "past_due", "canceled", "expired"] as const;
+export type SubscriptionStatus = (typeof subscriptionStatusEnum)[number];
+
+/**
+ * One row per user — the internal, normalized entitlement record.
+ * Populated/updated ONLY from verified payment-provider webhook events
+ * (see lib/payments/webhooks.ts once built) — never from client state,
+ * never from a success-page redirect. Every user has a row, defaulting
+ * to plan="free" — there is no "no subscription" null state to handle
+ * elsewhere in the app.
+ */
+export const subscription = pgTable("subscription", {
+  userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
+  plan: text("plan", { enum: planEnum }).notNull().default("free"),
+  status: text("status", { enum: subscriptionStatusEnum }).notNull().default("active"),
+  provider: text("provider"), // e.g. "lemonsqueezy" — null while on free plan
+  providerCustomerId: text("provider_customer_id"),
+  providerSubscriptionId: text("provider_subscription_id"),
+  currency: text("currency"), // the currency the customer actually pays in
+  currentPeriodEnd: timestamp("current_period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/**
+ * Idempotency ledger for payment-provider webhooks — the provider's
+ * event ID is the primary key, so a replayed/duplicated delivery can
+ * never be processed twice (see section on webhook security).
+ */
+export const webhookEvent = pgTable("webhook_event", {
+  id: text("id").primaryKey(),
+  provider: text("provider").notNull(),
+  type: text("type").notNull(),
+  processedAt: timestamp("processed_at").notNull().defaultNow(),
 });

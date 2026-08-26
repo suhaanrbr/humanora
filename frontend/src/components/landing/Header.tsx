@@ -156,7 +156,7 @@ export function Header() {
           <ButtonLink href="/login" variant="ghost" size="sm">
             Log in
           </ButtonLink>
-          <ButtonLink href="/#try-it" variant="primary" size="sm">
+          <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
             Get Started Free
           </ButtonLink>
         </div>
@@ -248,7 +248,7 @@ export function Header() {
             <ButtonLink href="/login" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
               Log in
             </ButtonLink>
-            <ButtonLink href="/#try-it" variant="primary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
+            <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
               Get Started Free
             </ButtonLink>
           </div>
