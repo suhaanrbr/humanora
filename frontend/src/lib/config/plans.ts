@@ -23,8 +23,14 @@ export interface PlanConfig {
   monthlyHumanizations: number;
   /** Max input length in characters for a single humanize request. */
   maxInputChars: number;
+  /** Independent rewrite candidates produced per request (lib/ai/humanize.ts). */
   outputVariations: number;
-  myVoice: "none" | "preview" | "full";
+  /** How many named My Voice profiles this plan may own at once (0 = feature unavailable). */
+  maxVoiceProfiles: number;
+  /** A free-text steering instruction appended to the rewrite prompt
+   * (e.g. "avoid em dashes", "keep it under 100 words") — genuinely
+   * changes model behavior, not a cosmetic toggle. */
+  customInstructions: boolean;
   prioritySupport: boolean;
 }
 
@@ -40,7 +46,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     monthlyHumanizations: 0, // not used — see FREE_TRIAL_MAX_CHARS below
     maxInputChars: 200,
     outputVariations: 1,
-    myVoice: "none",
+    maxVoiceProfiles: 0,
+    customInstructions: false,
     prioritySupport: false,
   },
   essential: {
@@ -50,7 +57,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     monthlyHumanizations: 100,
     maxInputChars: 1500 * 6,
     outputVariations: 2,
-    myVoice: "preview",
+    maxVoiceProfiles: 1,
+    customInstructions: false,
     prioritySupport: false,
   },
   pro: {
@@ -60,7 +68,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     monthlyHumanizations: 300,
     maxInputChars: 3000 * 6,
     outputVariations: 3,
-    myVoice: "full",
+    maxVoiceProfiles: 3,
+    customInstructions: true,
     prioritySupport: true,
   },
   ultra: {
@@ -72,7 +81,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     monthlyHumanizations: 2000,
     maxInputChars: 5000 * 6,
     outputVariations: 5,
-    myVoice: "full",
+    maxVoiceProfiles: 5,
+    customInstructions: true,
     prioritySupport: true,
   },
 };

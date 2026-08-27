@@ -30,12 +30,18 @@ function wordCount(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
+interface VoiceProfileOption {
+  id: string;
+  name: string;
+  isDefault: boolean;
+}
+
 export function HumanizeWorkspace({
   plan,
-  hasVoiceProfile,
+  voiceProfiles,
 }: {
   plan: PlanId;
-  hasVoiceProfile: boolean;
+  voiceProfiles: VoiceProfileOption[];
 }) {
   // Starts empty on both server and the client's first render (SSR-safe,
   // no hydration mismatch), then restored from sessionStorage — see
@@ -54,8 +60,13 @@ export function HumanizeWorkspace({
   const [meaningCheck, setMeaningCheck] = useState<MeaningCheckResult | null>(null);
   const [readability, setReadability] = useState<ReadabilityScore | null>(null);
 
-  const voiceAvailable = plan !== "free" && hasVoiceProfile;
-  const [useVoice, setUseVoice] = useState(false);
+  const voiceAvailable = plan !== "free" && voiceProfiles.length > 0;
+  const [voiceProfileId, setVoiceProfileId] = useState<string>(
+    voiceProfiles.find((p) => p.isDefault)?.id ?? voiceProfiles[0]?.id ?? ""
+  );
+  const customInstructionsAvailable = PLANS[plan].customInstructions;
+  const [customInstructions, setCustomInstructions] = useState("");
+  const [showCustomInstructions, setShowCustomInstructions] = useState(false);
 
   // Restore once on mount, then persist on every subsequent edit via
   // handleTextChange below — deliberately NOT two separate effects (one
@@ -97,7 +108,13 @@ export function HumanizeWorkspace({
       const response = await fetch("/api/humanize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, mode, strength, useVoice: voiceAvailable && useVoice }),
+        body: JSON.stringify({
+          text,
+          mode,
+          strength,
+          voiceProfileId: voiceAvailable && voiceProfileId ? voiceProfileId : undefined,
+          customInstructions: customInstructionsAvailable ? customInstructions : undefined,
+        }),
       });
       const data = await response.json();
 
@@ -205,18 +222,23 @@ export function HumanizeWorkspace({
           </div>
 
           {voiceAvailable ? (
-            <button
-              type="button"
-              onClick={() => setUseVoice((v) => !v)}
-              className={cn(
-                "focus-ring press-feedback inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors",
-                useVoice
-                  ? "border-transparent bg-brand-gradient text-white"
-                  : "border-border bg-surface text-foreground-muted hover:text-foreground"
-              )}
-            >
-              My Voice
-            </button>
+            <label className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs text-foreground-muted">
+              <span className="text-foreground-subtle">Voice:</span>
+              <select
+                value={voiceProfileId}
+                onChange={(e) => setVoiceProfileId(e.target.value)}
+                className="focus-ring cursor-pointer rounded bg-transparent font-medium text-foreground"
+              >
+                <option value="" className="bg-surface text-foreground">
+                  None
+                </option>
+                {voiceProfiles.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-surface text-foreground">
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           ) : (
             <Link
               href="/dashboard/voice"
@@ -229,7 +251,45 @@ export function HumanizeWorkspace({
               </Badge>
             </Link>
           )}
+
+          {customInstructionsAvailable ? (
+            <button
+              type="button"
+              onClick={() => setShowCustomInstructions((v) => !v)}
+              className={cn(
+                "focus-ring press-feedback inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition-colors",
+                showCustomInstructions || customInstructions
+                  ? "border-transparent bg-brand-gradient text-white"
+                  : "border-border bg-surface text-foreground-muted hover:text-foreground"
+              )}
+            >
+              Custom instructions
+            </button>
+          ) : (
+            <Link
+              href="/dashboard/billing"
+              title="Custom instructions require the Pro or Ultra plan"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-xs text-foreground-subtle opacity-70 hover:opacity-100"
+            >
+              Custom instructions
+              <Badge variant="neutral" className="px-1.5 py-0 text-[9px]">
+                Pro
+              </Badge>
+            </Link>
+          )}
         </div>
+
+        {customInstructionsAvailable && showCustomInstructions && (
+          <div className="border-b border-border bg-background-elevated px-5 py-4 sm:px-7">
+            <input
+              value={customInstructions}
+              onChange={(e) => setCustomInstructions(e.target.value.slice(0, 300))}
+              placeholder='e.g. "avoid em dashes", "keep it under 100 words", "use British spelling"'
+              className="focus-ring w-full rounded-md border border-border bg-surface px-3.5 py-2.5 text-sm text-foreground placeholder:text-foreground-subtle"
+            />
+            <p className="mt-1.5 text-xs text-foreground-subtle">{customInstructions.length}/300</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
           <div className="p-7 sm:p-9">
@@ -416,7 +476,10 @@ function PaywallPanel({ onBack }: { onBack: () => void }) {
                 <span className="text-sm font-normal text-foreground-subtle">/30 days</span>
               </p>
               <p className="mt-3 text-xs text-foreground-subtle">
-                {plan.monthlyHumanizations} humanizations · up to {Math.round(plan.maxInputChars / 6)} words
+                {plan.monthlyHumanizations} humanizations · up to {Math.round(plan.maxInputChars / 6)} words ·{" "}
+                {plan.outputVariations} variations · {plan.maxVoiceProfiles} Voice profile
+                {plan.maxVoiceProfiles === 1 ? "" : "s"}
+                {plan.customInstructions ? " · custom instructions" : ""}
               </p>
               <CheckoutButton planId={id} variant={id === "pro" ? "primary" : "secondary"} className="mt-6 w-full">
                 Choose {plan.name}

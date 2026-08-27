@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/ButtonLink";
 import { SignOutButton } from "@/components/dashboard/SignOutButton";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
-import { getOrCreateVoiceProfile } from "@/lib/db/voice";
+import { getVoiceOverview } from "@/lib/db/voice";
 import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { RecentWorkCard } from "@/components/dashboard/RecentWorkCard";
@@ -35,7 +35,7 @@ export default async function DashboardPage() {
   const [usage, history, voice, freeTrial, billing] = await Promise.allSettled([
     getUsageSummary(userId, plan),
     getHistoryForUser(userId, 5),
-    getOrCreateVoiceProfile(userId),
+    getVoiceOverview(userId),
     getFreeTrialStatus(userId),
     getSubscriptionSummary(userId),
   ]);
@@ -179,20 +179,20 @@ export default async function DashboardPage() {
               <Card className="p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-foreground">
-                    {voice.value.styleProfileJson ? "Profile ready" : "Not set up"}
+                    {voice.value.hasAnalyzedProfile ? "Profile ready" : "Not set up"}
                   </p>
-                  <Badge variant={voice.value.styleProfileJson ? "brand" : "neutral"}>
-                    {voice.value.sampleCount} sample{voice.value.sampleCount === 1 ? "" : "s"}
+                  <Badge variant={voice.value.hasAnalyzedProfile ? "brand" : "neutral"}>
+                    {voice.value.profileCount} profile{voice.value.profileCount === 1 ? "" : "s"}
                   </Badge>
                 </div>
                 <p className="mt-2 text-xs text-foreground-subtle">
-                  {voice.value.styleProfileJson
-                    ? "Turn it on next to Mode when humanizing text on a paid plan."
+                  {voice.value.hasAnalyzedProfile
+                    ? "Pick it next to Mode when humanizing text on a paid plan."
                     : "Teach HUMANORA how you write from a few real samples."}
                 </p>
                 <div className="mt-3">
                   <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
-                    {voice.value.sampleCount === 0 ? "Get started" : "Open"}
+                    {voice.value.profileCount === 0 ? "Get started" : "Open"}
                   </ButtonLink>
                 </div>
               </Card>

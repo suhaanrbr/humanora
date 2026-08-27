@@ -17,8 +17,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
   }
 
-  const result = await analyzeAndSaveVoiceProfile(userId);
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+  const { profileId } = (body ?? {}) as Record<string, unknown>;
+  if (typeof profileId !== "string") {
+    return NextResponse.json({ error: "Missing profileId." }, { status: 400 });
+  }
+
+  const result = await analyzeAndSaveVoiceProfile(userId, profileId);
   if (!result.ok) {
+    if (result.reason === "not_found") {
+      return NextResponse.json({ error: "Voice profile not found." }, { status: 404 });
+    }
     if (result.reason === "no_samples") {
       return NextResponse.json(
         { error: `Add at least ${MIN_SAMPLES_TO_ANALYZE} writing sample first.` },

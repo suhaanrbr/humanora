@@ -16,6 +16,11 @@ export async function PATCH(req: NextRequest) {
   }
 
   const raw = (body ?? {}) as Record<string, unknown>;
+  const { profileId } = raw;
+  if (typeof profileId !== "string") {
+    return NextResponse.json({ error: "Missing profileId." }, { status: 400 });
+  }
+
   const overrides: Partial<Record<VoiceTrait, string>> = {};
 
   // Only ever accept known traits with a value from that trait's own
@@ -27,6 +32,6 @@ export async function PATCH(req: NextRequest) {
     }
   }
 
-  await saveVoiceOverrides(userId, overrides);
+  await saveVoiceOverrides(userId, profileId, overrides);
   return NextResponse.json({ ok: true, overrides });
 }

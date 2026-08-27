@@ -155,50 +155,66 @@ export const humanization = pgTable(
 );
 
 /**
- * My Voice — Phase 2 scope is deliberately limited to "does a profile
- * exist and how complete is it", not real style analysis. `completeness`
- * is a simple function of sample count for now (see lib/db/voice.ts);
- * replacing it with genuine writing-style analysis is Phase 3 work and
- * this table's shape doesn't need to change for that.
+ * My Voice — a user can own MULTIPLE named profiles (e.g. "Academic",
+ * "Client Emails"), gated by plan (see lib/config/plans.ts#maxVoiceProfiles).
+ * Exactly one profile per user should have isDefault=true at a time —
+ * enforced in application logic (lib/db/voice.ts), not a DB constraint,
+ * since "make this one the default" is a two-row transition (unset the
+ * old default, set the new one) that a partial unique index can't
+ * express any more simply than the application already does.
  */
-export const voiceProfile = pgTable("voice_profile", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }).unique(),
-  sampleCount: integer("sample_count").notNull().default(0),
-  totalWordsSubmitted: integer("total_words_submitted").notNull().default(0),
-  // Gemini-derived structured style profile (validated against a Zod
-  // schema before being stored — see lib/ai/voiceAnalysis.ts — never
-  // trust/store arbitrary model output). Null until at least one
-  // analysis has run.
-  styleProfileJson: text("style_profile_json"),
-  // User-supplied corrections, applied on top of the inferred profile
-  // when building the style prompt. User intent always wins.
-  userOverridesJson: text("user_overrides_json"),
-  // Hash of the exact sample set (ids + content) the current
-  // styleProfileJson was analyzed from — lets us skip a redundant
-  // Gemini call when the user re-opens My Voice without changing their
-  // samples. See lib/ai/voiceAnalysis.ts.
-  analyzedSamplesHash: text("analyzed_samples_hash"),
-  analyzedAt: timestamp("analyzed_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const voiceProfile = pgTable(
+  "voice_profile",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    name: text("name").notNull().default("My Voice"),
+    isDefault: boolean("is_default").notNull().default(false),
+    sampleCount: integer("sample_count").notNull().default(0),
+    totalWordsSubmitted: integer("total_words_submitted").notNull().default(0),
+    // Gemini-derived structured style profile (validated against a Zod
+    // schema before being stored — see lib/ai/voiceAnalysis.ts — never
+    // trust/store arbitrary model output). Null until at least one
+    // analysis has run.
+    styleProfileJson: text("style_profile_json"),
+    // User-supplied corrections, applied on top of the inferred profile
+    // when building the style prompt. User intent always wins.
+    userOverridesJson: text("user_overrides_json"),
+    // Hash of the exact sample set (ids + content) the current
+    // styleProfileJson was analyzed from — lets us skip a redundant
+    // Gemini call when the user re-opens My Voice without changing their
+    // samples. See lib/ai/voiceAnalysis.ts.
+    analyzedSamplesHash: text("analyzed_samples_hash"),
+    analyzedAt: timestamp("analyzed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [index("voice_profile_user_idx").on(table.userId)]
+);
 
 /**
- * Individual pasted writing samples backing a Voice profile. Kept
+ * Individual pasted writing samples backing ONE Voice profile. Kept
  * separate from voiceProfile so re-analysis can reprocess all of a
- * user's samples without losing the originals.
+ * profile's samples without losing the originals. `userId` is kept
+ * (denormalized from the owning profile) purely so ownership checks
+ * stay a simple single-column WHERE, matching every other
+ * ownership-scoped table in this schema, rather than requiring a join
+ * through voiceProfile on every sample query.
  */
 export const voiceSample = pgTable(
   "voice_sample",
   {
     id: text("id").primaryKey(),
     userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    profileId: text("profile_id").notNull().references(() => voiceProfile.id, { onDelete: "cascade" }),
     content: text("content").notNull(),
     wordCount: integer("word_count").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => [index("voice_sample_user_idx").on(table.userId)]
+  (table) => [
+    index("voice_sample_user_idx").on(table.userId),
+    index("voice_sample_profile_idx").on(table.profileId),
+  ]
 );
 
 /**

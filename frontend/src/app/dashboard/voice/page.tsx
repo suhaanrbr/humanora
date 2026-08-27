@@ -2,39 +2,40 @@ import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { Container } from "@/components/ui/Container";
 import { getUserPlan } from "@/lib/db/entitlement";
-import { listVoiceSamples, getOrCreateVoiceProfile } from "@/lib/db/voice";
+import { listVoiceProfiles, listVoiceSamples } from "@/lib/db/voice";
 import { voiceStyleProfileSchema } from "@/lib/ai/voiceAnalysis";
-import { VoiceWorkspace } from "@/components/dashboard/VoiceWorkspace";
+import { VoiceWorkspace, type ProfileData } from "@/components/dashboard/VoiceWorkspace";
+import { PLANS } from "@/lib/config/plans";
 
 export const metadata = { title: "My Voice — HUMANORA" };
 
 export default async function VoicePage() {
-  // Request-memoized — reuses the layout's session lookup, no extra DB call.
   const result = await getVerifiedSession();
-  if (result.status !== "authenticated") {
-    redirect("/login");
-  }
+  if (result.status !== "authenticated") redirect("/login");
   const userId = result.session.user.id;
 
-  const [plan, samples, profileRow] = await Promise.all([
-    getUserPlan(userId),
-    listVoiceSamples(userId),
-    getOrCreateVoiceProfile(userId),
-  ]);
+  const [plan, profiles] = await Promise.all([getUserPlan(userId), listVoiceProfiles(userId)]);
 
-  const initialProfile = profileRow.styleProfileJson
-    ? voiceStyleProfileSchema.safeParse(JSON.parse(profileRow.styleProfileJson))
-    : null;
-  const overrides = profileRow.userOverridesJson ? JSON.parse(profileRow.userOverridesJson) : {};
+  const profileData: ProfileData[] = await Promise.all(
+    profiles.map(async (p) => {
+      const samples = await listVoiceSamples(p.id);
+      const parsedProfile = p.styleProfileJson
+        ? voiceStyleProfileSchema.safeParse(JSON.parse(p.styleProfileJson))
+        : null;
+      return {
+        id: p.id,
+        name: p.name,
+        isDefault: p.isDefault,
+        samples: samples.map((s) => ({ id: s.id, content: s.content, wordCount: s.wordCount })),
+        profile: parsedProfile?.success ? parsedProfile.data : null,
+        overrides: p.userOverridesJson ? JSON.parse(p.userOverridesJson) : {},
+      };
+    })
+  );
 
   return (
     <Container className="mx-auto max-w-4xl">
-      <VoiceWorkspace
-        plan={plan}
-        initialSamples={samples.map((s) => ({ id: s.id, content: s.content, wordCount: s.wordCount }))}
-        initialProfile={initialProfile?.success ? initialProfile.data : null}
-        initialOverrides={overrides}
-      />
+      <VoiceWorkspace plan={plan} maxProfiles={PLANS[plan].maxVoiceProfiles} initialProfiles={profileData} />
     </Container>
   );
 }

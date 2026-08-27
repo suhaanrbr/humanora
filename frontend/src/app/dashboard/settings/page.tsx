@@ -5,7 +5,7 @@ import { AccountSettings } from "@/components/dashboard/AccountSettings";
 import { getLinkedProviders } from "@/lib/db/account";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getSubscriptionSummary, getFreeTrialStatus } from "@/lib/db/entitlement";
-import { getOrCreateVoiceProfile } from "@/lib/db/voice";
+import { getVoiceOverview } from "@/lib/db/voice";
 import { PLANS } from "@/lib/config/plans";
 
 export const metadata = { title: "Account — HUMANORA" };
@@ -18,7 +18,7 @@ export default async function SettingsPage() {
   const [providers, billing, voice, freeTrial] = await Promise.all([
     getLinkedProviders(user.id),
     getSubscriptionSummary(user.id),
-    getOrCreateVoiceProfile(user.id),
+    getVoiceOverview(user.id),
     getFreeTrialStatus(user.id),
   ]);
   const usage =
@@ -43,8 +43,8 @@ export default async function SettingsPage() {
         freeTrialUsed={freeTrial.used}
         currentPeriodEnd={billing.currentPeriodEnd}
         usage={usage}
-        voiceSampleCount={voice.sampleCount}
-        voiceProfileReady={!!voice.styleProfileJson}
+        voiceProfileCount={voice.profileCount}
+        voiceProfileReady={voice.hasAnalyzedProfile}
       />
     </Container>
   );
