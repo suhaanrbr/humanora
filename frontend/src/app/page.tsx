@@ -11,6 +11,7 @@ import { Pricing } from "@/components/landing/Pricing";
 import { Trust } from "@/components/landing/Trust";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { Footer } from "@/components/landing/Footer";
+import { StructuredData } from "@/components/seo/StructuredData";
 
 /**
  * HUMANORA marketing landing page.
@@ -18,6 +19,7 @@ import { Footer } from "@/components/landing/Footer";
 export default function Home() {
   return (
     <>
+      <StructuredData />
       <Header />
       <main>
         <Hero />

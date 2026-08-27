@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Sora, Inter, Geist_Mono } from "next/font/google";
+import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/config/site";
 import "./globals.css";
 
 // Sora: geometric, confident display face for headings — reads as
@@ -23,9 +24,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HUMANORA — AI drafts. Human impact.",
-  description:
-    "HUMANORA transforms AI-assisted writing into clearer, more natural writing while preserving meaning, facts, and citations.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${SITE_NAME} — ${SITE_TAGLINE}`, template: `%s — ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "AI humanizer",
+    "AI writing humanizer",
+    "humanize AI text",
+    "natural writing",
+    "AI text rewriter",
+    "writing style",
+    SITE_NAME,
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: { index: true, follow: true },
 };
 
 // HUMANORA is dark-mode only by deliberate product decision — there is

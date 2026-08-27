@@ -1,10 +1,15 @@
 import { redirect } from "next/navigation";
-import { Header } from "@/components/landing/Header";
-import { Footer } from "@/components/landing/Footer";
+import type { Metadata } from "next";
+import { AppHeader } from "@/components/dashboard/AppHeader";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { ButtonLink } from "@/components/ui/ButtonLink";
+
+// Defense in depth — this is already behind a real auth boundary below,
+// but a private, per-account workspace should never be a candidate for
+// a search result regardless.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /**
  * The real authorization boundary for /dashboard/*. middleware.ts already
@@ -20,6 +25,10 @@ import { ButtonLink } from "@/components/ui/ButtonLink";
  * already-authenticated user occasionally got bounced to /login by a
  * one-off DB error unrelated to their session's validity. See
  * lib/auth-session.ts for the full reasoning.
+ *
+ * Uses AppHeader (the app's own nav), not the marketing Header — a
+ * separate concern from auth, but this is the one place both are
+ * assembled together for every /dashboard/* page.
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const result = await getVerifiedSession();
@@ -31,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (result.status === "error") {
     return (
       <>
-        <Header />
+        <AppHeader />
         <main className="flex-1 py-16">
           <Container className="mx-auto max-w-md text-center">
             <Card className="p-8">
@@ -46,16 +55,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </Card>
           </Container>
         </main>
-        <Footer />
       </>
     );
   }
 
   return (
     <>
-      <Header />
-      <main className="flex-1 py-12 sm:py-16">{children}</main>
-      <Footer />
+      <AppHeader />
+      <main className="flex-1 py-10 sm:py-14">{children}</main>
     </>
   );
 }
