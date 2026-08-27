@@ -3,13 +3,13 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "@/lib/db/client";
 
 /**
- * HUMANORA authentication (server-side). Email/password only for now —
- * that's the simplest thing that supports the full
- * signup → verify → login → session → logout journey without requiring
- * an OAuth app registration (Google/GitHub) or an email-sending service
- * (both of which would need a decision — and possibly a paid service —
- * this project hasn't made yet). Adding a social provider later is a
- * config addition here, not a rearchitecture.
+ * HUMANORA authentication (server-side): email/password, plus Google
+ * OAuth when GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET are configured (see
+ * docs/GOOGLE_LOGIN_SETUP.md). Google is added conditionally — with no
+ * client id/secret set, `socialProviders` is simply omitted so
+ * email/password keeps working standalone in any environment that
+ * hasn't configured Google yet (local dev without the env vars, or
+ * before the owner completes the one-time Google Cloud setup).
  *
  * IMPORTANT: this module calls getDb() at import time, which throws if
  * DATABASE_URL isn't set. Anything that needs to keep working without a
@@ -23,6 +23,9 @@ import { getDb } from "@/lib/db/client";
  * import at the call site is the more reliable way to get the same
  * "degrade gracefully without a DB" behavior.)
  */
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
 export const auth = betterAuth({
   database: drizzleAdapter(getDb(), { provider: "pg" }),
   emailAndPassword: {
@@ -34,6 +37,24 @@ export const auth = betterAuth({
     // once a mail provider is wired up.
     requireEmailVerification: false,
     minPasswordLength: 8,
+  },
+  ...(googleClientId && googleClientSecret
+    ? {
+        socialProviders: {
+          google: { clientId: googleClientId, clientSecret: googleClientSecret },
+        },
+      }
+    : {}),
+  account: {
+    // Google always verifies the email address it hands back, so it's
+    // safe to link a Google sign-in to an existing email/password
+    // account with the same address rather than creating a second,
+    // disconnected user (which would otherwise silently split one
+    // person's History/My Voice/subscription across two accounts).
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google"],
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 30, // 30 days

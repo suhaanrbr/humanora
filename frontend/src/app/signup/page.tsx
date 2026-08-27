@@ -9,5 +9,5 @@ export default async function SignupPage() {
   if (result.status === "authenticated") {
     redirect("/dashboard");
   }
-  return <SignupPageClient />;
+  return <SignupPageClient googleEnabled={!!process.env.GOOGLE_CLIENT_ID} />;
 }
