@@ -180,14 +180,21 @@ export function Header() {
           )}
         </div>
 
-        {/* Mobile-only: shows the same account avatar as desktop next to
-            the menu button, so a logged-in user has a visible "you're
-            signed in" cue on the collapsed top bar, not only after
-            opening the hamburger menu. Renders nothing when logged out
-            (AccountMenu returns null) — no layout gap either way since
-            it only ever occupies space when it has something to show. */}
+        {/* Mobile-only: a "you're signed in" cue on the collapsed top bar,
+            without duplicating account actions — the hamburger panel
+            below is the one place Dashboard/Log out live on mobile, so
+            this is a plain link to /dashboard, not a second interactive
+            menu with its own Log out control. */}
         <div className="flex items-center gap-2 lg:hidden">
-          {!isPending && session && <AccountMenu />}
+          {!isPending && session && (
+            <Link
+              href="/dashboard"
+              aria-label="Go to your dashboard"
+              className="focus-ring press-feedback flex h-9 w-9 items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white shadow-glow-sm"
+            >
+              {session.user.name?.trim()?.[0]?.toUpperCase() ?? "U"}
+            </Link>
+          )}
           <button
             type="button"
             className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"

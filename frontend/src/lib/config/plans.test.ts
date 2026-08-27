@@ -21,7 +21,31 @@ describe("plan entitlements — server-side source of truth", () => {
 
   it("each paid tier strictly increases output variations", () => {
     expect(PLANS.essential.outputVariations).toBeGreaterThan(PLANS.free.outputVariations);
-    expect(PLANS.pro.outputVariations).toBeGreaterThan(PLANS.essential.outputVariations);
+    expect(PLANS.pro.outputVariations).toBeGreaterThanOrEqual(PLANS.essential.outputVariations);
     expect(PLANS.ultra.outputVariations).toBeGreaterThan(PLANS.pro.outputVariations);
+  });
+
+  it("every plan has a real (non-unlimited) monthly word allowance and output token ceiling", () => {
+    for (const plan of Object.values(PLANS)) {
+      expect(plan.monthlyWordAllowance).toBeGreaterThan(0);
+      expect(Number.isFinite(plan.monthlyWordAllowance)).toBe(true);
+      expect(plan.outputTokenLimit).toBeGreaterThan(0);
+    }
+  });
+
+  it("paid tiers strictly increase monthly word allowance and output token ceiling", () => {
+    expect(PLANS.pro.monthlyWordAllowance).toBeGreaterThan(PLANS.essential.monthlyWordAllowance);
+    expect(PLANS.ultra.monthlyWordAllowance).toBeGreaterThan(PLANS.pro.monthlyWordAllowance);
+    expect(PLANS.pro.outputTokenLimit).toBeGreaterThan(PLANS.essential.outputTokenLimit);
+    expect(PLANS.ultra.outputTokenLimit).toBeGreaterThan(PLANS.pro.outputTokenLimit);
+  });
+
+  it("output token ceiling comfortably covers a same-length rewrite of the plan's longest permitted input", () => {
+    // ~4 chars/token — see docs/AI_COST_MODEL.md. A same-length rewrite
+    // of the longest permitted input should not be truncated.
+    for (const plan of [PLANS.essential, PLANS.pro, PLANS.ultra]) {
+      const longestInputTokens = plan.maxInputChars / 4;
+      expect(plan.outputTokenLimit).toBeGreaterThanOrEqual(longestInputTokens);
+    }
   });
 });

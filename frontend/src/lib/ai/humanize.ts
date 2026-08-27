@@ -50,6 +50,30 @@ export interface HumanizeRequest {
    * AI-provider requests proportional to `variations`, which is the
    * honest tradeoff for a real multi-output feature on this model. */
   variations?: number;
+  /** Ceiling for this call's `maxOutputTokens` — driven by the caller's
+   * plan (PLANS[plan].outputTokenLimit), never client-supplied. The
+   * actual per-call value is scaled down from this based on input
+   * length (see estimateMaxOutputTokens below); this is only the upper
+   * bound, sized so a plan's longest permitted input isn't truncated.
+   * Defaults to 1024 (the previous flat ceiling) if omitted, so any
+   * future caller that doesn't pass a plan-derived value degrades to
+   * the old, safe-but-unoptimized behavior rather than an error. */
+  outputTokenLimit?: number;
+}
+
+/**
+ * Scales the actual per-call output ceiling to what a rewrite of this
+ * length plausibly needs, instead of always requesting the plan's full
+ * ceiling — most requests are far short of their plan's max input
+ * length, so most calls should cost proportionally less, not spend the
+ * same worst-case output budget every time. Never exceeds `ceiling`
+ * (the plan's outputTokenLimit), and never goes below a floor generous
+ * enough for a short rewrite to complete. See docs/AI_COST_MODEL.md.
+ */
+function estimateMaxOutputTokens(inputText: string, ceiling: number): number {
+  const estimatedInputTokens = Math.ceil(inputText.length / 4);
+  const estimated = Math.round(estimatedInputTokens * 1.8) + 150;
+  return Math.min(ceiling, Math.max(200, estimated));
 }
 
 export interface HumanizeResult {
@@ -119,12 +143,13 @@ function buildPrompt(req: HumanizeRequest, variationIndex: number): string {
 }
 
 async function requestOneCandidate(req: HumanizeRequest, apiKey: string, variationIndex: number, temperature: number): Promise<string> {
+  const maxOutputTokens = estimateMaxOutputTokens(req.text, req.outputTokenLimit ?? 1024);
   const response = await fetch(`${API_URL}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ parts: [{ text: buildPrompt(req, variationIndex) }] }],
-      generationConfig: { temperature, maxOutputTokens: 1024 },
+      generationConfig: { temperature, maxOutputTokens },
     }),
   });
 

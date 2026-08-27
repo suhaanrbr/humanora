@@ -32,6 +32,30 @@ export interface PlanConfig {
    * changes model behavior, not a cosmetic toggle. */
   customInstructions: boolean;
   prioritySupport: boolean;
+  /**
+   * Total INPUT words a plan may submit across a calendar month, checked
+   * atomically alongside `monthlyHumanizations` (lib/db/usage.ts) BEFORE
+   * every Gemini call. Exists because `monthlyHumanizations` alone
+   * doesn't bound spend: nothing previously stopped a paid account from
+   * submitting max-length text on every single one of its monthly
+   * humanizations, and `outputVariations` re-sends that same input once
+   * per candidate — see docs/AI_COST_MODEL.md for the full derivation.
+   * Sized so that realistic mixed usage (mostly short/medium requests,
+   * occasional long ones) keeps modeled Gemini cost at roughly 9-11% of
+   * plan revenue even in a deliberately pessimistic estimate.
+   */
+  monthlyWordAllowance: number;
+  /**
+   * Ceiling passed as Gemini's `maxOutputTokens` for this plan (lib/ai/
+   * humanize.ts scales the actual per-call value down from this based on
+   * input length — most requests use far less). Sized to avoid
+   * truncating a legitimate max-length rewrite for this plan's
+   * `maxInputChars`, while keeping the worst-case per-call cost bounded
+   * — replaces a previous flat 1024-token ceiling that was both too low
+   * for Pro/Ultra's longest inputs (real truncation risk) and unnecessarily
+   * high for Essential/Free's shortest ones (real, avoidable cost).
+   */
+  outputTokenLimit: number;
 }
 
 // Character limits below map to the previously-approved word-based
@@ -49,6 +73,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     maxVoiceProfiles: 0,
     customInstructions: false,
     prioritySupport: false,
+    monthlyWordAllowance: 35, // matches the one-time ~200-char trial — there is no recurring monthly grant on Free
+    outputTokenLimit: 256,
   },
   essential: {
     id: "essential",
@@ -60,30 +86,44 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     maxVoiceProfiles: 1,
     customInstructions: false,
     prioritySupport: false,
+    monthlyWordAllowance: 25_000,
+    outputTokenLimit: 3072,
   },
   pro: {
     id: "pro",
     name: "Pro",
     monthlyPriceInr: 599,
-    monthlyHumanizations: 300,
+    // Was 300/mo with 3 output variations — reduced alongside a genuine
+    // per-plan monthlyWordAllowance below (previously unbounded total
+    // monthly volume) after the AI cost model showed the old numbers
+    // could exceed plan revenue on Gemini cost alone in a realistic
+    // heavy-usage month. See docs/AI_COST_MODEL.md.
+    monthlyHumanizations: 150,
     maxInputChars: 3000 * 6,
-    outputVariations: 3,
+    outputVariations: 2,
     maxVoiceProfiles: 3,
     customInstructions: true,
     prioritySupport: true,
+    monthlyWordAllowance: 45_000,
+    outputTokenLimit: 6144,
   },
   ultra: {
     id: "ultra",
     name: "Ultra",
     monthlyPriceInr: 999,
-    // "Unlimited*" in marketing copy — this is the real fair-use ceiling
-    // behind that asterisk. Never remove the technical cap.
-    monthlyHumanizations: 2000,
+    // Was framed as "Unlimited humanizations*" with a 2000/mo technical
+    // ceiling — replaced with a real, stated number. "Unlimited" plus an
+    // asterisked fine-print cap is exactly the pattern this plan should
+    // not use; see docs/AI_COST_MODEL.md for why 2000/mo × 5 variations
+    // was never sustainable at this price regardless of framing.
+    monthlyHumanizations: 180,
     maxInputChars: 5000 * 6,
-    outputVariations: 5,
+    outputVariations: 3,
     maxVoiceProfiles: 5,
     customInstructions: true,
     prioritySupport: true,
+    monthlyWordAllowance: 55_000,
+    outputTokenLimit: 10_240,
   },
 };
 

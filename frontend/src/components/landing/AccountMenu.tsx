@@ -12,7 +12,6 @@ const links = [
   { label: "My Voice", href: "/dashboard/voice" },
   { label: "History", href: "/dashboard/history" },
   { label: "Billing", href: "/dashboard/billing" },
-  { label: "Settings", href: "/dashboard/settings" },
 ];
 
 /**
@@ -24,7 +23,7 @@ const links = [
  * existed. `useSession` is Better Auth's reactive client hook — it
  * reflects the real cookie-backed session, never a locally-faked flag.
  */
-export function AccountMenu() {
+export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } = {}) {
   const { data: session, isPending } = useSession();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -78,19 +77,34 @@ export function AccountMenu() {
             <p className="truncate text-sm font-medium text-foreground">{session.user.name}</p>
             <p className="truncate text-xs text-foreground-subtle">{session.user.email}</p>
           </div>
-          <div className="flex flex-col gap-0.5 py-1.5">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+          {showAppLinks && (
+            <div className="flex flex-col gap-0.5 py-1.5">
+              {links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
+          {/* Inside the dashboard, AppHeader's own top nav already covers
+              Dashboard/Humanize/My Voice/History/Billing — repeating them
+              here would just be the same destinations twice. Settings has
+              no other entry point, so it stays regardless of context. */}
+          <div className={cn("flex flex-col gap-0.5", showAppLinks ? "border-t border-border pt-1.5" : "py-1.5")}>
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setOpen(false)}
+              className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
+            >
+              Settings
+            </Link>
           </div>
           <div className="border-t border-border pt-1.5">
             <button
