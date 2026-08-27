@@ -174,7 +174,7 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
                   without losing your meaning, facts, or voice.
                 </p>
               </div>
-              <TransformationPreview className="w-64" />
+              <TransformationPreview className="login-preview-glass w-64" />
             </div>
 
             <p className="text-xs text-foreground-subtle">&copy; {new Date().getFullYear()} HUMANORA</p>
