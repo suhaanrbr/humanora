@@ -171,14 +171,22 @@ export function Header() {
           )}
         </div>
 
-        <button
-          type="button"
-          className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground lg:hidden"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-nav"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
+        {/* Mobile-only: shows the same account avatar as desktop next to
+            the menu button, so a logged-in user has a visible "you're
+            signed in" cue on the collapsed top bar, not only after
+            opening the hamburger menu. Renders nothing when logged out
+            (AccountMenu returns null) — no layout gap either way since
+            it only ever occupies space when it has something to show. */}
+        <div className="flex items-center gap-2 lg:hidden">
+          {!isPending && session && <AccountMenu />}
+          <button
+            type="button"
+            className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
           <span className="relative block h-4 w-5" aria-hidden="true">
             <span
               className={cn(
@@ -199,7 +207,8 @@ export function Header() {
               )}
             />
           </span>
-        </button>
+          </button>
+        </div>
       </div>
 
       <div
