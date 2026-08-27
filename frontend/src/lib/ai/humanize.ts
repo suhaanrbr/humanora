@@ -33,6 +33,14 @@ export interface HumanizeRequest {
    * (see lib/ai/voiceAnalysis.ts#buildStyleDirectives) — never raw
    * sample text. Omit for the plain, voice-agnostic rewrite. */
   styleDirectives?: string;
+  /** A free-text steering instruction from the user (e.g. "avoid em
+   * dashes", "keep it under 100 words", "use British spelling") —
+   * genuinely appended to the prompt, gated server-side to plans with
+   * PLANS[plan].customInstructions (see api/humanize/route.ts). Never
+   * allowed to override the meaning/formatting-preservation rules
+   * below — it's appended as an additional preference, not a
+   * system-level override. */
+  customInstructions?: string;
   /** How many independent rewrite candidates to request (default 1) —
    * driven by the caller's plan (PLANS[plan].outputVariations), never a
    * client-supplied number. Made as SEPARATE sequential requests, not
@@ -88,6 +96,7 @@ function buildPrompt(req: HumanizeRequest, variationIndex: number): string {
     "",
     "Rules:",
     "- Preserve the original meaning, facts, numbers, dates, names, quotations, and citations exactly.",
+    "- Preserve the original structure: keep paragraph breaks, bullet/numbered lists, and headings in the same places and format — rewrite the wording within each, never merge or reorder them.",
     "- Do not add information that wasn't in the original text.",
     "- Do not add commentary, explanations, or notes — output ONLY the rewritten text.",
     "- Do not wrap the output in quotes or markdown.",
@@ -96,6 +105,9 @@ function buildPrompt(req: HumanizeRequest, variationIndex: number): string {
     `Strength: ${req.strength} — ${strengthInstructions[req.strength]}`,
     ...(req.styleDirectives
       ? ["", `Match the writer's own voice as closely as the mode/strength above allow: ${req.styleDirectives}`]
+      : []),
+    ...(req.customInstructions
+      ? ["", `Additional preference from the user (follow it unless it conflicts with the rules above): ${req.customInstructions}`]
       : []),
     ...(variationIndex > 0
       ? ["", `Produce a genuinely different phrasing from a typical rewrite — vary sentence structure and word choice, while following every rule above.`]

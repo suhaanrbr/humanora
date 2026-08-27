@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { text, mode, strength, useVoice } = (body ?? {}) as Record<string, unknown>;
+  const { text, mode, strength, voiceProfileId, customInstructions } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "Please provide some text to humanize." }, { status: 400 });
@@ -125,14 +125,23 @@ export async function POST(req: NextRequest) {
     reserved = true;
   }
 
-  // My Voice: only ever loaded for the authenticated user's own id, and
-  // only used if their plan actually includes it — a request can't ask
-  // for someone else's voice or upgrade its own entitlement by lying
-  // about `useVoice`.
+  // My Voice: only ever loaded for the authenticated user's own id
+  // (getEffectiveVoiceProfile's ownership check makes it structurally
+  // impossible to resolve someone else's profile), and only used if
+  // the plan's real quota (maxVoiceProfiles) allows it — a request
+  // can't unlock the feature by just passing a profile id.
   let styleDirectives: string | undefined;
-  if (useVoice === true && PLANS[plan].myVoice !== "none") {
-    const voiceProfile = await getEffectiveVoiceProfile(userId);
+  if (typeof voiceProfileId === "string" && PLANS[plan].maxVoiceProfiles > 0) {
+    const voiceProfile = await getEffectiveVoiceProfile(userId, voiceProfileId);
     if (voiceProfile) styleDirectives = buildStyleDirectives(voiceProfile);
+  }
+
+  // Custom instructions: a real, plan-gated capability (Pro/Ultra) —
+  // capped at a sane length and only ever forwarded if the resolved
+  // plan (never client-claimed) actually includes it.
+  let safeCustomInstructions: string | undefined;
+  if (typeof customInstructions === "string" && customInstructions.trim() && PLANS[plan].customInstructions) {
+    safeCustomInstructions = customInstructions.trim().slice(0, 300);
   }
 
   // --- Call Gemini. On ANY failure, release the reservation — the
@@ -143,6 +152,7 @@ export async function POST(req: NextRequest) {
       mode: safeMode,
       strength: safeStrength,
       styleDirectives,
+      customInstructions: safeCustomInstructions,
       variations: PLANS[plan].outputVariations,
     });
     const words = wordCount(trimmed);

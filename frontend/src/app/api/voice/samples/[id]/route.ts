@@ -8,8 +8,12 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const userId = auth.userId;
 
   const { id } = await params;
-  // deleteVoiceSample scopes its WHERE clause by userId AND id — a
-  // request for another user's sample id simply deletes nothing.
-  await deleteVoiceSample(userId, id);
+  const profileId = req.nextUrl.searchParams.get("profileId");
+  if (!profileId) return NextResponse.json({ error: "Missing profileId." }, { status: 400 });
+
+  // deleteVoiceSample scopes its WHERE clause by userId AND profileId
+  // AND sample id — a request for another user's sample (or the right
+  // sample under the wrong profile) simply deletes nothing.
+  await deleteVoiceSample(userId, profileId, id);
   return NextResponse.json({ ok: true });
 }

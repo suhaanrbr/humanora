@@ -28,7 +28,7 @@ interface AccountSettingsProps {
   freeTrialUsed: boolean;
   currentPeriodEnd: Date | null;
   usage: UsageSummary | null;
-  voiceSampleCount: number;
+  voiceProfileCount: number;
   voiceProfileReady: boolean;
 }
 
@@ -48,7 +48,7 @@ export function AccountSettings({
   freeTrialUsed,
   currentPeriodEnd,
   usage,
-  voiceSampleCount,
+  voiceProfileCount,
   voiceProfileReady,
 }: AccountSettingsProps) {
   const initial = initialName.trim()[0]?.toUpperCase() ?? "U";
@@ -118,13 +118,13 @@ export function AccountSettings({
           </Badge>
         </div>
         <p className="mt-2 text-sm text-foreground-muted">
-          {voiceSampleCount === 0
-            ? "No writing samples yet."
-            : `${voiceSampleCount} writing sample${voiceSampleCount === 1 ? "" : "s"} saved.`}
+          {voiceProfileCount === 0
+            ? "No Voice profiles yet."
+            : `${voiceProfileCount} Voice profile${voiceProfileCount === 1 ? "" : "s"}.`}
         </p>
         <div className="mt-4">
           <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
-            {voiceSampleCount === 0 ? "Get started" : "Manage"}
+            {voiceProfileCount === 0 ? "Get started" : "Manage"}
           </ButtonLink>
         </div>
       </Card>
