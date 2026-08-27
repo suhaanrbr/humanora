@@ -36,28 +36,14 @@ const wordmarkSizes: Record<LogoSize, string> = {
   xl: "text-3xl",
 };
 
-// The mark's own viewBox (0 0 40 40, content spans x=6..34) carries
-// ~6 units of dead space to the right of its tallest stroke, on top of
-// the plain flex gap — squaring markSizes assumes a square icon
-// elsewhere (dashboard rail, favicon), so it isn't safe to crop the
-// shared viewBox itself. Instead the lockup below pulls the wordmark in
-// with a SMALL negative margin (just enough to cancel that dead space,
-// not fuse the two together) so it reads as one properly-spaced
-// wordmark rather than either two separate elements or one squashed
-// glyph — every other LogoMark usage keeps its untouched square bounds.
+// Deliberate breathing room between mark and wordmark — the mark
+// stands beside "HUMANORA", not in place of its H.
 const gapSizes: Record<LogoSize, string> = {
-  xs: "gap-1",
-  sm: "gap-1.5",
-  md: "gap-2",
-  lg: "gap-2.5",
-  xl: "gap-3",
-};
-const markPullSizes: Record<LogoSize, string> = {
-  xs: "-mr-0.5",
-  sm: "-mr-1",
-  md: "-mr-1.5",
-  lg: "-mr-2",
-  xl: "-mr-2.5",
+  xs: "gap-1.5",
+  sm: "gap-2",
+  md: "gap-2.5",
+  lg: "gap-3",
+  xl: "gap-3.5",
 };
 
 /**
@@ -121,24 +107,28 @@ export function LogoMark({ size = "md", tone = "gradient", className }: { size?:
  * genuinely too tight for the wordmark (a collapsed nav rail, a mobile
  * tab) or where the wordmark would duplicate an adjacent page title.
  *
- * The mark stands in for the wordmark's own "H" rather than sitting
- * beside a full "HUMANORA" — set flush (see `gapSizes`) against
- * "UMANORA" so the two read as one word: the Ascent mark literally IS
- * the H.
+ * The wordmark keeps its own "H" — the mark sits beside "HUMANORA",
+ * not in place of a letter. Color is deliberately restrained: the mark
+ * carries the full brand gradient, but the wordmark itself uses
+ * `--color-wordmark` (see globals.css), a near-white with only ~8%
+ * violet mixed in — reads as white at a glance, brand-tinted on
+ * closer inspection. `mono-light` still forces pure white (for
+ * placement over photography/video, where even that 8% would be lost
+ * in the surrounding contrast anyway).
  */
 export function Logo({ size = "md", showWordmark = true, tone = "gradient", className }: LogoProps) {
   return (
     <div className={cn("inline-flex items-center", gapSizes[size], className)}>
-      <LogoMark size={size} tone={tone} className={showWordmark ? markPullSizes[size] : undefined} />
+      <LogoMark size={size} tone={tone} />
       {showWordmark && (
         <span
           className={cn(
-            "font-display font-extrabold tracking-tighter text-foreground",
+            "font-display font-bold tracking-tight",
             wordmarkSizes[size],
-            tone === "mono-light" && "text-white"
+            tone === "mono-light" ? "text-white" : "text-wordmark"
           )}
         >
-          UMANORA
+          HUMANORA
         </span>
       )}
     </div>

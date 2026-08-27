@@ -30,6 +30,12 @@
   --color-foreground: #f8f8fc;
   --color-foreground-muted: #c6c6e0;
   --color-foreground-subtle: #9d9dc0;
+  /* The HUMANORA wordmark's own color — reads as essentially white at
+     a glance, with just enough cool violet mixed in to feel like it
+     belongs to the same palette as the logo mark. Deliberately far
+     more restrained than the mark itself (which stays a full
+     gradient) — the wordmark is typography, not a second logo. */
+  --color-wordmark: color-mix(in srgb, var(--color-brand-violet) 8%, var(--color-foreground));
 
   /* Brand — cyan → blue → violet → magenta spectrum, replacing the
      narrower indigo/purple pairing with a wider, more electric range. */
@@ -122,6 +128,7 @@
   --color-foreground: #12111a;
   --color-foreground-muted: #4c4a5c;
   --color-foreground-subtle: #67647a;
+  --color-wordmark: color-mix(in srgb, var(--color-brand-violet) 8%, var(--color-foreground));
 
   /* Brand — Indigo → Electric Violet → Orchid, HUMANORA's light-theme
      spectrum. Most of the interface stays neutral so this reads as
@@ -182,6 +189,7 @@
   --color-foreground: var(--color-foreground);
   --color-foreground-muted: var(--color-foreground-muted);
   --color-foreground-subtle: var(--color-foreground-subtle);
+  --color-wordmark: var(--color-wordmark);
 
   --color-brand-indigo: var(--color-brand-indigo);
   --color-brand-purple: var(--color-brand-purple);
