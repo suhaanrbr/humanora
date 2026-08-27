@@ -104,21 +104,7 @@ export function VoiceWorkspace({
   }
 
   if (maxProfiles === 0) {
-    return (
-      <div className="text-center">
-        <Badge variant="brand">My Voice</Badge>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
-          Teach HUMANORA how you write
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm text-foreground-muted">
-          My Voice learns your vocabulary, sentence rhythm, and tone from real writing samples, then
-          applies it when humanizing future drafts. Available on every paid plan.
-        </p>
-        <div className="mx-auto mt-8 max-w-sm">
-          <BillingActions />
-        </div>
-      </div>
-    );
+    return <MyVoiceUpsell />;
   }
 
   return (
@@ -216,10 +202,116 @@ export function VoiceWorkspace({
           }}
         />
       ) : (
-        <Card className="p-8 text-center">
-          <p className="text-sm text-foreground-muted">Create your first Voice profile to get started.</p>
+        <Card className="flex flex-col items-center gap-5 p-8 text-center sm:flex-row sm:items-center sm:gap-8 sm:p-9 sm:text-left">
+          <ExampleProfilePreview className="w-full max-w-xs shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Create your first Voice profile</p>
+            <p className="mt-1.5 max-w-sm text-sm text-foreground-muted">
+              Add a few writing samples and HUMANORA analyzes patterns like these — vocabulary, tone,
+              and rhythm — then applies them the next time you humanize a draft.
+            </p>
+          </div>
         </Card>
       )}
+    </div>
+  );
+}
+
+/**
+ * A compact, clearly-labeled EXAMPLE of what an analyzed Voice profile
+ * looks like — real trait vocabulary from lib/ai/voiceAnalysis.ts, never
+ * live account data. Shared between the free-plan upsell and the "no
+ * profile yet" prompt for a paid account, so both places show the same
+ * honest preview of the real feature instead of two different pitches.
+ */
+function ExampleProfilePreview({ className }: { className?: string }) {
+  const exampleTraits: Partial<Record<VoiceTrait, string>> = {
+    conversationalTone: "conversational",
+    directness: "direct",
+    rhythmVariation: "varied",
+    formality: "casual",
+  };
+
+  return (
+    <div className={cn("pearl-glass rounded-xl p-5 text-left shadow-glow-sm", className)}>
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-brand-gradient text-xs font-semibold uppercase tracking-wide">
+          Example profile
+        </span>
+        <Badge variant="neutral" className="text-[10px]">
+          Not your data
+        </Badge>
+      </div>
+      <p className="text-sm text-foreground-muted">
+        &ldquo;Honestly, I think this works — it should help the team move faster without cutting
+        corners.&rdquo;
+      </p>
+      <div className="mt-4 flex flex-wrap gap-1.5 border-t border-border pt-4">
+        {Object.entries(exampleTraits).map(([trait, value]) => (
+          <span
+            key={trait}
+            className="rounded-full border border-brand-purple/30 bg-brand-purple/10 px-2.5 py-1 text-xs capitalize text-foreground"
+          >
+            {TRAIT_META[trait as VoiceTrait].label}: {value}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const VOICE_STEPS = [
+  { title: "Add samples", description: "Paste a few pieces of your own writing." },
+  { title: "HUMANORA learns", description: "Vocabulary, sentence rhythm, tone, and more." },
+  { title: "Voice profile", description: "A structured, reviewable style — not a black box." },
+  { title: "Used in Humanize", description: "Pick it next to Mode when you rewrite a draft." },
+] as const;
+
+/**
+ * The free-plan My Voice screen — replaces what used to be a headline and
+ * three price pills on an empty page. Leads with what the feature is and
+ * why it matters (with a real example of its output), and only then
+ * explains the plan requirement — value before paywall.
+ */
+function MyVoiceUpsell() {
+  return (
+    <div className="mx-auto flex max-w-4xl flex-col gap-10">
+      <div className="text-center">
+        <Badge variant="brand">My Voice</Badge>
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Not just human. More like you.
+        </h1>
+        <p className="mx-auto mt-3 max-w-lg text-sm text-foreground-muted">
+          Generic humanizing makes writing sound natural. My Voice goes further — HUMANORA learns
+          patterns in how <span className="text-foreground">you</span> actually write and applies
+          them to future rewrites.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2">
+        <ExampleProfilePreview />
+        <div className="flex flex-col gap-5">
+          {VOICE_STEPS.map((step, i) => (
+            <div key={step.title} className="flex gap-3.5">
+              <span className="bg-brand-gradient flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white">
+                {i + 1}
+              </span>
+              <div>
+                <p className="text-sm font-medium text-foreground">{step.title}</p>
+                <p className="text-sm text-foreground-muted">{step.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Card className="flex flex-col items-center gap-4 p-6 text-center sm:p-8">
+        <p className="text-sm font-medium text-foreground">Available on every paid plan</p>
+        <p className="text-xs text-foreground-subtle">
+          This describes writing style only — never used to verify identity or authorship.
+        </p>
+        <BillingActions />
+      </Card>
     </div>
   );
 }

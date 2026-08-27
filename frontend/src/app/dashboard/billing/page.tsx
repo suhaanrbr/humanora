@@ -66,9 +66,9 @@ export default async function BillingPage() {
           Payment history
         </h2>
         {payments.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-sm text-foreground-muted">No payments yet.</p>
-          </Card>
+          <p className="text-sm text-foreground-subtle">
+            No payments yet — they&apos;ll appear here once you choose a plan.
+          </p>
         ) : (
           <div className="flex flex-col gap-2.5">
             {payments.map((p) => (

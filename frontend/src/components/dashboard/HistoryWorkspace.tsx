@@ -121,16 +121,15 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEn
       )}
 
       {entries.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-sm text-foreground-muted">No writing history yet.</p>
-          <p className="mt-1 text-xs text-foreground-subtle">
-            Your recent HUMANORA transformations will appear here.
+        <Card className="flex flex-col items-center gap-2 p-12 text-center">
+          <HistoryIcon className="h-8 w-8 text-foreground-subtle" />
+          <p className="mt-2 text-sm font-medium text-foreground">No writing history yet</p>
+          <p className="max-w-xs text-xs text-foreground-subtle">
+            Every draft you humanize is saved here automatically — searchable, and ready to reuse.
           </p>
-          <div className="mt-4 flex justify-center">
-            <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm">
-              Humanize your first draft
-            </ButtonLink>
-          </div>
+          <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm" className="mt-3">
+            Humanize your first draft
+          </ButtonLink>
         </Card>
       ) : visible.length === 0 ? (
         <Card className="p-8 text-center">
@@ -261,5 +260,15 @@ function HistoryCard({
         )}
       </div>
     </Card>
+  );
+}
+
+function HistoryIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M3.5 4.5V9h4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 8v4.5l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }

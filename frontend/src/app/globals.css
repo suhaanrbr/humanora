@@ -832,6 +832,18 @@ h4,
   transform: scale(0.97);
 }
 
+/* A horizontally-scrollable strip (mobile app nav, mobile mode toolbar)
+   still scrolls with touch/trackpad input — this only removes the
+   visible scrollbar chrome, which reads as a leftover desktop control
+   rather than a native mobile gesture affordance. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* A hairline of internal light along the top edge of HUMANORA's primary
    CTA — what makes it read as "illuminated from within" rather than a
    flat gradient rectangle. Subtle enough to disappear at a glance. */
