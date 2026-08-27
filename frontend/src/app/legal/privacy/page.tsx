@@ -3,107 +3,114 @@ import { LegalPage } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — HUMANORA",
-  description: "How HUMANORA currently handles the text and data you provide.",
+  description: "How HUMANORA handles the data and text you provide.",
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPage title="Privacy Policy" lastUpdated="Draft — not yet finalized">
+    <LegalPage title="Privacy Policy" lastUpdated="Draft — legal entity/jurisdiction details pending owner input">
       <p>
-        This policy describes what actually happens to your data in
-        HUMANORA&apos;s current development version. It will be expanded
-        as accounts, saved history, and Voice profiles are built — this
-        version only covers what exists today.
+        This policy describes what HUMANORA actually does with your data
+        today. Fields marked{" "}
+        <span className="font-mono text-foreground">[placeholder]</span>{" "}
+        require a decision only HUMANORA&apos;s owner can make and have
+        deliberately not been invented.
       </p>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">1. What we collect today</h2>
+        <h2 className="text-lg font-semibold text-foreground">1. Account information</h2>
+        <p>
+          Creating a HUMANORA account requires a name, email address, and
+          password. Your password is never stored in plain text. Your
+          session is maintained via a secure, HTTP-only cookie.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-foreground">2. Text you submit</h2>
         <ul className="mt-3 flex flex-col gap-2">
           <li>
-            <strong className="text-foreground">Text you submit to the humanizer.</strong>{" "}
-            When you use the &ldquo;Humanize this draft&rdquo; feature,
-            the text you enter is sent to our AI processing provider (see
-            Section 2) to generate a rewritten result. HUMANORA does not
-            currently save this text to a database — it exists only for
-            the duration of that request.
+            <strong className="text-foreground">Humanize requests.</strong>{" "}
+            Text you submit to be rewritten is sent to our AI processing
+            provider (Google&apos;s Gemini API — see Section 4) to
+            generate the result, and the original text plus the rewritten
+            result are saved to your account&apos;s History so you can
+            revisit past work. You can view your History at any time in
+            your dashboard; deleting your account permanently deletes it.
           </li>
           <li>
-            <strong className="text-foreground">Theme preference.</strong>{" "}
-            Your Light/Dark/System choice is stored only in your
-            browser&apos;s local storage. It is never sent to our
-            servers.
-          </li>
-          <li>
-            <strong className="text-foreground">Basic request metadata.</strong>{" "}
-            Your IP address is used transiently, server-side, to enforce
-            rate limits and prevent abuse of the free AI tier. It is
-            written to short-lived server logs for this purpose and is
-            not linked to any account (none exist yet) or used for
-            tracking.
+            <strong className="text-foreground">My Voice writing samples.</strong>{" "}
+            If you choose to use My Voice, the writing samples you paste
+            in are stored against your account and used to derive a
+            structured description of your writing style (vocabulary,
+            sentence length, tone, and similar traits — never a claim
+            about your identity or authorship). Samples and the derived
+            profile are visible only to you and are deleted if you remove
+            them or delete your account.
           </li>
         </ul>
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">2. Third-party AI processing</h2>
+        <h2 className="text-lg font-semibold text-foreground">3. Payment information</h2>
         <p>
-          Text submitted to the humanizer is processed by a third-party
-          AI provider (currently Google&apos;s Gemini API) in order to
-          generate the rewritten output. That provider processes the
-          text under its own terms and privacy policy; we do not control
-          how they handle data on their infrastructure beyond the
-          request itself. We recommend not submitting highly sensitive
-          personal, financial, or confidential information while
-          HUMANORA is in this development stage.
+          Paid plans are processed by Razorpay. HUMANORA never receives
+          or stores your card, UPI, or bank details — Razorpay handles
+          payment collection directly and shares back only an order
+          status, a payment identifier, and the amount paid, which we
+          store to maintain your billing history and active plan.
         </p>
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">3. Cookies and analytics</h2>
+        <h2 className="text-lg font-semibold text-foreground">4. Third-party AI processing</h2>
         <p>
-          HUMANORA does not currently use tracking or advertising
-          cookies, and no analytics platform is installed. If this
-          changes, this policy and our{" "}
+          Text submitted to the humanizer or for My Voice analysis is
+          processed by Google&apos;s Gemini API to generate the result.
+          That provider processes the text under its own terms; we do
+          not control how it handles data on its own infrastructure
+          beyond the request itself. Avoid submitting highly sensitive
+          personal, financial, or confidential information.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold text-foreground">5. Cookies and local storage</h2>
+        <p>
+          See our{" "}
           <a href="/legal/cookies" className="text-foreground underline underline-offset-2 hover:text-brand-purple">
             Cookie Policy
           </a>{" "}
-          will be updated first.
+          for the exact list of what&apos;s stored in your browser. In short:
+          a session cookie to keep you logged in, and a temporary draft
+          of unsaved text in your browser only, cleared when you close
+          the tab. No advertising or tracking cookies, no analytics
+          platform installed.
         </p>
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">4. Accounts and future storage</h2>
+        <h2 className="text-lg font-semibold text-foreground">6. Your rights</h2>
         <p>
-          HUMANORA does not yet have user accounts. Once accounts,
-          document history, and Voice profiles (a personal writing-style
-          profile) are launched, this policy will be updated to describe
-          exactly what is stored, for how long, and how you can delete
-          it — including an explicit opt-in requirement before any of
-          your writing is used to improve HUMANORA&apos;s models.
+          You can view and delete your History and My Voice samples at
+          any time from your dashboard. You can permanently delete your
+          entire account — including History, My Voice data, and billing
+          records — from Settings; this is irreversible. Depending on{" "}
+          your location, you may have additional rights to access,
+          correct, or export personal data we hold about you — contact
+          us using the details below.
         </p>
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold text-foreground">5. Your rights</h2>
-        <p>
-          Depending on your location, you may have rights to access,
-          correct, or delete personal data we hold about you. Since
-          HUMANORA does not currently store submitted text or maintain
-          accounts, there is presently little to request beyond
-          server logs. This section will be expanded with a concrete
-          process once accounts exist.
-        </p>
-      </section>
-
-      <section>
-        <h2 className="text-lg font-semibold text-foreground">6. Contact</h2>
+        <h2 className="text-lg font-semibold text-foreground">7. Contact</h2>
         <p>
           Questions about this policy can be sent to{" "}
-          <span className="font-mono text-foreground">[privacy contact email]</span>.
+          <span className="font-mono text-foreground">[privacy contact email — placeholder]</span>.
           HUMANORA is operated by{" "}
-          <span className="font-mono text-foreground">[legal entity name]</span>{" "}
+          <span className="font-mono text-foreground">[legal entity name — placeholder]</span>{" "}
           under the laws of{" "}
-          <span className="font-mono text-foreground">[jurisdiction]</span>.
+          <span className="font-mono text-foreground">[jurisdiction — placeholder]</span>.
         </p>
       </section>
     </LegalPage>
