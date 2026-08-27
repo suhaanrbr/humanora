@@ -390,6 +390,21 @@ h4,
   }
 }
 
+/* Base/final state: fully clipped away, so reduced-motion users (who never
+   get the .animate-sweep-reveal rule below) see the humanized result
+   underneath immediately, not the original stuck on top. */
+.animate-sweep-reveal {
+  clip-path: inset(0 100% 0 0);
+}
+@keyframes sweep-reveal {
+  0% {
+    clip-path: inset(0 0% 0 0);
+  }
+  100% {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
 /* ==========================================================================
    Pearl Glass — HUMANORA's Light Mode elevated-surface material.
    White/translucent, a whisper of lavender, a thin visible border, a
@@ -648,6 +663,14 @@ h4,
   }
   .animate-float-gentle-delayed-3 {
     animation: float-gentle 4.6s ease-in-out infinite 0.6s;
+  }
+  /* Signature interaction (ProductShowcase, Humanize tab): a soft edge of
+     light sweeps left-to-right across the original/stiff text, clipping
+     it away to reveal the humanized rewrite already sitting underneath —
+     "AI draft becoming human" as one continuous motion rather than an
+     abrupt swap. Runs once per mount/replay, not a loop. */
+  .animate-sweep-reveal {
+    animation: sweep-reveal 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
   }
   .animate-tilt-3d {
     animation: tilt-3d 9s ease-in-out infinite;

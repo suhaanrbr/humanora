@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
  * HUMANORA's writing-mode architecture, presented as a selectable filter
  * strip rather than a static list — selecting a mode just highlights its
  * description here (no output is generated; the real mode selector lives
- * in the Humanize product itself, see LiveDemo for a working preview).
+ * in the Humanize product itself, see ProductShowcase for a working preview).
  */
 export function WritingModes() {
   const [active, setActive] = useState(0);

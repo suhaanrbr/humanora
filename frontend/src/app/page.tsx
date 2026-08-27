@@ -1,6 +1,6 @@
 import { Header } from "@/components/landing/Header";
 import { Hero } from "@/components/landing/Hero";
-import { LiveDemo } from "@/components/landing/LiveDemo";
+import { ProductShowcase } from "@/components/landing/ProductShowcase";
 import { Features } from "@/components/landing/Features";
 import { WritingModes } from "@/components/landing/WritingModes";
 import { MyVoicePreview } from "@/components/landing/MyVoicePreview";
@@ -23,7 +23,7 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <LiveDemo />
+        <ProductShowcase />
         <Features />
         <WritingModes />
         <MyVoicePreview />
