@@ -61,13 +61,22 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const navRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(max > 0 ? Math.min(1, window.scrollY / max) : 0);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -209,6 +218,18 @@ export function Header() {
           </span>
           </button>
         </div>
+      </div>
+
+      {/* A thin thread of the brand gradient tracking scroll position —
+          the one element that literally travels the length of the page,
+          making the navbar feel like part of the same continuous
+          experience as the scroll story beneath it, not a fixed lid
+          sitting on top of unrelated sections. */}
+      <div className="h-px w-full bg-border/60" aria-hidden="true">
+        <div
+          className="bg-brand-gradient h-full transition-[width] duration-150 ease-out motion-reduce:transition-none"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
       </div>
 
       <div
