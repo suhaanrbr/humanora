@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/cn";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "destructive";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -35,6 +35,11 @@ export const buttonSizeStyles: Record<ButtonSize, string> = {
   sm: "h-9 px-3.5 text-sm",
   md: "h-11 px-5 text-sm",
   lg: "h-12 px-6 text-base",
+  // Square, for a single icon with no label — pair with variant="ghost"
+  // or "secondary" for a toolbar/header action, never "primary" (an
+  // icon-only primary CTA has no accessible label unless the caller
+  // adds aria-label, which this size doesn't enforce on its own).
+  icon: "h-9 w-9 p-0",
 };
 
 /**

@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import { Sora, Inter, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/config/site";
 import "./globals.css";
 
-// Sora: geometric, confident display face for headings — reads as
-// premium/technological without tipping into gimmicky. Inter: the body
-// workhorse, chosen for long-form readability at small sizes. Both free,
-// self-hosted via next/font (no external request, no license cost).
-const sora = Sora({
+// Plus Jakarta Sans is HUMANORA's one master UI typeface — headings and
+// body both draw from this single family (weight, not a second face, is
+// what separates "Display" from "Caption") rather than pairing two
+// different fonts. One font load, one variable, self-hosted via
+// next/font (no external request, no runtime fetch, no license cost).
+// Only the five weights the type scale actually uses — see the type
+// scale in globals.css — not the full variable-font weight range.
+const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
-});
-
-const inter = Inter({
-  variable: "--font-body",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -65,7 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${sora.variable} ${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
