@@ -6,12 +6,17 @@ import { Logo } from "@/components/brand/Logo";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { cn } from "@/lib/cn";
 
+// Goal-oriented, not tool-oriented — HUMANORA is a workspace with
+// categories (Write, Study, ...), not a flat list of every capability.
+// Billing/Settings deliberately live under the Account menu, not here —
+// they're account administration, not something a student "does" in
+// the product. See AccountMenu.tsx for that half of the navigation.
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/humanize", label: "Humanize" },
+  { href: "/dashboard", label: "Home" },
+  { href: "/dashboard/humanize", label: "Write" },
+  { href: "/dashboard/study", label: "Study" },
   { href: "/dashboard/voice", label: "My Voice" },
-  { href: "/dashboard/history", label: "History" },
-  { href: "/dashboard/billing", label: "Billing" },
+  { href: "/dashboard/history", label: "Library" },
 ];
 
 /**
@@ -19,7 +24,7 @@ const NAV_ITEMS = [
  * Header (Product/Solutions/Developers/Resources mega-menus). Reusing
  * the public nav inside the logged-in product was a real "feels like a
  * prototype" signal: once a user is inside HUMANORA, they need
- * Dashboard/Humanize/My Voice/History/Billing, not a marketing sitemap.
+ * Home/Write/Study/My Voice/Library, not a marketing sitemap.
  */
 export function AppHeader() {
   const pathname = usePathname();
