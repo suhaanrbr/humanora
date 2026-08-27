@@ -24,9 +24,9 @@ export function PreserveMeaning() {
               className="rounded-xl border border-border-strong bg-surface p-7 shadow-glow-md sm:p-9"
             >
               <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
-                Example sentence
+                Original
               </p>
-              <p className="text-lg leading-loose text-foreground">
+              <p className="text-lg leading-loose text-foreground-muted">
                 The company reported revenue of{" "}
                 <LockedFragment text="£4.7 million" label="NUMBER" delay={150} />, up
                 from the previous year in{" "}
@@ -34,13 +34,36 @@ export function PreserveMeaning() {
                 <LockedFragment text="[14]" label="CITATION" delay={550} />.
               </p>
 
+              {/* A short gradient thread — the same connective motif as the
+                  navbar's scroll progress bar — linking the original line
+                  to its rewrite below, so the two read as one continuous
+                  transformation rather than two separate examples. */}
+              <div className="my-6 flex items-center gap-3" aria-hidden="true">
+                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-purple/50 to-brand-purple/50" />
+                <span className="text-xs text-foreground-subtle">rewritten</span>
+                <span className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-purple/50 to-brand-purple/50" />
+              </div>
+
+              <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
+                HUMANORA result
+              </p>
+              <Reveal
+                as="p"
+                delay={700}
+                className="text-lg leading-loose text-foreground"
+              >
+                Revenue reached <LockedFragment text="£4.7 million" label="NUMBER" delay={850} /> in{" "}
+                <LockedFragment text="2025" label="DATE" delay={950} />, according to{" "}
+                <LockedFragment text="[14]" label="CITATION" delay={1050} />.
+              </Reveal>
+
               <div className="mt-7 flex flex-col gap-2.5 border-t border-border pt-6">
                 {protectedFragments.map((item, i) => (
                   <Reveal key={item.text} as="div" delay={150 + i * 200}>
                     <div className="flex items-center gap-2 text-sm text-foreground-muted">
                       <ShieldIcon className="h-4 w-4 text-brand-purple" />
                       <span className="text-foreground">{item.text}</span>
-                      <span className="text-foreground-subtle">— {item.tag}</span>
+                      <span className="text-foreground-subtle">— {item.tag}, unchanged in both</span>
                     </div>
                   </Reveal>
                 ))}

@@ -1,54 +1,59 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Container } from "@/components/ui/Container";
+"use client";
 
-const features = [
+import { useState } from "react";
+import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
+import { cn } from "@/lib/cn";
+
+const capabilities = [
   {
     title: "Advanced Humanizer",
-    description: "Rewrite stiff AI-assisted drafts into more natural language.",
+    description: "Rewrite stiff AI-assisted drafts into more natural language — the transformation you just saw above, running on every mode and strength HUMANORA offers.",
     icon: WandIcon,
-    accent: "text-brand-purple bg-brand-purple/10 border-brand-purple/25",
   },
   {
     title: "My Voice",
-    description: "Adapt rewriting toward your own writing preferences and style.",
+    description: "Adapt rewriting toward your own writing preferences and style, learned from samples you provide.",
     icon: FingerprintIcon,
-    accent: "text-brand-indigo bg-brand-indigo/10 border-brand-indigo/25",
   },
   {
     title: "Preserve Meaning",
-    description: "Protect important facts, terminology, quotations, and citations.",
+    description: "Protect important facts, terminology, quotations, and citations while the language around them changes.",
     icon: ShieldIcon,
-    accent: "text-success bg-success/10 border-success/25",
   },
   {
     title: "Academic Mode",
-    description: "Improve clarity and tone for academic writing, citations kept intact.",
+    description: "Improve clarity and tone for academic writing, with citations kept intact.",
     icon: CapIcon,
-    accent: "text-warning bg-warning/10 border-warning/25",
   },
   {
     title: "Multi-Language",
     description: "Built on an architecture designed to extend beyond English over time.",
     icon: GlobeIcon,
-    accent: "text-sky-400 bg-sky-400/10 border-sky-400/25",
   },
   {
     title: "Writing Analysis",
-    description: "Review characteristics of your writing, such as tone and structure.",
+    description: "Review characteristics of your writing, such as readability, tone, and structure.",
     icon: ChartIcon,
-    accent: "text-teal-400 bg-teal-400/10 border-teal-400/25",
   },
 ];
 
 /**
- * Feature grid — "Everything you need to write naturally." Six compact
- * cards, each with a distinctly colored icon treatment.
+ * "Capability dock" — a single app-window chrome (matching the
+ * ProductShowcase/LiveDemo browser-bar language) housing a horizontal
+ * row of capability pills. Selecting one swaps a single detail panel,
+ * rather than presenting six identical cards side by side — the same
+ * interaction shape already established in WritingModes/ProductShowcase,
+ * reused here instead of a generic feature grid.
  */
 export function Features() {
+  const [active, setActive] = useState(0);
+  const Active = capabilities[active];
+
   return (
     <section id="features" className="section-tint-lavender section-glow-top py-16 sm:py-20">
       <Container>
-        <div className="mx-auto max-w-2xl text-center">
+        <Reveal as="div" className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Everything you need to write naturally
           </h2>
@@ -56,27 +61,52 @@ export function Features() {
             A focused toolkit for turning AI-assisted drafts into writing that
             sounds like you — without losing what matters.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <Card
-              key={feature.title}
-              className="hover-lift group hover:shadow-glow-sm"
-            >
-              <CardHeader>
-                <div
-                  className={`mb-2 inline-flex h-11 w-11 items-center justify-center rounded-md border ${feature.accent}`}
-                >
-                  <feature.icon className="h-5 w-5" />
-                </div>
-                <CardTitle>{feature.title}</CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-3" />
-            </Card>
-          ))}
-        </div>
+        <Reveal
+          as="div"
+          delay={100}
+          className="pearl-glass mx-auto mt-12 max-w-4xl overflow-hidden rounded-xl shadow-glow-sm"
+        >
+          <div className="flex items-center gap-2 border-b border-border bg-background-elevated px-5 py-3 sm:px-7">
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+            <span className="h-2.5 w-2.5 rounded-full bg-line" />
+            <span className="ml-3 text-xs text-foreground-subtle">HUMANORA — Capabilities</span>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-1.5 border-b border-border px-4 py-4 sm:px-7">
+            {capabilities.map((cap, i) => (
+              <button
+                key={cap.title}
+                type="button"
+                onClick={() => setActive(i)}
+                aria-pressed={active === i}
+                className={cn(
+                  "focus-ring press-feedback flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
+                  active === i
+                    ? "border-transparent bg-brand-gradient text-white shadow-glow-sm"
+                    : "border-border bg-surface text-foreground-muted hover:border-brand-purple/30 hover:text-foreground"
+                )}
+              >
+                <cap.icon className="h-4 w-4 shrink-0" />
+                {cap.title}
+              </button>
+            ))}
+          </div>
+
+          <div key={active} className="animate-fade-in-up flex items-start gap-4 p-7 sm:p-9">
+            <div className="bg-brand-gradient inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-white shadow-glow-sm">
+              <Active.icon className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-foreground">{Active.title}</p>
+              <p className="mt-1.5 text-base leading-relaxed text-foreground-muted">
+                {Active.description}
+              </p>
+            </div>
+          </div>
+        </Reveal>
       </Container>
     </section>
   );

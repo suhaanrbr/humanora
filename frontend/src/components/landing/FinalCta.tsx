@@ -29,12 +29,9 @@ export function FinalCta() {
           <div className="relative">
             <h2 className="text-3xl font-bold tracking-tight text-[#f8f7fc] sm:text-4xl lg:text-5xl">
               <Reveal as="span" className="block">
-                Your ideas.
+                The draft was AI&apos;s.
               </Reveal>
               <Reveal as="span" delay={150} className="block">
-                Your meaning.
-              </Reveal>
-              <Reveal as="span" delay={300} className="block">
                 <span
                   className="bg-clip-text text-transparent"
                   style={{
@@ -42,13 +39,13 @@ export function FinalCta() {
                       "linear-gradient(90deg, #8cc8ff, #9d5cff, #cdb8ff)",
                   }}
                 >
-                  Your voice.
+                  The voice is yours.
                 </span>
               </Reveal>
             </h2>
-            <Reveal as="p" delay={450} className="mx-auto mt-5 max-w-xl text-base text-[#c6c2d9]">
-              Let AI help with the draft. Let HUMANORA help make the writing
-              yours.
+            <Reveal as="p" delay={350} className="mx-auto mt-5 max-w-xl text-base text-[#c6c2d9]">
+              Same facts. Same meaning. Writing that finally sounds like you
+              wrote it — because by the time HUMANORA is done, you basically did.
             </Reveal>
             <Reveal
               as="div"
