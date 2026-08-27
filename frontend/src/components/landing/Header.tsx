@@ -183,12 +183,16 @@ export function Header() {
             : "border-transparent bg-background/80 backdrop-blur-sm"
       )}
     >
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      {/* Three deliberate zones (logo / nav / account), not a plain
+          justify-between — the center column is free-sized so the nav
+          group can sit with its own consistent rhythm regardless of
+          how wide the left/right zones are. */}
+      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-6 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="focus-ring rounded-md" aria-label="HUMANORA home">
           <Logo size="sm" />
         </Link>
 
-        <nav ref={navRef} className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+        <nav ref={navRef} className="hidden items-center justify-center gap-1.5 lg:flex" aria-label="Primary">
           {GROUP_ORDER.map((group, i) => (
             <button
               key={group}
@@ -201,30 +205,25 @@ export function Header() {
               aria-expanded={activeGroup === group}
               aria-controls="nav-panel"
               className={cn(
-                "focus-ring press-feedback relative cursor-pointer py-2 text-sm font-semibold tracking-tight transition-colors",
-                activeGroup === group ? "text-foreground" : "text-foreground-muted hover:text-foreground"
+                "focus-ring press-feedback cursor-pointer rounded-lg border border-transparent px-3.5 py-2 text-[0.9rem] font-medium tracking-tight transition-[color,background-color,border-color] duration-200",
+                activeGroup === group
+                  ? "border-white/10 bg-white/[0.04] text-foreground"
+                  : "text-foreground-muted hover:border-white/[0.06] hover:bg-white/[0.025] hover:text-foreground"
               )}
             >
               {GROUP_LABELS[group]}
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "bg-brand-gradient absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full transition-opacity duration-200",
-                  activeGroup === group ? "opacity-100" : "opacity-0"
-                )}
-              />
             </button>
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden items-center gap-2.5 lg:flex">
           {isPending ? (
             <div className="h-9 w-24" aria-hidden="true" />
           ) : session ? (
             <AccountMenu />
           ) : (
             <>
-              <ButtonLink href="/login" variant="ghost" size="sm">
+              <ButtonLink href="/login" variant="outline" size="sm">
                 Log in
               </ButtonLink>
               <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
@@ -293,7 +292,13 @@ export function Header() {
         aria-hidden={!panelOpen}
         inert={!panelOpen}
         className={cn(
-          "grid border-b bg-background/98 backdrop-blur-2xl transition-[grid-template-rows] duration-250 ease-out",
+          // relative z-50: without an explicit position/z-index this is
+          // an unpositioned element, which ALWAYS paints below the
+          // fixed z-40 backdrop scrim below regardless of the scrim's
+          // lower z-index number — a real bug (confirmed via a failed
+          // real-mouse hover test) that made every link inside an open
+          // panel unclickable, not just a visual nit.
+          "relative z-50 grid border-b bg-background/98 backdrop-blur-2xl transition-[grid-template-rows] duration-250 ease-out",
           panelOpen ? "grid-rows-[1fr] border-border" : "grid-rows-[0fr] border-transparent"
         )}
       >
