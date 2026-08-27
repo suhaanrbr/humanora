@@ -643,6 +643,12 @@ h4,
   .animate-float-gentle-delayed {
     animation: float-gentle 5s ease-in-out infinite 1.2s;
   }
+  .animate-float-gentle-delayed-2 {
+    animation: float-gentle 5.6s ease-in-out infinite 2.1s;
+  }
+  .animate-float-gentle-delayed-3 {
+    animation: float-gentle 4.6s ease-in-out infinite 0.6s;
+  }
   .animate-tilt-3d {
     animation: tilt-3d 9s ease-in-out infinite;
     transform-style: preserve-3d;
