@@ -7,11 +7,11 @@ import { useSession, signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
 
 const links = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Humanize", href: "/dashboard/humanize" },
+  { label: "Home", href: "/dashboard" },
+  { label: "Write", href: "/dashboard/humanize" },
+  { label: "Study", href: "/dashboard/study" },
   { label: "My Voice", href: "/dashboard/voice" },
-  { label: "History", href: "/dashboard/history" },
-  { label: "Billing", href: "/dashboard/billing" },
+  { label: "Library", href: "/dashboard/history" },
 ];
 
 /**
@@ -93,11 +93,19 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
               ))}
             </div>
           )}
-          {/* Inside the dashboard, AppHeader's own top nav already covers
-              Dashboard/Humanize/My Voice/History/Billing — repeating them
-              here would just be the same destinations twice. Settings has
-              no other entry point, so it stays regardless of context. */}
+          {/* Billing and Settings live under Account everywhere, not as
+              main product destinations — inside the dashboard, AppHeader's
+              own top nav already covers Home/Write/Study/My Voice/Library,
+              so repeating those here would just be the same destinations
+              twice (showAppLinks=false skips them there). */}
           <div className={cn("flex flex-col gap-0.5", showAppLinks ? "border-t border-border pt-1.5" : "py-1.5")}>
+            <Link
+              href="/dashboard/billing"
+              onClick={() => setOpen(false)}
+              className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
+            >
+              Billing
+            </Link>
             <Link
               href="/dashboard/settings"
               onClick={() => setOpen(false)}

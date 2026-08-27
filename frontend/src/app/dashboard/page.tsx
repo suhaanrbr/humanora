@@ -48,17 +48,18 @@ export default async function DashboardPage() {
 
   return (
     <Container className="flex flex-col gap-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-sm text-foreground-muted">Welcome back,</p>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
-        </div>
-        {/* Log out already lives in the account menu (top-right, every
-            page) — repeating it here was a second exit action competing
-            with the one thing this header should point people toward. */}
-        <ButtonLink href="/dashboard/humanize" variant="primary" size="md">
-          Humanize text
-        </ButtonLink>
+      <div>
+        <p className="text-sm text-foreground-muted">Welcome back,</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
+      </div>
+
+      {/* "What do you want to work on?" — three real destinations, not a
+          wall of tool cards. Log out already lives in the account menu
+          (top-right, every page), so this header has exactly one job. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <QuickAction href="/dashboard/humanize" title="Write" description="Humanize a draft, apply My Voice." />
+        <QuickAction href="/dashboard/study" title="Study" description="Summarize, explain, or make notes." />
+        <QuickAction href="/dashboard/voice" title="My Voice" description="Teach HUMANORA how you write." />
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -231,6 +232,18 @@ export default async function DashboardPage() {
         </Link>
       </p>
     </Container>
+  );
+}
+
+function QuickAction({ href, title, description }: { href: string; title: string; description: string }) {
+  return (
+    <Link
+      href={href}
+      className="focus-ring hover-lift group rounded-lg border border-border bg-surface p-4 transition-[border-color,box-shadow] hover:border-brand-purple/35 hover:shadow-glow-sm"
+    >
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="mt-1 text-xs text-foreground-subtle">{description}</p>
+    </Link>
   );
 }
 
