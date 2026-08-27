@@ -36,12 +36,28 @@ const wordmarkSizes: Record<LogoSize, string> = {
   xl: "text-3xl",
 };
 
+// The mark's own viewBox (0 0 40 40, content spans x=6..34) carries
+// ~6 units of dead space to the right of its tallest stroke, on top of
+// the plain flex gap — squaring markSizes assumes a square icon
+// elsewhere (dashboard rail, favicon), so it isn't safe to crop the
+// shared viewBox itself. Instead the lockup below pulls the wordmark in
+// with a SMALL negative margin (just enough to cancel that dead space,
+// not fuse the two together) so it reads as one properly-spaced
+// wordmark rather than either two separate elements or one squashed
+// glyph — every other LogoMark usage keeps its untouched square bounds.
 const gapSizes: Record<LogoSize, string> = {
-  xs: "gap-1.5",
-  sm: "gap-2.5",
-  md: "gap-2.5",
-  lg: "gap-3",
-  xl: "gap-3.5",
+  xs: "gap-1",
+  sm: "gap-1.5",
+  md: "gap-2",
+  lg: "gap-2.5",
+  xl: "gap-3",
+};
+const markPullSizes: Record<LogoSize, string> = {
+  xs: "-mr-0.5",
+  sm: "-mr-1",
+  md: "-mr-1.5",
+  lg: "-mr-2",
+  xl: "-mr-2.5",
 };
 
 /**
@@ -104,20 +120,25 @@ export function LogoMark({ size = "md", tone = "gradient", className }: { size?:
  * caller should use; reach for `LogoMark` alone only where space is
  * genuinely too tight for the wordmark (a collapsed nav rail, a mobile
  * tab) or where the wordmark would duplicate an adjacent page title.
+ *
+ * The mark stands in for the wordmark's own "H" rather than sitting
+ * beside a full "HUMANORA" — set flush (see `gapSizes`) against
+ * "UMANORA" so the two read as one word: the Ascent mark literally IS
+ * the H.
  */
 export function Logo({ size = "md", showWordmark = true, tone = "gradient", className }: LogoProps) {
   return (
     <div className={cn("inline-flex items-center", gapSizes[size], className)}>
-      <LogoMark size={size} tone={tone} />
+      <LogoMark size={size} tone={tone} className={showWordmark ? markPullSizes[size] : undefined} />
       {showWordmark && (
         <span
           className={cn(
-            "font-display font-bold tracking-tight text-foreground",
+            "font-display font-extrabold tracking-tighter text-foreground",
             wordmarkSizes[size],
             tone === "mono-light" && "text-white"
           )}
         >
-          HUMANORA
+          UMANORA
         </span>
       )}
     </div>
