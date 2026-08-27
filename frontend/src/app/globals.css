@@ -938,10 +938,10 @@ h4,
    reflecting on glass" rather than a gradient wash across the whole
    card. */
 .login-glass-panel {
-  background-color: rgba(10, 14, 32, 0.55);
+  background-color: rgba(17, 25, 40, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(139, 92, 246, 0.2);
   box-shadow:
     0 24px 60px -20px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
@@ -971,6 +971,33 @@ h4,
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+/* Login form inputs — scoped overrides on top of the shared Input
+   primitive's classes (via `cn`, applied last so they win), matching
+   the approved reference exactly. Not a change to Input.tsx itself —
+   every other consumer of Input keeps its own default look. */
+.login-field {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(139, 92, 246, 0.15) !important;
+}
+.login-field:hover {
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+.login-field::placeholder {
+  color: #64748b;
+}
+
+/* The login CTA's own gradient — a clean two-stop blue->purple sweep
+   (the reference's exact spec) rather than the shared .bg-brand-gradient
+   three-stop indigo/violet/purple used for every other primary button
+   in the app. Layered on top of Button's own primary variant (which
+   already provides the inner-highlight/hover-sweep treatment), so this
+   only overrides the fill color. */
+.login-cta {
+  background-image: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%) !important;
+}
+
+/* Consistent, accessible focus ring across custom primitives */
 
 /* Consistent, accessible focus ring across custom primitives */
 .focus-ring {
