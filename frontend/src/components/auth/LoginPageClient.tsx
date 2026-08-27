@@ -8,7 +8,9 @@ import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { signIn } from "@/lib/auth-client";
+import { cn } from "@/lib/cn";
 
 /** Only ever redirect within HUMANORA itself — an open `next` param could
  * otherwise be used to bounce a just-authenticated user to an external
@@ -20,7 +22,7 @@ function safeNextPath(raw: string | null): string {
   return "/dashboard";
 }
 
-function LoginForm() {
+function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNextPath(params.get("next"));
@@ -52,7 +54,18 @@ function LoginForm() {
       <h1 className="text-2xl font-bold tracking-tight text-foreground">Log in</h1>
       <p className="mt-2 text-sm text-foreground-muted">Welcome back to HUMANORA.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+      {googleEnabled && (
+        <div className="mt-6 flex flex-col gap-4">
+          <GoogleButton />
+          <div className="flex items-center gap-3 text-xs text-foreground-subtle">
+            <span className="h-px flex-1 bg-border" />
+            or
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className={cn("flex flex-col gap-4", googleEnabled ? "mt-4" : "mt-8")}>
         <div>
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
             Email
@@ -104,7 +117,7 @@ function LoginForm() {
   );
 }
 
-export function LoginPageClient() {
+export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="relative flex min-h-screen">
       {/* Left: brand/aurora panel — desktop only. This is a focused,
@@ -141,7 +154,7 @@ export function LoginPageClient() {
           <Logo size="sm" />
         </Link>
         <Suspense fallback={null}>
-          <LoginForm />
+          <LoginForm googleEnabled={googleEnabled} />
         </Suspense>
       </div>
     </div>

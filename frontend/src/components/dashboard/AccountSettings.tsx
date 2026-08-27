@@ -2,11 +2,146 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { ButtonLink } from "@/components/ui/ButtonLink";
 import { signOut } from "@/lib/auth-client";
 
-export function AccountSettings({ name: initialName, email }: { name: string; email: string }) {
+interface UsageSummary {
+  humanizeCount: number;
+  humanizeLimit: number;
+  wordsProcessed: number;
+  periodEnd: Date;
+}
+
+interface AccountSettingsProps {
+  name: string;
+  email: string;
+  image: string | null;
+  createdAt: Date;
+  providers: string[];
+  plan: string;
+  planIsFree: boolean;
+  freeTrialUsed: boolean;
+  currentPeriodEnd: Date | null;
+  usage: UsageSummary | null;
+  voiceSampleCount: number;
+  voiceProfileReady: boolean;
+}
+
+const PROVIDER_LABEL: Record<string, string> = {
+  credential: "Email & password",
+  google: "Google",
+};
+
+export function AccountSettings({
+  name: initialName,
+  email,
+  image,
+  createdAt,
+  providers,
+  plan,
+  planIsFree,
+  freeTrialUsed,
+  currentPeriodEnd,
+  usage,
+  voiceSampleCount,
+  voiceProfileReady,
+}: AccountSettingsProps) {
+  const initial = initialName.trim()[0]?.toUpperCase() ?? "U";
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Overview */}
+      <Card className="p-6">
+        <div className="flex items-center gap-4">
+          {image ? (
+            // eslint-disable-next-line @next/next/no-img-element -- external Google avatar URL, not worth Next/Image's optimization pipeline for a single small avatar
+            <img src={image} alt="" className="h-14 w-14 shrink-0 rounded-full border border-border" referrerPolicy="no-referrer" />
+          ) : (
+            <div className="bg-brand-gradient flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-semibold text-white">
+              {initial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-base font-semibold text-foreground">{initialName}</p>
+            <p className="truncate text-sm text-foreground-muted">{email}</p>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4 text-xs text-foreground-subtle">
+          <span>
+            Member since {createdAt.toLocaleDateString(undefined, { year: "numeric", month: "long" })}
+          </span>
+          <span>·</span>
+          <span>
+            Signed in with {providers.map((p) => PROVIDER_LABEL[p] ?? p).join(" & ") || "email & password"}
+          </span>
+        </div>
+      </Card>
+
+      {/* Plan summary */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">Plan</p>
+          <Badge variant={planIsFree ? "neutral" : "brand"}>{plan}</Badge>
+        </div>
+        {planIsFree ? (
+          <p className="mt-2 text-sm text-foreground-muted">
+            {freeTrialUsed
+              ? "Your one complimentary humanization has been used."
+              : "You have one complimentary humanization available."}
+          </p>
+        ) : (
+          usage && (
+            <p className="mt-2 text-sm text-foreground-muted">
+              {usage.humanizeCount} / {usage.humanizeLimit} humanizations used
+              {currentPeriodEnd && ` · access through ${currentPeriodEnd.toLocaleDateString()}`}
+            </p>
+          )
+        )}
+        <div className="mt-4 flex gap-2">
+          <ButtonLink href="/dashboard/billing" variant="secondary" size="sm">
+            {planIsFree ? "View plans" : "Manage billing"}
+          </ButtonLink>
+        </div>
+      </Card>
+
+      {/* My Voice summary */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">My Voice</p>
+          <Badge variant={voiceProfileReady ? "brand" : "neutral"}>
+            {voiceProfileReady ? "Profile ready" : "Not set up"}
+          </Badge>
+        </div>
+        <p className="mt-2 text-sm text-foreground-muted">
+          {voiceSampleCount === 0
+            ? "No writing samples yet."
+            : `${voiceSampleCount} writing sample${voiceSampleCount === 1 ? "" : "s"} saved.`}
+        </p>
+        <div className="mt-4">
+          <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
+            {voiceSampleCount === 0 ? "Get started" : "Manage"}
+          </ButtonLink>
+        </div>
+      </Card>
+
+      <ProfileForm initialName={initialName} />
+      <DangerZone />
+
+      <p className="text-center text-xs text-foreground-subtle">
+        Need something else?{" "}
+        <Link href="/contact" className="underline underline-offset-2 hover:text-foreground">
+          Contact us
+        </Link>
+      </p>
+    </div>
+  );
+}
+
+function ProfileForm({ initialName }: { initialName: string }) {
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -37,36 +172,26 @@ export function AccountSettings({ name: initialName, email }: { name: string; em
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="p-6">
-        <p className="mb-4 text-sm font-medium text-foreground">Profile</p>
-        <label className="mb-1.5 block text-xs text-foreground-subtle">Name</label>
-        <input
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            setSaved(false);
-          }}
-          maxLength={80}
-          className="focus-ring w-full rounded-md border border-border bg-background-elevated px-3.5 py-2.5 text-sm text-foreground"
-        />
-        <label className="mb-1.5 mt-4 block text-xs text-foreground-subtle">Email</label>
-        <input
-          value={email}
-          disabled
-          className="w-full cursor-not-allowed rounded-md border border-border bg-background-elevated px-3.5 py-2.5 text-sm text-foreground-subtle"
-        />
-        {error && <p className="mt-3 text-xs text-danger">{error}</p>}
-        <div className="mt-4 flex items-center gap-3">
-          <Button variant="secondary" size="sm" onClick={saveName} loading={saving} disabled={!name.trim() || name === initialName}>
-            Save changes
-          </Button>
-          {saved && <span className="text-xs text-success">Saved</span>}
-        </div>
-      </Card>
-
-      <DangerZone />
-    </div>
+    <Card className="p-6">
+      <p className="mb-4 text-sm font-medium text-foreground">Profile</p>
+      <label className="mb-1.5 block text-xs text-foreground-subtle">Name</label>
+      <input
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          setSaved(false);
+        }}
+        maxLength={80}
+        className="focus-ring w-full rounded-md border border-border bg-background-elevated px-3.5 py-2.5 text-sm text-foreground"
+      />
+      {error && <p className="mt-3 text-xs text-danger">{error}</p>}
+      <div className="mt-4 flex items-center gap-3">
+        <Button variant="secondary" size="sm" onClick={saveName} loading={saving} disabled={!name.trim() || name === initialName}>
+          Save changes
+        </Button>
+        {saved && <span className="text-xs text-success">Saved</span>}
+      </div>
+    </Card>
   );
 }
 

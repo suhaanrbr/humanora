@@ -8,9 +8,10 @@ import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
+import { GoogleButton } from "@/components/auth/GoogleButton";
 import { signUp } from "@/lib/auth-client";
 
-export function SignupPageClient() {
+export function SignupPageClient({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -72,7 +73,18 @@ export function SignupPageClient() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
           <p className="mt-2 text-sm text-foreground-muted">Free — no credit card required.</p>
 
-          <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+          {googleEnabled && (
+            <div className="mt-6 flex flex-col gap-4">
+              <GoogleButton />
+              <div className="flex items-center gap-3 text-xs text-foreground-subtle">
+                <span className="h-px flex-1 bg-border" />
+                or
+                <span className="h-px flex-1 bg-border" />
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className={`flex flex-col gap-4 ${googleEnabled ? "mt-4" : "mt-8"}`}>
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
                 Name

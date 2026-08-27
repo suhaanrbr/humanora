@@ -18,5 +18,5 @@ export default async function LoginPage() {
   if (result.status === "authenticated") {
     redirect("/dashboard");
   }
-  return <LoginPageClient />;
+  return <LoginPageClient googleEnabled={!!process.env.GOOGLE_CLIENT_ID} />;
 }

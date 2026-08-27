@@ -1,6 +1,13 @@
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
-import { user } from "@/lib/db/schema";
+import { user, account } from "@/lib/db/schema";
+
+/** The sign-in method(s) linked to this account — "credential" (email/password), "google", etc. */
+export async function getLinkedProviders(userId: string): Promise<string[]> {
+  const db = getDb();
+  const rows = await db.select({ providerId: account.providerId }).from(account).where(eq(account.userId, userId));
+  return Array.from(new Set(rows.map((r) => r.providerId)));
+}
 
 export async function updateUserName(userId: string, name: string): Promise<void> {
   const db = getDb();
