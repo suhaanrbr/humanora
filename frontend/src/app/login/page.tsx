@@ -1,139 +1,22 @@
-"use client";
+import { redirect } from "next/navigation";
+import { getVerifiedSession } from "@/lib/auth-session";
+import { LoginPageClient } from "@/components/auth/LoginPageClient";
 
-import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
-import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
-import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/Button";
-import { signIn } from "@/lib/auth-client";
+export const metadata = { title: "Log in — HUMANORA" };
 
-function LoginForm() {
-  const router = useRouter();
-  const params = useSearchParams();
-  const next = params.get("next") ?? "/dashboard";
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const { error: signInError } = await signIn.email({ email, password });
-
-    if (signInError) {
-      setError(signInError.message ?? "Couldn't log in. Check your email and password.");
-      setLoading(false);
-      return;
-    }
-
-    router.push(next);
-    router.refresh();
+/**
+ * An already-authenticated user has no reason to see the login form —
+ * sending them straight to the dashboard is standard commercial-SaaS
+ * behavior. A session-lookup ERROR (transient DB hiccup) is treated as
+ * "show the form" rather than redirected, same fail-open-to-the-form
+ * reasoning as everywhere else that distinguishes the two (see
+ * lib/auth-session.ts) — worst case here is just seeing a login form
+ * you didn't need, not a security problem.
+ */
+export default async function LoginPage() {
+  const result = await getVerifiedSession();
+  if (result.status === "authenticated") {
+    redirect("/dashboard");
   }
-
-  return (
-    <div className="pearl-glass w-full max-w-sm rounded-2xl p-8 sm:p-10">
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Log in</h1>
-      <p className="mt-2 text-sm text-foreground-muted">Welcome back to HUMANORA.</p>
-
-      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-        <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            required
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-          />
-        </div>
-        <div>
-          <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium text-foreground">
-              Password
-            </label>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </div>
-
-        {error && (
-          <p role="alert" className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
-            {error}
-          </p>
-        )}
-
-        <Button type="submit" variant="primary" size="lg" loading={loading} className="mt-2 w-full">
-          Log in
-        </Button>
-      </form>
-
-      <p className="mt-8 text-center text-sm text-foreground-muted">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-foreground underline underline-offset-2 hover:text-brand-purple">
-          Sign up free
-        </Link>
-      </p>
-    </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <div className="relative flex min-h-screen">
-      {/* Left: brand/aurora panel — desktop only. This is a focused,
-          full-screen auth moment, deliberately without the marketing
-          header/footer chrome, matching how premium products (not
-          copied from any one of them) treat sign-in as its own space. */}
-      <div className="bg-ambient-glow bg-grid-texture relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
-        <Link href="/" className="focus-ring relative z-10 w-fit rounded-md">
-          <Logo size="md" />
-        </Link>
-
-        <div className="relative z-10 max-w-md">
-          <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
-            Writing that sounds like you.
-          </p>
-          <p className="mt-4 text-base text-foreground-muted">
-            HUMANORA turns stiff, AI-assisted drafts into natural writing —
-            without losing your meaning, facts, or voice.
-          </p>
-        </div>
-
-        <HumanoraRibbon
-          className="pointer-events-none absolute inset-x-0 bottom-16 h-24 w-full opacity-[0.12]"
-          animated
-        />
-        <p className="relative z-10 text-xs text-foreground-subtle">
-          &copy; {new Date().getFullYear()} HUMANORA
-        </p>
-      </div>
-
-      {/* Right: the actual form, on its own quiet surface. */}
-      <div className="bg-ambient-glow-soft relative flex flex-1 flex-col items-center justify-center px-6 py-16">
-        <Link href="/" className="focus-ring absolute left-6 top-6 w-fit rounded-md lg:hidden">
-          <Logo size="sm" />
-        </Link>
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
-      </div>
-    </div>
-  );
+  return <LoginPageClient />;
 }

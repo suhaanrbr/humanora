@@ -267,7 +267,7 @@ export function VoiceWorkspace({
               ) : (
                 <p className="text-xs text-foreground-subtle">
                   Your profile is ready. Applying it to humanized text requires a paid plan —{" "}
-                  <Link href="/#pricing" className="underline underline-offset-2 hover:text-foreground">
+                  <Link href="/dashboard/billing" className="underline underline-offset-2 hover:text-foreground">
                     view plans
                   </Link>
                   .
