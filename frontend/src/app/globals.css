@@ -55,12 +55,44 @@
   --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
   --radius-xl: 1.75rem;
+  /* Semantic aliases — named by WHAT the radius is for, so a component
+     author reaches for "this is a card" rather than picking sm/md/lg/xl
+     by feel each time. Same four numbers as above; nothing new to
+     learn, just a second, more legible name for each. */
+  --radius-control-sm: var(--radius-sm);
+  --radius-control: var(--radius-md);
+  --radius-card: var(--radius-lg);
+  --radius-panel: var(--radius-xl);
+  --radius-pill: 9999px;
 
   /* Shadows / glow */
   --shadow-glow-sm: 0 0 24px -8px rgba(139, 92, 246, 0.45);
   --shadow-glow-md: 0 0 48px -12px rgba(139, 92, 246, 0.55);
+  --shadow-glow-lg: 0 0 72px -14px rgba(139, 92, 246, 0.6);
   --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
     0 8px 24px -12px rgba(0, 0, 0, 0.7);
+  /* Elevation shadows — dark surfaces need depth from contrast/shadow,
+     not size; these stay compact (small blur radius, tight spread)
+     rather than the large soft shadows that read fine on white but
+     look like fog on near-black. */
+  --shadow-elevation-raised: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 4px 14px -6px rgba(0, 0, 0, 0.55);
+  --shadow-elevation-floating: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 12px 32px -10px rgba(0, 0, 0, 0.65);
+  --shadow-elevation-modal: 0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
+    0 24px 60px -16px rgba(0, 0, 0, 0.75);
+
+  /* Semantic borders — named by ROLE, not by opacity value, so nothing
+     in the app reaches for a one-off rgba() when it means "this is
+     selected" or "this is focused". --color-border/-border-strong
+     above are the two that already existed and are kept as the
+     general-purpose default/strong pair. */
+  --color-border-subtle: rgba(255, 255, 255, 0.07);
+  --color-border-interactive: rgba(168, 85, 247, 0.35);
+  --color-border-selected: rgba(168, 85, 247, 0.6);
+  --color-border-focus: var(--color-brand-purple);
+  --color-border-ai: rgba(59, 130, 246, 0.4);
+  --color-border-danger: rgba(239, 68, 68, 0.4);
 
   color-scheme: dark;
 }
@@ -115,8 +147,22 @@
 
   --shadow-glow-sm: 0 0 22px -10px rgba(109, 74, 255, 0.3);
   --shadow-glow-md: 0 0 40px -12px rgba(109, 74, 255, 0.32);
+  --shadow-glow-lg: 0 0 56px -12px rgba(109, 74, 255, 0.34);
   --shadow-card: 0 1px 2px rgba(23, 21, 42, 0.05),
     0 10px 26px -16px rgba(23, 21, 42, 0.22);
+  --shadow-elevation-raised: 0 1px 2px rgba(23, 21, 42, 0.04),
+    0 6px 16px -8px rgba(23, 21, 42, 0.14);
+  --shadow-elevation-floating: 0 2px 4px rgba(23, 21, 42, 0.05),
+    0 16px 36px -12px rgba(23, 21, 42, 0.2);
+  --shadow-elevation-modal: 0 2px 6px rgba(23, 21, 42, 0.06),
+    0 28px 64px -18px rgba(23, 21, 42, 0.26);
+
+  --color-border-subtle: rgba(18, 17, 26, 0.06);
+  --color-border-interactive: rgba(139, 47, 224, 0.3);
+  --color-border-selected: rgba(139, 47, 224, 0.55);
+  --color-border-focus: var(--color-brand-purple);
+  --color-border-ai: rgba(91, 95, 245, 0.35);
+  --color-border-danger: rgba(209, 53, 44, 0.35);
 
   color-scheme: light;
 }
@@ -156,14 +202,332 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+  --radius-control-sm: var(--radius-control-sm);
+  --radius-control: var(--radius-control);
+  --radius-card: var(--radius-card);
+  --radius-panel: var(--radius-panel);
+  --radius-pill: var(--radius-pill);
 
   --shadow-glow-sm: var(--shadow-glow-sm);
   --shadow-glow-md: var(--shadow-glow-md);
+  --shadow-glow-lg: var(--shadow-glow-lg);
   --shadow-card: var(--shadow-card);
+  --shadow-elevation-raised: var(--shadow-elevation-raised);
+  --shadow-elevation-floating: var(--shadow-elevation-floating);
+  --shadow-elevation-modal: var(--shadow-elevation-modal);
 
-  --font-sans: var(--font-body);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-interactive: var(--color-border-interactive);
+  --color-border-selected: var(--color-border-selected);
+  --color-border-focus: var(--color-border-focus);
+  --color-border-ai: var(--color-border-ai);
+  --color-border-danger: var(--color-border-danger);
+
+  /* One master face (Plus Jakarta Sans, loaded once in layout.tsx as
+     --font-display) — --font-sans re-points to the same injected
+     variable rather than a second font load. Hierarchy comes from
+     weight/size (see the type scale below), not a second typeface. */
+  --font-sans: var(--font-display);
   --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
+}
+
+/* ==========================================================================
+   HUMANORA Foundation — Stage 1 design-system additions.
+   Spacing, motion, and the application type scale, sitting alongside
+   (not replacing) the color/radius/shadow tokens above. Theme-
+   independent — these describe RHYTHM and TIMING, not appearance, so
+   one definition covers both Dark and Light Mode.
+   ========================================================================== */
+:root {
+  /* Spacing — named for the CONTEXT it's used in, not a generic t-shirt
+     scale. Values sit on Tailwind's own 4px grid (so `gap-[var(--space-
+     card-gap)]` and a plain `gap-4` are never fighting different grids);
+     this exists so five different components building "a card" don't
+     each independently decide what a card's internal gap should be.
+     Reach for a plain Tailwind spacing utility for anything that isn't
+     one of these named contexts — this is not a replacement scale. */
+  --space-gutter-mobile: 1rem; /* 16px — matches existing px-4 usage */
+  --space-gutter-tablet: 1.5rem; /* 24px — matches existing sm:px-6 */
+  --space-gutter-desktop: 2rem; /* 32px — matches existing lg:px-8 */
+  --space-section-gap: 4rem; /* 64px — vertical gap between major page sections */
+  --space-card-padding: 1.25rem; /* 20px — a card/panel's internal padding */
+  --space-card-gap: 0.75rem; /* 12px — gap between sibling cards in a list */
+  --space-control-gap: 0.5rem; /* 8px — gap between adjacent controls (buttons, pills) */
+  --space-stack-sm: 0.5rem; /* 8px */
+  --space-stack-md: 1rem; /* 16px */
+  --space-stack-lg: 1.5rem; /* 24px */
+  --space-inline-gap: 0.625rem; /* 10px — gap within an inline group (icon + label) */
+
+  /* Motion — a small, named scale rather than picking a duration by
+     feel per component. "Instant" is for state that must never feel
+     laggy (checkbox toggles, pressed states); "deliberate" is for
+     something the user should visually track (a panel docking, a
+     result revealing) — most interactions want "fast" or "normal". */
+  --motion-duration-instant: 80ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 240ms;
+  --motion-duration-deliberate: 420ms;
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --motion-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Application type scale — deliberately more restrained than the
+   marketing site's fluid `.text-hero` treatment (clamp() up to ~5rem).
+   The product is read for hours at a time; nothing here needs to
+   shout. All sizes use Plus Jakarta Sans (inherited from body/heading
+   defaults) — hierarchy comes from size+weight, matching the "one
+   master face" font decision. Marketing headings (h1-h4 global rule,
+   `.text-hero`) are untouched by this block — these are opt-in
+   utility classes for the APPLICATION only. */
+.text-display {
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.text-app-h1 {
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.text-app-h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.text-app-h3 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.text-app-body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+.text-app-ui {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.text-app-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.text-app-caption {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-foreground-subtle);
+}
+.text-app-helper {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-foreground-muted);
+}
+.text-app-button {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1;
+}
+.text-app-stat {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Elevation — surfaces layer by CONTRAST + BORDER + SHADOW together,
+   not shadow alone (a lone drop-shadow barely reads against near-black
+   — see --shadow-elevation-* above, which are already deliberately
+   compact for this reason). Five levels: pick the one matching how far
+   "off the page" something should feel, not a shadow size.
+   ========================================================================== */
+.surface-base {
+  background-color: var(--color-background);
+}
+.surface-raised {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-elevation-raised);
+}
+.surface-floating {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-elevation-floating);
+}
+.surface-modal {
+  background-color: var(--color-background-elevated);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-elevation-modal);
+}
+/* AI-highlighted: the treatment for "HUMANORA generated/is generating
+   this" — an indigo-leaning border instead of the brand-purple used
+   for selection, so the two states never look identical. Pairs with
+   `.ai-active` below for the in-progress version. */
+.surface-ai {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-ai);
+  box-shadow: var(--shadow-elevation-raised);
+}
+
+/* ==========================================================================
+   HUMANORA Atmospheric Primitives — reusable, restrained. Each of these
+   is meant to be reached for by name rather than re-invented per page;
+   see the 70/20/10 rule (globals.css header comment on `.app-*` usage
+   sites) — these supply the 20% (atmosphere), never the 70% (the
+   actual working surface underneath stays plain).
+   ========================================================================== */
+
+/* Selected-navigation illumination — a soft glow bleeding from a
+   selected nav item's accent bar, rather than just a background-color
+   change. Apply to the accent bar element itself (small, fixed-size),
+   not the whole nav row. */
+.nav-illuminated {
+  box-shadow: 0 0 12px 1px var(--color-border-selected);
+}
+
+/* Premium gradient border — a border that IS the brand gradient,
+   implemented via a padding-box/border-box double-background so the
+   inside stays a normal flat surface color (unlike a gradient
+   *background* with a mask, which is more expensive and harder to
+   combine with content). Use sparingly — one gradient-bordered element
+   per view at most, or it stops reading as premium and starts reading
+   as decoration. */
+.border-gradient {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
+    linear-gradient(120deg, var(--color-brand-indigo), var(--color-brand-purple), var(--color-brand-pink)) border-box;
+}
+
+/* AI-processing state — a slow, quiet pulse on an element's border,
+   for "HUMANORA is working on this right now" (paired with the
+   existing shimmer/skeleton treatment for the content itself, not a
+   replacement for it). Never used for a merely-hovered or merely-
+   selected state — this specifically means "generation in flight". */
+@media (prefers-reduced-motion: no-preference) {
+  .ai-active {
+    animation: ai-pulse-border var(--motion-duration-deliberate) var(--motion-ease-standard) infinite alternate;
+  }
+}
+.ai-active {
+  border-color: var(--color-border-ai);
+}
+@keyframes ai-pulse-border {
+  from {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.25);
+  }
+  to {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
+  }
+}
+
+/* Soft panel illumination — a faint glow bleeding from behind a panel,
+   for the ONE panel per view that should feel like the focal point
+   (an active workspace card, a result panel) — not applied broadly. */
+.panel-glow {
+  position: relative;
+}
+.panel-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(60% 100% at 50% 0%, var(--mesh-1) 0%, transparent 70%);
+  filter: blur(20px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* A soft glowing separator — for the rare divider that should read as
+   "a seam of light" rather than a flat border line (e.g. between a
+   hero moment and the content below it), not a replacement for
+   ordinary `border-t border-border` dividers elsewhere. */
+.divider-glow {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border-interactive), transparent);
+  border: none;
+}
+
+/* Application cosmic/network backdrop — a calmer, sparser relative of
+   the marketing site's `.bg-ambient-glow` (which is section-scoped and
+   tuned for a scrolling landing page). This is meant as a single fixed
+   layer behind the whole logged-in shell (Stage 2 wires it in), not
+   per-section — moving between app pages should feel like moving
+   through one lit environment, not loading a new gradient each time.
+   Deliberately NOT applied anywhere yet in Stage 1; defined here so
+   Stage 2 has one real, tested primitive to reach for instead of
+   inventing a background per page. */
+.app-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background-image: radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(120% 90% at 50% 0%, black 0%, transparent 85%);
+}
+.app-atmosphere::before,
+.app-atmosphere::after {
+  content: "";
+  position: absolute;
+  width: 42vw;
+  height: 42vw;
+  border-radius: 9999px;
+  filter: blur(90px);
+}
+.app-atmosphere::before {
+  top: -12vw;
+  left: -10vw;
+  background: var(--mesh-1);
+}
+.app-atmosphere::after {
+  bottom: -16vw;
+  right: -12vw;
+  background: var(--mesh-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app-atmosphere::before {
+    animation: pulse-slow 9s ease-in-out infinite;
+  }
+  .app-atmosphere::after {
+    animation: pulse-slow 11s ease-in-out infinite 1.5s;
+  }
+}
+
+/* Application container/gutter — responsive foundation for Stage 2's
+   shell to consume; not applied to any page in Stage 1. Gutters widen
+   at each breakpoint using the --space-gutter-* tokens above rather
+   than a new arbitrary set of padding values. */
+.app-container {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: var(--space-gutter-mobile);
+}
+@media (min-width: 640px) {
+  .app-container {
+    padding-inline: var(--space-gutter-tablet);
+  }
+}
+@media (min-width: 1024px) {
+  .app-container {
+    padding-inline: var(--space-gutter-desktop);
+  }
 }
 
 :root[data-theme="dark"] {
@@ -561,7 +925,7 @@ h4,
   outline: none;
 }
 .focus-ring:focus-visible {
-  outline: 2px solid var(--color-brand-purple);
+  outline: 2px solid var(--color-border-focus);
   outline-offset: 2px;
 }
 

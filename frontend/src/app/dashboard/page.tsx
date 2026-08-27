@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
+import { ErrorState } from "@/components/ui/ErrorState";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
 import { getVoiceOverview } from "@/lib/db/voice";
@@ -121,7 +122,7 @@ export default async function DashboardPage() {
               </div>
             )
           ) : (
-            <ErrorCard message="Couldn't load your recent work right now." />
+            <ErrorState message="Couldn't load your recent work right now." />
           )}
         </section>
 
@@ -189,7 +190,7 @@ export default async function DashboardPage() {
                 </div>
               </Card>
             ) : (
-              <ErrorCard message="Couldn't load your plan right now." />
+              <ErrorState message="Couldn't load your plan right now." />
             )}
           </section>
 
@@ -219,7 +220,7 @@ export default async function DashboardPage() {
                 </div>
               </Card>
             ) : (
-              <ErrorCard message="Couldn't load your Voice profile right now." />
+              <ErrorState message="Couldn't load your Voice profile right now." />
             )}
           </section>
         </aside>
@@ -244,14 +245,5 @@ function QuickAction({ href, title, description }: { href: string; title: string
       <p className="text-sm font-semibold text-foreground">{title}</p>
       <p className="mt-1 text-xs text-foreground-subtle">{description}</p>
     </Link>
-  );
-}
-
-function ErrorCard({ message }: { message: string }) {
-  return (
-    <Card className="border-danger/30 bg-danger/5 p-6 text-center">
-      <p className="text-sm text-foreground-muted">{message}</p>
-      <p className="mt-1 text-xs text-foreground-subtle">Please refresh, or try again shortly.</p>
-    </Card>
   );
 }
