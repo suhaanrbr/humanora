@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { signOut } from "@/lib/auth-client";
+import { formatDate } from "@/lib/formatDate";
 
 interface UsageSummary {
   humanizeCount: number;
@@ -72,7 +73,7 @@ export function AccountSettings({
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4 text-xs text-foreground-subtle">
           <span>
-            Member since {createdAt.toLocaleDateString(undefined, { year: "numeric", month: "long" })}
+            Member since {formatDate(createdAt)}
           </span>
           <span>·</span>
           <span>
@@ -97,7 +98,7 @@ export function AccountSettings({
           usage && (
             <p className="mt-2 text-sm text-foreground-muted">
               {usage.humanizeCount} / {usage.humanizeLimit} humanizations used
-              {currentPeriodEnd && ` · access through ${currentPeriodEnd.toLocaleDateString()}`}
+              {currentPeriodEnd && ` · access through ${formatDate(currentPeriodEnd)}`}
             </p>
           )
         )}

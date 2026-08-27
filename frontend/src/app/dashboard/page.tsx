@@ -8,9 +8,10 @@ import { ButtonLink } from "@/components/ui/ButtonLink";
 import { SignOutButton } from "@/components/dashboard/SignOutButton";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
-import { getOrCreateVoiceProfile, computeCompleteness } from "@/lib/db/voice";
+import { getOrCreateVoiceProfile } from "@/lib/db/voice";
 import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
 import { BillingActions } from "@/components/dashboard/BillingActions";
+import { RecentWorkCard } from "@/components/dashboard/RecentWorkCard";
 import { PLANS } from "@/lib/config/plans";
 
 export const metadata = { title: "Dashboard — HUMANORA" };
@@ -33,172 +34,174 @@ export default async function DashboardPage() {
   // (e.g. usage) shouldn't take down the whole dashboard.
   const [usage, history, voice, freeTrial, billing] = await Promise.allSettled([
     getUsageSummary(userId, plan),
-    getHistoryForUser(userId, 10),
+    getHistoryForUser(userId, 5),
     getOrCreateVoiceProfile(userId),
     getFreeTrialStatus(userId),
     getSubscriptionSummary(userId),
   ]);
 
   return (
-    <Container className="flex flex-col gap-10">
+    <Container className="flex flex-col gap-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm text-foreground-muted">Welcome back,</p>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
         </div>
         <div className="flex items-center gap-3">
-          <ButtonLink href="/dashboard/humanize" variant="primary" size="sm">
+          <ButtonLink href="/dashboard/humanize" variant="primary" size="md">
             Humanize text
           </ButtonLink>
           <SignOutButton />
         </div>
       </div>
 
-      {/* Usage / Billing */}
-      <section id="billing" className="scroll-mt-24">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-          Usage this month
-        </h2>
-        {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
-          <Card className="p-6">
-            {plan === "free" ? (
-              <>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-foreground-muted">
-                      {billing.value.isExpired ? `Your ${PLANS[billing.value.plan].name} plan` : "Complimentary humanization"}
-                    </p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">
-                      {billing.value.isExpired ? "Ended" : freeTrial.value.used ? "Used" : "Available"}
-                    </p>
-                  </div>
-                  <Badge variant="brand">Free plan</Badge>
-                </div>
-                <p className="mt-3 text-xs text-foreground-subtle">
-                  {billing.value.isExpired
-                    ? `Your access ended on ${billing.value.currentPeriodEnd?.toLocaleDateString()}. Choose a plan below to continue.`
-                    : freeTrial.value.used
-                      ? "You've used your one complimentary transformation. Choose a plan to keep writing with HUMANORA."
-                      : "Every account gets one complimentary humanization, up to 200 characters."}
-                </p>
-                {(freeTrial.value.used || billing.value.isExpired) && <BillingActions />}
-              </>
-            ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-foreground-muted">Humanizations</p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">
-                      {usage.value.humanizeCount} / {usage.value.humanizeLimit}
-                    </p>
-                  </div>
-                  <Badge variant="brand" className="capitalize">
-                    {usage.value.plan} plan
-                  </Badge>
-                </div>
-                <div className="mt-4 h-2 w-full overflow-hidden rounded-full border border-border">
-                  <div
-                    className="bg-brand-gradient h-full rounded-full"
-                    style={{
-                      width: `${Math.min(100, (usage.value.humanizeCount / usage.value.humanizeLimit) * 100)}%`,
-                    }}
-                  />
-                </div>
-                <p className="mt-3 text-xs text-foreground-subtle">
-                  {usage.value.wordsProcessed} words processed.{" "}
-                  {billing.value.currentPeriodEnd &&
-                    `Access renews or ends on ${billing.value.currentPeriodEnd.toLocaleDateString()}.`}
-                </p>
-              </>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        {/* Main column: recent work is the reason someone opens the dashboard daily */}
+        <section className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+              Recent work
+            </h2>
+            {history.status === "fulfilled" && history.value.length > 0 && (
+              <Link
+                href="/dashboard/history"
+                className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground"
+              >
+                View all
+              </Link>
             )}
-          </Card>
-        ) : (
-          <ErrorCard message="Couldn't load usage right now." />
-        )}
-      </section>
+          </div>
 
-      {/* My Voice */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
-          <Badge variant={voice.status === "fulfilled" && voice.value.styleProfileJson ? "brand" : "neutral"}>
-            {voice.status === "fulfilled" && voice.value.styleProfileJson ? "Profile ready" : "Not set up"}
-          </Badge>
-        </div>
-        {voice.status === "fulfilled" ? (
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center">
-                <span className="text-lg font-semibold text-foreground">
-                  {computeCompleteness(voice.value.sampleCount)}%
-                </span>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-foreground">
-                  {voice.value.sampleCount === 0
-                    ? "No writing samples yet."
-                    : `${voice.value.sampleCount} sample(s) · ${
-                        voice.value.styleProfileJson ? "voice profile analyzed" : "not yet analyzed"
-                      }`}
+          {history.status === "fulfilled" ? (
+            history.value.length === 0 ? (
+              <Card className="flex flex-col items-center gap-3 p-10 text-center">
+                <p className="text-sm text-foreground-muted">Nothing humanized yet.</p>
+                <p className="max-w-xs text-xs text-foreground-subtle">
+                  Paste a draft into the Humanizer and your work will show up here, ready to reopen,
+                  copy, or reuse.
                 </p>
-                <p className="mt-1 text-xs text-foreground-subtle">
-                  Teach HUMANORA how you write, then apply it when humanizing text on a paid plan.
-                </p>
-              </div>
-              <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
-                {voice.value.sampleCount === 0 ? "Get started" : "Open"}
-              </ButtonLink>
-            </div>
-          </Card>
-        ) : (
-          <ErrorCard message="Couldn't load your Voice profile right now." />
-        )}
-      </section>
-
-      {/* History */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-            Recent history
-          </h2>
-          {history.status === "fulfilled" && history.value.length > 0 && (
-            <Link href="/dashboard/history" className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground">
-              View all
-            </Link>
-          )}
-        </div>
-        {history.status === "fulfilled" ? (
-          history.value.length === 0 ? (
-            <Card className="p-8 text-center">
-              <p className="text-sm text-foreground-muted">No writing history yet.</p>
-              <p className="mt-1 text-xs text-foreground-subtle">
-                Your recent HUMANORA transformations will appear here.
-              </p>
-              <div className="mt-4 flex justify-center">
-                <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm">
+                <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm" className="mt-1">
                   Humanize your first draft
                 </ButtonLink>
+              </Card>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {history.value.map((entry) => (
+                  <RecentWorkCard
+                    key={entry.id}
+                    inputText={entry.inputText}
+                    outputText={entry.outputText}
+                    mode={entry.mode}
+                    strength={entry.strength}
+                    createdAt={entry.createdAt.toISOString()}
+                  />
+                ))}
               </div>
-            </Card>
+            )
           ) : (
-            <div className="flex flex-col gap-3">
-              {history.value.map((entry) => (
-                <Card key={entry.id} className="p-5">
-                  <div className="mb-2 flex items-center justify-between text-xs text-foreground-subtle">
-                    <span className="capitalize">
-                      {entry.mode} · {entry.strength}
-                    </span>
-                    <span>{entry.createdAt.toLocaleString()}</span>
-                  </div>
-                  <p className="line-clamp-2 text-sm text-foreground-muted">{entry.outputText}</p>
-                </Card>
-              ))}
-            </div>
-          )
-        ) : (
-          <ErrorCard message="Couldn't load your history right now." />
-        )}
-      </section>
+            <ErrorCard message="Couldn't load your recent work right now." />
+          )}
+        </section>
+
+        {/* Sidebar: account state you'd otherwise have to go hunting for */}
+        <aside className="flex flex-col gap-6">
+          <section>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+              Plan
+            </h2>
+            {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
+              <Card className="p-5">
+                {plan === "free" ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium text-foreground">
+                        {billing.value.isExpired ? PLANS[billing.value.plan].name : "Free"}
+                      </p>
+                      <Badge variant="neutral">Free plan</Badge>
+                    </div>
+                    <p className="mt-2 text-xs text-foreground-subtle">
+                      {billing.value.isExpired
+                        ? `Access ended ${billing.value.currentPeriodEnd?.toLocaleDateString()}.`
+                        : freeTrial.value.used
+                          ? "Complimentary transformation used."
+                          : "Complimentary transformation available."}
+                    </p>
+                    {(freeTrial.value.used || billing.value.isExpired) && (
+                      <div className="mt-3">
+                        <BillingActions />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-medium capitalize text-foreground">{usage.value.plan}</p>
+                      <Badge variant="brand">Active</Badge>
+                    </div>
+                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full border border-border">
+                      <div
+                        className="bg-brand-gradient h-full rounded-full"
+                        style={{
+                          width: `${Math.min(100, (usage.value.humanizeCount / usage.value.humanizeLimit) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-foreground-subtle">
+                      {usage.value.humanizeCount} / {usage.value.humanizeLimit} humanizations ·{" "}
+                      {usage.value.wordsProcessed} words
+                    </p>
+                    {billing.value.currentPeriodEnd && (
+                      <p className="mt-1 text-xs text-foreground-subtle">
+                        Access through {billing.value.currentPeriodEnd.toLocaleDateString()}
+                      </p>
+                    )}
+                  </>
+                )}
+                <div className="mt-4 border-t border-border pt-3">
+                  <Link
+                    href="/dashboard/billing"
+                    className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground"
+                  >
+                    {plan === "free" ? "View plans" : "Manage billing"}
+                  </Link>
+                </div>
+              </Card>
+            ) : (
+              <ErrorCard message="Couldn't load your plan right now." />
+            )}
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+              My Voice
+            </h2>
+            {voice.status === "fulfilled" ? (
+              <Card className="p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">
+                    {voice.value.styleProfileJson ? "Profile ready" : "Not set up"}
+                  </p>
+                  <Badge variant={voice.value.styleProfileJson ? "brand" : "neutral"}>
+                    {voice.value.sampleCount} sample{voice.value.sampleCount === 1 ? "" : "s"}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-xs text-foreground-subtle">
+                  {voice.value.styleProfileJson
+                    ? "Turn it on next to Mode when humanizing text on a paid plan."
+                    : "Teach HUMANORA how you write from a few real samples."}
+                </p>
+                <div className="mt-3">
+                  <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
+                    {voice.value.sampleCount === 0 ? "Get started" : "Open"}
+                  </ButtonLink>
+                </div>
+              </Card>
+            ) : (
+              <ErrorCard message="Couldn't load your Voice profile right now." />
+            )}
+          </section>
+        </aside>
+      </div>
 
       <p className="text-center text-xs text-foreground-subtle">
         Need something else?{" "}
