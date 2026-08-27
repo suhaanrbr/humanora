@@ -7,205 +7,101 @@ import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { useSession, signOut } from "@/lib/auth-client";
+import { writingModes } from "@/lib/config/modes";
+import { PAID_PLAN_IDS, PLANS } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
 
-type TileColor = "indigo" | "purple" | "pink" | "cyan";
+type GroupId = "product" | "solutions" | "pricing" | "developers" | "resources";
 
-interface NavItem {
-  label: string;
-  href: string;
-  soon?: boolean;
-  /** Short, honest one-line description — only real, shipped capabilities get one. */
-  description?: string;
-  icon?: (props: { className?: string }) => ReactElement;
-  color?: TileColor;
-}
+const GROUP_LABELS: Record<GroupId, string> = {
+  product: "Product",
+  solutions: "Solutions",
+  pricing: "Pricing",
+  developers: "Developers",
+  resources: "Resources",
+};
+const GROUP_ORDER: GroupId[] = ["product", "solutions", "pricing", "developers", "resources"];
 
-interface NavGroup {
-  label: string;
-  subtitle: string;
-  items: NavItem[];
-  /** A real, single next step — only shown for groups with more than one item. */
-  cta?: { label: string; href: string };
-}
-
-// "/#section" links work from any route (they resolve to the home page's
-// in-page anchors). Items without a real destination are marked `soon`
-// rather than pointing at a route that doesn't exist yet. Descriptions
-// describe only what HUMANORA actually does today — no invented tools
-// (no "AI Detector"/"AI Bypasser"-style features; HUMANORA doesn't
-// claim to defeat AI detection, full stop).
-const productItems: NavItem[] = [
+// Every destination below is a route or in-page anchor that actually
+// exists today. Nothing marked "Soon" — a smaller menu of real
+// destinations beats a bigger one padded with placeholders.
+const PRODUCT_CAPABILITIES = [
   {
+    id: "humanizer",
     label: "Humanizer",
     href: "/#hero",
-    description: "Turn AI-assisted drafts into natural writing that still sounds like you.",
-    icon: TileWriteIcon,
-    color: "purple",
+    blurb: "Turn an AI-assisted draft into writing that reads like you wrote it.",
   },
   {
+    id: "modes",
     label: "Writing Modes",
     href: "/#writing-modes",
-    description: "Six rewrite styles — Natural, Academic, Professional, and more.",
-    icon: TileModesIcon,
-    color: "indigo",
+    blurb: `${writingModes.length} rewrite styles, from ${writingModes[0].name} to ${writingModes[writingModes.length - 1].name}.`,
   },
   {
+    id: "voice",
     label: "My Voice",
     href: "/#my-voice",
-    description: "Teach HUMANORA your own patterns from real writing samples.",
-    icon: TileVoiceIcon,
-    color: "cyan",
+    blurb: "A style profile built from your own writing samples.",
   },
   {
-    label: "Document Rewrite",
-    href: "#",
-    description: "Rewrite whole documents in one pass, not paragraph by paragraph.",
-    icon: TileDocIcon,
-    color: "pink",
-    soon: true,
+    id: "study",
+    label: "Study",
+    href: "/dashboard/study",
+    blurb: "Summarize, explain, or turn material into structured notes.",
   },
-];
+  {
+    id: "library",
+    label: "Library",
+    href: "/dashboard/history",
+    blurb: "Every past rewrite, saved automatically and ready to reuse.",
+  },
+] as const;
 
-const solutionsItems: NavItem[] = [
+// Framed by audience, but every description points at the same six
+// real situations in the /#use-cases section — not a separate,
+// invented feature set. "Teams" was dropped rather than shown as
+// "Soon": HUMANORA has no team functionality today.
+const SOLUTIONS = [
   {
+    id: "students",
     label: "Students",
-    href: "/#use-cases",
-    description: "Turn rough drafts into submissions that sound like your own writing.",
-    icon: TileStudentIcon,
-    color: "purple",
+    description: "Coursework and personal statements that still sound like your own writing.",
+    helps: "Writing Modes, My Voice",
   },
   {
+    id: "professionals",
     label: "Professionals",
-    href: "/#use-cases",
-    description: "Polish reports, emails, and proposals without losing your voice.",
-    icon: TileWriteIcon,
-    color: "indigo",
+    description: "Emails, reports, and everyday writing that reads naturally, not machine-drafted.",
+    helps: "Humanizer, Writing Modes",
   },
   {
+    id: "creators",
     label: "Creators",
-    href: "/#use-cases",
-    description: "Keep AI-assisted drafts sounding like a real person wrote them.",
-    icon: TileModesIcon,
-    color: "cyan",
+    description: "Blog drafts and long-form writing with a voice that's recognizably yours.",
+    helps: "My Voice, Writing Modes",
   },
-  {
-    label: "Teams",
-    href: "#",
-    description: "Shared style profiles and usage across a whole workspace.",
-    icon: TileDocIcon,
-    color: "pink",
-    soon: true,
-  },
-];
-
-const resourcesItems: NavItem[] = [
-  {
-    label: "Blog",
-    href: "/blog",
-    description: "Writing tips, product updates, and how HUMANORA is built.",
-    icon: TileDocIcon,
-    color: "purple",
-  },
-  {
-    label: "Guides",
-    href: "#",
-    description: "Step-by-step walkthroughs for getting the most out of HUMANORA.",
-    icon: TileModesIcon,
-    color: "indigo",
-    soon: true,
-  },
-  {
-    label: "FAQ",
-    href: "/#pricing",
-    description: "Common questions about plans, billing, and how HUMANORA works.",
-    icon: TileVoiceIcon,
-    color: "cyan",
-  },
-  {
-    label: "Affiliates",
-    href: "/affiliates",
-    description: "Refer HUMANORA and earn a share of what you bring in.",
-    icon: TileStudentIcon,
-    color: "pink",
-  },
-];
-
-// Pricing and Developers each have exactly one real destination today
-// (there's no separate FAQ page or API sub-sections to link to yet) —
-// rather than inventing extra items to fill out a menu, each panel
-// just carries that one honest destination so it still gets the same
-// floating "subwindow" treatment as Product/Solutions/Resources.
-const pricingItems: NavItem[] = [
-  {
-    label: "Plans & FAQ",
-    href: "/#pricing",
-    description: "Compare Essential, Pro, and Ultra, and see what's included.",
-    icon: TilePricingIcon,
-    color: "purple",
-  },
-];
-const developersItems: NavItem[] = [
-  {
-    label: "API overview",
-    href: "/api",
-    description: "Bring HUMANORA's rewrite engine into your own product — developer preview.",
-    icon: TileDocIcon,
-    color: "indigo",
-  },
-];
-
-const navGroups: NavGroup[] = [
-  {
-    label: "Product",
-    subtitle: "Powerful tools to write like yourself, faster.",
-    items: productItems,
-    cta: { label: "Try the Humanizer", href: "/dashboard/humanize" },
-  },
-  {
-    label: "Solutions",
-    subtitle: "Built for how you actually use HUMANORA.",
-    items: solutionsItems,
-    cta: { label: "See all use cases", href: "/#use-cases" },
-  },
-  { label: "Pricing", subtitle: "Simple plans, no surprises.", items: pricingItems },
-  { label: "Developers", subtitle: "Bring HUMANORA into what you're building.", items: developersItems },
-  {
-    label: "Resources",
-    subtitle: "Everything else worth knowing.",
-    items: resourcesItems,
-    cta: { label: "Read the blog", href: "/blog" },
-  },
-];
-
-// One abstract line icon per top-level destination — same 1.6 stroke
-// weight and "shape IS the mark" restraint as the dashboard rail's
-// icons (see AppShell.tsx), not literal clip art. Each is painted with
-// the shared brand gradient (defined once in <NavIconGradientDefs>)
-// rather than a flat color, so the nav bar picks up a touch of the
-// same indigo→purple→pink identity as the logo and primary buttons.
-const NAV_ICONS: Record<string, (props: { className?: string }) => ReactElement> = {
-  Product: NavProductIcon,
-  Solutions: NavSolutionsIcon,
-  Pricing: NavPricingIcon,
-  Developers: NavDevelopersIcon,
-  Resources: NavResourcesIcon,
-};
+] as const;
 
 /**
- * Landing page header. Sticky, translucent over the dark background so it
- * reads as part of the page rather than a generic floating navbar.
- * Mobile viewports get a dedicated slide-down menu instead of a squeezed
- * desktop nav.
+ * HUMANORA's desktop navigation — one persistent shell attached to the
+ * header, not five copies of the same dropdown. Each destination gets
+ * its own composition (Product explores capabilities with a live
+ * preview, Solutions reads as editorial copy, Pricing is a direct
+ * compact comparison from the real plan config, Developers is quiet
+ * and technical, Resources is a short reading list) — switching
+ * between them cross-fades in place instead of closing and reopening.
  */
 export function Header() {
   const { data: session, isPending } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [activeGroup, setActiveGroup] = useState<GroupId | null>(null);
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const navRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const triggerRefs = useRef<Partial<Record<GroupId, HTMLButtonElement | null>>>({});
 
   useEffect(() => {
     const onScroll = () => {
@@ -224,12 +120,17 @@ export function Header() {
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
-      if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpenGroup(null);
+      if (navRef.current && !navRef.current.contains(e.target as Node) && panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setActiveGroup(null);
       }
     }
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpenGroup(null);
+      if (e.key === "Escape" && activeGroup) {
+        e.preventDefault();
+        const trigger = triggerRefs.current[activeGroup];
+        setActiveGroup(null);
+        trigger?.focus();
+      }
     }
     document.addEventListener("mousedown", onClickOutside);
     document.addEventListener("keydown", onKeyDown);
@@ -237,15 +138,49 @@ export function Header() {
       document.removeEventListener("mousedown", onClickOutside);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, []);
+  }, [activeGroup]);
+
+  // Move focus into the panel whenever it opens or switches to a
+  // different destination — keyboard users land somewhere useful
+  // instead of the focus staying stranded on the trigger row. This is
+  // a DOM focus move, not a state update, so it doesn't need the
+  // set-state-in-effect exception used elsewhere in this codebase.
+  useEffect(() => {
+    if (!activeGroup) return;
+    const id = window.setTimeout(() => {
+      const first = panelRef.current?.querySelector<HTMLElement>("a,button");
+      first?.focus();
+    }, 10);
+    return () => window.clearTimeout(id);
+  }, [activeGroup]);
+
+  function toggle(group: GroupId) {
+    setActiveGroup((g) => (g === group ? null : group));
+  }
+
+  function onTriggerKeyDown(e: React.KeyboardEvent, index: number) {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      const next = GROUP_ORDER[(index + 1) % GROUP_ORDER.length];
+      triggerRefs.current[next]?.focus();
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      const prev = GROUP_ORDER[(index - 1 + GROUP_ORDER.length) % GROUP_ORDER.length];
+      triggerRefs.current[prev]?.focus();
+    }
+  }
+
+  const panelOpen = activeGroup !== null;
 
   return (
     <header
       className={cn(
         "sticky top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-300",
-        scrolled
-          ? "border-border bg-background/90 backdrop-blur-lg shadow-card"
-          : "border-transparent bg-background/80 backdrop-blur-sm"
+        panelOpen
+          ? "border-transparent bg-background/95 backdrop-blur-lg"
+          : scrolled
+            ? "border-border bg-background/90 backdrop-blur-lg shadow-card"
+            : "border-transparent bg-background/80 backdrop-blur-sm"
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -253,48 +188,33 @@ export function Header() {
           <Logo size="sm" />
         </Link>
 
-        <nav ref={navRef} className="hidden items-center gap-1.5 lg:flex" aria-label="Primary">
-          <NavIconGradientDefs />
-          {navGroups.map((group, i) => {
-            const Icon = NAV_ICONS[group.label];
-            return (
-            <div key={group.label} className="relative">
-              <button
-                type="button"
-                onClick={() => setOpenGroup((g) => (g === group.label ? null : group.label))}
-                aria-expanded={openGroup === group.label}
+        <nav ref={navRef} className="hidden items-center gap-6 lg:flex" aria-label="Primary">
+          {GROUP_ORDER.map((group, i) => (
+            <button
+              key={group}
+              ref={(el) => {
+                triggerRefs.current[group] = el;
+              }}
+              type="button"
+              onClick={() => toggle(group)}
+              onKeyDown={(e) => onTriggerKeyDown(e, i)}
+              aria-expanded={activeGroup === group}
+              aria-controls="nav-panel"
+              className={cn(
+                "focus-ring press-feedback relative cursor-pointer py-2 text-sm font-semibold tracking-tight transition-colors",
+                activeGroup === group ? "text-foreground" : "text-foreground-muted hover:text-foreground"
+              )}
+            >
+              {GROUP_LABELS[group]}
+              <span
+                aria-hidden="true"
                 className={cn(
-                  "focus-ring press-feedback flex cursor-pointer items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold tracking-tight transition-all",
-                  openGroup === group.label
-                    ? "border-brand-purple/40 bg-surface text-foreground shadow-glow-sm"
-                    : "border-transparent text-foreground-muted hover:border-border hover:bg-surface/70 hover:text-foreground"
+                  "bg-brand-gradient absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full transition-opacity duration-200",
+                  activeGroup === group ? "opacity-100" : "opacity-0"
                 )}
-              >
-                {Icon && <Icon className="h-4 w-4 shrink-0" />}
-                {group.label}
-                <ChevronIcon
-                  className={cn(
-                    "h-3.5 w-3.5 transition-transform",
-                    openGroup === group.label && "rotate-180"
-                  )}
-                />
-              </button>
-              {/* The last two triggers sit near the right edge of the
-                  header — a centered panel there would clip against the
-                  viewport, so they open right-aligned instead. */}
-              <NavFloatingPanel
-                open={openGroup === group.label}
-                label={group.label}
-                subtitle={group.subtitle}
-                items={group.items}
-                cta={group.cta}
-                onNavigate={() => setOpenGroup(null)}
-                onClose={() => setOpenGroup(null)}
-                align={i >= navGroups.length - 2 ? "right" : "center"}
               />
-            </div>
-            );
-          })}
+            </button>
+          ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
@@ -337,36 +257,81 @@ export function Header() {
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-          <span className="relative block h-4 w-5" aria-hidden="true">
-            <span
-              className={cn(
-                "absolute left-0 top-0 h-0.5 w-5 bg-current transition-transform duration-200",
-                menuOpen && "translate-y-[7px] rotate-45"
-              )}
-            />
-            <span
-              className={cn(
-                "absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-current transition-opacity duration-200",
-                menuOpen && "opacity-0"
-              )}
-            />
-            <span
-              className={cn(
-                "absolute bottom-0 left-0 h-0.5 w-5 bg-current transition-transform duration-200",
-                menuOpen && "-translate-y-[7px] -rotate-45"
-              )}
-            />
-          </span>
+            <span className="relative block h-4 w-5" aria-hidden="true">
+              <span
+                className={cn(
+                  "absolute left-0 top-0 h-0.5 w-5 bg-current transition-transform duration-200",
+                  menuOpen && "translate-y-[7px] rotate-45"
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-current transition-opacity duration-200",
+                  menuOpen && "opacity-0"
+                )}
+              />
+              <span
+                className={cn(
+                  "absolute bottom-0 left-0 h-0.5 w-5 bg-current transition-transform duration-200",
+                  menuOpen && "-translate-y-[7px] -rotate-45"
+                )}
+              />
+            </span>
           </button>
         </div>
       </div>
+
+      {/* The nav shell — one surface, full-bleed under the header, its
+          inner content matching the page's own max-w-7xl column so it
+          reads as part of the site's grid rather than a floating card.
+          Height animates via a grid-template-rows trick (0fr -> 1fr)
+          so each destination's real content height "just works"
+          without measuring — Pricing stays compact, Product doesn't. */}
+      <div
+        id="nav-panel"
+        role="menu"
+        aria-hidden={!panelOpen}
+        inert={!panelOpen}
+        className={cn(
+          "grid border-b bg-background/98 backdrop-blur-2xl transition-[grid-template-rows] duration-250 ease-out",
+          panelOpen ? "grid-rows-[1fr] border-border" : "grid-rows-[0fr] border-transparent"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div ref={panelRef} className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+            {activeGroup && (
+              <div key={activeGroup} className="animate-nav-panel-fade-in">
+                {activeGroup === "product" && <ProductPanel onNavigate={() => setActiveGroup(null)} />}
+                {activeGroup === "solutions" && <SolutionsPanel onNavigate={() => setActiveGroup(null)} />}
+                {activeGroup === "pricing" && <PricingPanel onNavigate={() => setActiveGroup(null)} />}
+                {activeGroup === "developers" && <DevelopersPanel onNavigate={() => setActiveGroup(null)} />}
+                {activeGroup === "resources" && <ResourcesPanel onNavigate={() => setActiveGroup(null)} />}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* A very subtle depth response behind the panel — not a full-page
+          dim/blur "modal" treatment, just enough separation that the
+          open panel reads as sitting above the page rather than
+          floating disconnected from it. Doubles as an outside-click
+          target. */}
+      <div
+        aria-hidden="true"
+        onClick={() => setActiveGroup(null)}
+        className={cn(
+          "fixed inset-x-0 top-16 bottom-0 z-40 bg-background/45 transition-opacity duration-200",
+          panelOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+      />
 
       {/* A thin thread of the brand gradient tracking scroll position —
           the one element that literally travels the length of the page,
           making the navbar feel like part of the same continuous
           experience as the scroll story beneath it, not a fixed lid
           sitting on top of unrelated sections. */}
-      <div className="h-px w-full bg-border/60" aria-hidden="true">
+      <div className="relative z-50 h-px w-full bg-border/60" aria-hidden="true">
         <div
           className="bg-brand-gradient h-full transition-[width] duration-150 ease-out motion-reduce:transition-none"
           style={{ width: `${scrollProgress * 100}%` }}
@@ -376,34 +341,28 @@ export function Header() {
       <div
         id="mobile-nav"
         className={cn(
-          "overflow-hidden border-t border-border bg-background transition-[max-height] duration-300 ease-in-out lg:hidden",
-          menuOpen ? "max-h-[32rem] overflow-y-auto" : "max-h-0 border-t-0"
+          "relative z-50 overflow-hidden border-t border-border bg-background transition-[max-height] duration-300 ease-in-out lg:hidden",
+          menuOpen ? "max-h-[36rem] overflow-y-auto" : "max-h-0 border-t-0"
         )}
       >
         <nav className="flex flex-col gap-1 px-4 py-4 sm:px-6" aria-label="Mobile">
-          {navGroups.map((group) => (
-            <div key={group.label}>
-              <button
-                type="button"
-                onClick={() =>
-                  setOpenMobileGroup((g) => (g === group.label ? null : group.label))
-                }
-                className="focus-ring flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
-              >
-                {group.label}
-                <ChevronIcon
-                  className={cn("h-3.5 w-3.5 transition-transform", openMobileGroup === group.label && "rotate-180")}
-                />
-              </button>
-              {openMobileGroup === group.label && (
-                <div className="ml-2 flex flex-col gap-1 border-l border-border pl-3">
-                  {group.items.map((item) => (
-                    <NavTile key={item.label} item={item} onNavigate={() => setMenuOpen(false)} />
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+          <MobileGroup label="Product" open={openMobileGroup === "Product"} onToggle={() => setOpenMobileGroup((g) => (g === "Product" ? null : "Product"))}>
+            {PRODUCT_CAPABILITIES.map((item) => (
+              <MobileLink key={item.id} href={item.href} label={item.label} onNavigate={() => setMenuOpen(false)} />
+            ))}
+          </MobileGroup>
+          <MobileGroup label="Solutions" open={openMobileGroup === "Solutions"} onToggle={() => setOpenMobileGroup((g) => (g === "Solutions" ? null : "Solutions"))}>
+            {SOLUTIONS.map((item) => (
+              <MobileLink key={item.id} href="/#use-cases" label={item.label} onNavigate={() => setMenuOpen(false)} />
+            ))}
+          </MobileGroup>
+          <MobileLink href="/#pricing" label="Pricing" onNavigate={() => setMenuOpen(false)} top />
+          <MobileLink href="/api" label="Developers" onNavigate={() => setMenuOpen(false)} top />
+          <MobileGroup label="Resources" open={openMobileGroup === "Resources"} onToggle={() => setOpenMobileGroup((g) => (g === "Resources" ? null : "Resources"))}>
+            <MobileLink href="/blog" label="Blog" onNavigate={() => setMenuOpen(false)} />
+            <MobileLink href="/#pricing" label="FAQ" onNavigate={() => setMenuOpen(false)} />
+            <MobileLink href="/affiliates" label="Affiliates" onNavigate={() => setMenuOpen(false)} />
+          </MobileGroup>
 
           <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
             {!isPending && session ? (
@@ -430,142 +389,303 @@ export function Header() {
   );
 }
 
-/**
- * The desktop nav's "floating" sub-menu — always mounted (so the
- * open/close transition can actually animate instead of popping), a
- * genuinely separate elevated surface rather than a plain list glued
- * under the trigger: rounded-2xl, a lifted shadow-glow, a soft scale +
- * fade on open, and each item rendered as its own row with the same
- * illuminated-left-edge hover language used in the dashboard's nav
- * rail — so the marketing site and the app read as one HUMANORA
- * vocabulary, just applied to a different surface.
- */
-const TILE_COLOR_CLASSES: Record<TileColor, string> = {
-  indigo: "bg-brand-indigo/15 text-brand-indigo",
-  purple: "bg-brand-purple/15 text-brand-purple",
-  pink: "bg-brand-pink/15 text-brand-pink",
-  cyan: "bg-brand-cyan/15 text-brand-cyan",
-};
+/* ==========================================================================
+   PRODUCT — the strongest menu: a list of real capabilities on the left,
+   a live preview on the right that reacts to hover/focus. Defaults to
+   the Humanizer so the panel is never empty before anyone interacts.
+   ========================================================================== */
+function ProductPanel({ onNavigate }: { onNavigate: () => void }) {
+  const [activeId, setActiveId] = useState<(typeof PRODUCT_CAPABILITIES)[number]["id"]>("humanizer");
+  const active = PRODUCT_CAPABILITIES.find((c) => c.id === activeId) ?? PRODUCT_CAPABILITIES[0];
 
-/**
- * The nav's "subwindow" — a genuinely separate elevated surface (not a
- * thin list glued under the trigger): a title + one-line subtitle, a
- * close button, a grid of real destinations as icon tiles, and — for
- * groups with a natural next step — a footer CTA. Every tile is a real
- * HUMANORA capability with an honest description; nothing here is
- * decorative or invented. Always mounted (never conditionally
- * rendered) so open/close can actually transition instead of popping.
- */
-function NavFloatingPanel({
-  open,
-  label,
-  subtitle,
-  items,
-  cta,
-  onNavigate,
-  onClose,
-  align = "center",
-}: {
-  open: boolean;
-  label: string;
-  subtitle: string;
-  items: NavItem[];
-  cta?: { label: string; href: string };
-  onNavigate: () => void;
-  onClose: () => void;
-  align?: "center" | "right";
-}) {
-  const wide = items.length > 1;
   return (
-    <div
-      className={cn(
-        "border-border-strong/60 absolute top-full z-50 mt-3 rounded-2xl border bg-background-elevated/95 shadow-glow-sm backdrop-blur-xl transition-[opacity,transform] duration-150 ease-out",
-        wide ? "w-[36rem]" : "w-80",
-        align === "right" ? "right-0 origin-top-right" : "left-1/2 origin-top -translate-x-1/2",
-        open
-          ? "translate-y-0 scale-100 opacity-100"
-          : cn("pointer-events-none -translate-y-1 scale-95 opacity-0", align === "right" && "translate-x-0")
-      )}
-      role="menu"
-    >
-      <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
-        <div>
-          <p className="font-display text-lg font-bold tracking-tight text-foreground">{label}</p>
-          <p className="mt-0.5 text-sm text-foreground-muted">{subtitle}</p>
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div>
+        <p className="text-app-label text-brand-purple">Product</p>
+        <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-foreground">
+          What HUMANORA actually does
+        </h2>
+        <div className="mt-6 flex flex-col divide-y divide-border border-t border-border">
+          {PRODUCT_CAPABILITIES.map((item) => (
+            <a
+              key={item.id}
+              href={item.href}
+              onClick={onNavigate}
+              onMouseEnter={() => setActiveId(item.id)}
+              onFocus={() => setActiveId(item.id)}
+              className={cn(
+                "focus-ring group flex items-baseline justify-between gap-6 py-3.5 transition-colors",
+                activeId === item.id ? "text-foreground" : "text-foreground-muted hover:text-foreground"
+              )}
+            >
+              <span className="flex items-baseline gap-3">
+                <span className="text-base font-semibold">{item.label}</span>
+                <span className="hidden text-sm text-foreground-subtle sm:inline">{item.blurb}</span>
+              </span>
+              <ArrowRightIcon
+                className={cn(
+                  "h-4 w-4 shrink-0 -translate-x-1 opacity-0 transition-[opacity,transform] duration-150",
+                  activeId === item.id && "translate-x-0 opacity-100"
+                )}
+              />
+            </a>
+          ))}
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={`Close ${label} menu`}
-          className="focus-ring press-feedback flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground-subtle transition-colors hover:bg-surface hover:text-foreground"
-        >
-          <CloseIcon className="h-4 w-4" />
-        </button>
       </div>
 
-      <div className={cn("grid gap-1.5 p-3", wide && "grid-cols-2")}>
-        {items.map((item) => (
-          <NavTile key={item.label} item={item} onNavigate={onNavigate} />
-        ))}
-      </div>
-
-      {cta && (
-        <div className="flex items-center justify-between gap-4 border-t border-border bg-surface/40 px-5 py-3.5">
-          <p className="text-sm text-foreground-muted">Not sure where to start?</p>
-          <a
-            href={cta.href}
-            onClick={onNavigate}
-            className="focus-ring press-feedback bg-brand-gradient inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-glow-sm transition-transform hover:scale-[1.03]"
-          >
-            {cta.label}
-            <ArrowRightIcon className="h-3.5 w-3.5" />
-          </a>
+      <div className="hidden lg:block">
+        <div className="rounded-2xl border border-border bg-surface/60 p-5">
+          <ProductPreview id={active.id} />
         </div>
-      )}
+        <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="mt-5 w-full justify-center" onClick={onNavigate}>
+          Try the Humanizer
+        </ButtonLink>
+      </div>
     </div>
   );
 }
 
-function NavTile({ item, onNavigate }: { item: NavItem; onNavigate: () => void }) {
-  const Icon = item.icon;
-  const colorClass = TILE_COLOR_CLASSES[item.color ?? "purple"];
-
-  const content = (
-    <>
-      {Icon && (
-        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", colorClass)}>
-          <Icon className="h-5 w-5" />
-        </span>
-      )}
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">{item.label}</span>
-          {item.soon && (
-            <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-foreground-subtle">
-              Soon
-            </span>
-          )}
-        </span>
-        {item.description && <span className="mt-0.5 block text-xs text-foreground-subtle">{item.description}</span>}
-      </span>
-      {!item.soon && (
-        <ChevronIcon className="h-3.5 w-3.5 shrink-0 -rotate-90 text-foreground-subtle opacity-0 transition-opacity group-hover:opacity-100" />
-      )}
-    </>
-  );
-
-  if (item.soon) {
+function ProductPreview({ id }: { id: (typeof PRODUCT_CAPABILITIES)[number]["id"] }) {
+  if (id === "humanizer") {
     return (
-      <span className="flex cursor-not-allowed items-start gap-3 rounded-xl p-3 text-left">{content}</span>
+      <div key={id} className="animate-nav-panel-fade-in">
+        <p className="text-app-label text-foreground-subtle">Before</p>
+        <div className="mt-2 h-2 w-full rounded-full bg-border" />
+        <div className="mt-1.5 h-2 w-4/5 rounded-full bg-border" />
+        <p className="mt-4 text-app-label text-brand-purple">After</p>
+        <div className="bg-brand-gradient mt-2 h-2 w-full rounded-full" />
+        <div className="bg-brand-gradient mt-1.5 h-2 w-3/5 rounded-full" />
+      </div>
+    );
+  }
+  if (id === "modes") {
+    return (
+      <div key={id} className="flex flex-wrap gap-1.5 animate-nav-panel-fade-in">
+        {writingModes.map((m, i) => (
+          <span
+            key={m.name}
+            className={cn(
+              "rounded-full px-2.5 py-1 text-xs font-medium",
+              i === 0 ? "bg-brand-gradient text-white" : "border border-border text-foreground-muted"
+            )}
+          >
+            {m.name}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  if (id === "voice") {
+    return (
+      <div key={id} className="flex flex-wrap gap-1.5 animate-nav-panel-fade-in">
+        {["Conversational", "Direct", "Varied rhythm"].map((trait) => (
+          <span key={trait} className="rounded-full border border-brand-purple/30 bg-brand-purple/10 px-2.5 py-1 text-xs font-medium text-brand-purple">
+            {trait}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  if (id === "study") {
+    return (
+      <div key={id} className="flex flex-wrap gap-1.5 animate-nav-panel-fade-in">
+        {["Summarize", "Explain", "Study Notes"].map((mode, i) => (
+          <span
+            key={mode}
+            className={cn(
+              "rounded-full px-2.5 py-1 text-xs font-medium",
+              i === 0 ? "bg-brand-gradient text-white" : "border border-border text-foreground-muted"
+            )}
+          >
+            {mode}
+          </span>
+        ))}
+      </div>
     );
   }
   return (
+    <div key={id} className="flex flex-col gap-2 animate-nav-panel-fade-in">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-purple/50" />
+          <div className="h-2 flex-1 rounded-full bg-border" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SOLUTIONS — editorial rows, not a repeated card grid.
+   ========================================================================== */
+function SolutionsPanel({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div className="max-w-3xl">
+      <p className="text-app-label text-brand-purple">Solutions</p>
+      <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-foreground">
+        Built for how you actually write
+      </h2>
+      <div className="mt-6 flex flex-col divide-y divide-border border-t border-border">
+        {SOLUTIONS.map((s) => (
+          <Link
+            key={s.id}
+            href="/#use-cases"
+            onClick={onNavigate}
+            className="focus-ring group grid grid-cols-1 gap-1.5 py-5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:items-baseline sm:gap-6"
+          >
+            <span className="font-display text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-brand-purple">
+              {s.label}
+            </span>
+            <span>
+              <span className="block text-sm text-foreground-muted">{s.description}</span>
+              <span className="mt-1 block text-xs text-foreground-subtle">Helps with: {s.helps}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   PRICING — compact and direct, reading real numbers from the same
+   PLANS config the paywall and checkout use. No duplicated pricing logic.
+   ========================================================================== */
+function PricingPanel({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div className="max-w-2xl">
+      <p className="text-app-label text-brand-purple">Pricing</p>
+      <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-foreground">Simple plans, no surprises</h2>
+      <div className="mt-6 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+        {PAID_PLAN_IDS.map((id) => {
+          const plan = PLANS[id];
+          return (
+            <Link
+              key={id}
+              href="/#pricing"
+              onClick={onNavigate}
+              className="focus-ring group flex flex-col gap-1 bg-background-elevated p-4 transition-colors hover:bg-surface"
+            >
+              <span className="text-sm font-semibold text-foreground">{plan.name}</span>
+              <span className="font-display text-xl font-bold text-foreground">
+                ₹{plan.monthlyPriceInr}
+                <span className="text-xs font-normal text-foreground-subtle">/mo</span>
+              </span>
+              <span className="mt-1 text-xs text-foreground-subtle">{plan.monthlyHumanizations} humanizations/mo</span>
+            </Link>
+          );
+        })}
+      </div>
+      <Link
+        href="/#pricing"
+        onClick={onNavigate}
+        className="focus-ring press-feedback mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-purple hover:text-brand-pink"
+      >
+        Compare all plans
+        <ArrowRightIcon className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   DEVELOPERS — quiet and technical. Only the one real destination
+   (the API developer preview) — no invented SDKs or webhooks.
+   ========================================================================== */
+function DevelopersPanel({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div className="max-w-2xl">
+      <p className="text-app-label text-brand-purple">Developers</p>
+      <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-foreground">Bring HUMANORA into your product</h2>
+      <p className="mt-2 text-sm text-foreground-muted">
+        A REST endpoint for the same rewrite engine behind Humanize — currently in developer preview.
+      </p>
+      <pre className="mt-5 overflow-x-auto rounded-lg border border-border bg-background-elevated p-4 font-mono text-xs text-foreground-muted">
+        <code>{`POST https://api.humanora.dev/v1/humanize
+{ "text": "...", "mode": "professional" }`}</code>
+      </pre>
+      <Link
+        href="/api"
+        onClick={onNavigate}
+        className="focus-ring press-feedback mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-purple hover:text-brand-pink"
+      >
+        View the API overview
+        <ArrowRightIcon className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   RESOURCES — a short reading list, not a product menu.
+   ========================================================================== */
+function ResourcesPanel({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <div className="max-w-3xl">
+      <p className="text-app-label text-brand-purple">Resources</p>
+      <h2 className="font-display mt-1.5 text-2xl font-bold tracking-tight text-foreground">Learn HUMANORA</h2>
+      <div className="mt-6 grid grid-cols-1 gap-8 sm:grid-cols-[1fr_1px_1fr]">
+        <Link href="/blog" onClick={onNavigate} className="focus-ring group block">
+          <p className="text-app-label text-foreground-subtle">Featured</p>
+          <p className="font-display mt-1.5 text-lg font-bold text-foreground transition-colors group-hover:text-brand-purple">
+            The HUMANORA blog
+          </p>
+          <p className="mt-1 text-sm text-foreground-muted">Writing tips, product updates, and how HUMANORA is built.</p>
+        </Link>
+        <span aria-hidden="true" className="hidden bg-border sm:block" />
+        <div className="flex flex-col gap-4">
+          <Link href="/#pricing" onClick={onNavigate} className="focus-ring group flex items-center justify-between text-sm text-foreground-muted transition-colors hover:text-foreground">
+            FAQ
+            <ArrowRightIcon className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
+          </Link>
+          <Link href="/affiliates" onClick={onNavigate} className="focus-ring group flex items-center justify-between text-sm text-foreground-muted transition-colors hover:text-foreground">
+            Affiliates
+            <ArrowRightIcon className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileGroup({
+  label,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactElement | ReactElement[];
+}) {
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        className="focus-ring flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
+      >
+        {label}
+        <ChevronIcon className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
+      </button>
+      {open && <div className="ml-2 flex flex-col gap-1 border-l border-border pl-3">{children}</div>}
+    </div>
+  );
+}
+
+function MobileLink({ href, label, onNavigate, top }: { href: string; label: string; onNavigate: () => void; top?: boolean }) {
+  return (
     <a
-      href={item.href}
+      href={href}
       onClick={onNavigate}
-      className="focus-ring group flex items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-surface"
+      className={cn(
+        "focus-ring block rounded-md text-sm text-foreground-muted hover:bg-surface hover:text-foreground",
+        top ? "px-2 py-2.5" : "px-3 py-2"
+      )}
     >
-      {content}
+      {label}
     </a>
   );
 }
@@ -602,150 +722,10 @@ function ChevronIcon({ className }: { className?: string }) {
   );
 }
 
-/**
- * One <linearGradient> defined once (a hidden, zero-size SVG), reused
- * by every nav icon via `stroke="url(#nav-icon-gradient)"` — the same
- * indigo→purple→pink spectrum as the logo mark and primary buttons,
- * without redefining the gradient five times over.
- */
-function NavIconGradientDefs() {
-  return (
-    <svg width="0" height="0" className="absolute" aria-hidden="true">
-      <defs>
-        <linearGradient id="nav-icon-gradient" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--color-brand-indigo)" />
-          <stop offset="55%" stopColor="var(--color-brand-purple)" />
-          <stop offset="100%" stopColor="var(--color-brand-pink)" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-const NAV_ICON_PROPS = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  "aria-hidden": true as const,
-  stroke: "url(#nav-icon-gradient)",
-  strokeWidth: "1.6",
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-
-// Abstract line marks, not literal clip art — same restraint as the
-// dashboard rail's icon language (AppShell.tsx), just gradient-stroked
-// instead of solid, since these sit on a lighter-touch marketing
-// surface rather than a persistent app rail.
-function NavProductIcon({ className }: { className?: string }) {
-  return (
-    <svg {...NAV_ICON_PROPS} className={className}>
-      <path d="M4 20 15 9M17 3l1.2 2.6L21 7l-2.6 1.2L17 11l-1.2-2.8L13 7l2.8-1.4L17 3Z" />
-    </svg>
-  );
-}
-function NavSolutionsIcon({ className }: { className?: string }) {
-  return (
-    <svg {...NAV_ICON_PROPS} className={className}>
-      <path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z" />
-      <path d="m8 11 3 3 5-6" />
-    </svg>
-  );
-}
-function NavPricingIcon({ className }: { className?: string }) {
-  return (
-    <svg {...NAV_ICON_PROPS} className={className}>
-      <path d="M12 4v16M8 7.5c0-1.4 1.6-2.5 4-2.5s4 1.1 4 2.5-1.6 2.5-4 2.5-4 1.1-4 2.5 1.6 2.5 4 2.5 4-1.1 4-2.5" />
-    </svg>
-  );
-}
-function NavDevelopersIcon({ className }: { className?: string }) {
-  return (
-    <svg {...NAV_ICON_PROPS} className={className}>
-      <path d="m9 8-5 4 5 4M15 8l5 4-5 4" />
-    </svg>
-  );
-}
-function NavResourcesIcon({ className }: { className?: string }) {
-  return (
-    <svg {...NAV_ICON_PROPS} className={className}>
-      <path d="M4 19.5V6a1.5 1.5 0 0 1 1.5-1.5H14l6 6v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z" />
-      <path d="M14 4.5V10h5.5M9 13h6M9 16.5h6" />
-    </svg>
-  );
-}
-
 function ArrowRightIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
       <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function CloseIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="m5 5 10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-// Tile icons — flat currentColor (each tile sets its own text color via
-// TILE_COLOR_CLASSES), same abstract-line restraint as the nav
-// triggers' gradient icons above, just simpler shapes at a smaller
-// visual weight since they sit inside a colored badge rather than
-// directly on the nav bar.
-const TILE_ICON_PROPS = {
-  viewBox: "0 0 24 24",
-  fill: "none",
-  "aria-hidden": true as const,
-  stroke: "currentColor",
-  strokeWidth: "1.7",
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-function TileWriteIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <path d="M4 20 15 9M17 3l1.2 2.6L21 7l-2.6 1.2L17 11l-1.2-2.8L13 7l2.8-1.4L17 3Z" />
-    </svg>
-  );
-}
-function TileModesIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <rect x="4" y="4" width="7" height="16" rx="1.3" />
-      <rect x="13" y="4" width="7" height="9.5" rx="1.3" />
-    </svg>
-  );
-}
-function TileVoiceIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <path d="M12 3a7 7 0 0 1 7 7v2a9 9 0 0 1-2 5.5M6.6 18A9 9 0 0 1 5 12v-2a7 7 0 0 1 1.2-3.9M9 21a11 11 0 0 0 1.5-5.6V11a1.5 1.5 0 1 1 3 0v1.2M12 17.5c1.7 0 3-1.3 3-3V11" />
-    </svg>
-  );
-}
-function TileDocIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <path d="M6.5 3.5h8l4 4v13a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" />
-      <path d="M14 3.5V8h4.5M8.5 12.5h7M8.5 16h7" />
-    </svg>
-  );
-}
-function TileStudentIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <path d="m3 8 9-4 9 4-9 4-9-4Z" />
-      <path d="M7 10.5V16c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-5.5M21 8v6" />
-    </svg>
-  );
-}
-function TilePricingIcon({ className }: { className?: string }) {
-  return (
-    <svg {...TILE_ICON_PROPS} className={className}>
-      <path d="M12 4v16M8 7.5c0-1.4 1.6-2.5 4-2.5s4 1.1 4 2.5-1.6 2.5-4 2.5-4 1.1-4 2.5 1.6 2.5 4 2.5 4-1.1 4-2.5" />
     </svg>
   );
 }
