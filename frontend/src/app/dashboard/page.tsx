@@ -5,7 +5,6 @@ import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
-import { SignOutButton } from "@/components/dashboard/SignOutButton";
 import { getUsageSummary } from "@/lib/db/usage";
 import { getHistoryForUser } from "@/lib/db/history";
 import { getVoiceOverview } from "@/lib/db/voice";
@@ -54,12 +53,12 @@ export default async function DashboardPage() {
           <p className="text-sm text-foreground-muted">Welcome back,</p>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <ButtonLink href="/dashboard/humanize" variant="primary" size="md">
-            Humanize text
-          </ButtonLink>
-          <SignOutButton />
-        </div>
+        {/* Log out already lives in the account menu (top-right, every
+            page) — repeating it here was a second exit action competing
+            with the one thing this header should point people toward. */}
+        <ButtonLink href="/dashboard/humanize" variant="primary" size="md">
+          Humanize text
+        </ButtonLink>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
@@ -170,7 +169,7 @@ export default async function DashboardPage() {
                     </div>
                     <p className="mt-2 text-xs text-foreground-subtle">
                       {usage.value.humanizeCount} / {usage.value.humanizeLimit} humanizations ·{" "}
-                      {usage.value.wordsProcessed} words
+                      {usage.value.wordsProcessed.toLocaleString()} / {usage.value.wordsLimit.toLocaleString()} words
                     </p>
                     {billing.value.currentPeriodEnd && (
                       <p className="mt-1 text-xs text-foreground-subtle">

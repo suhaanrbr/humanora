@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { getSubscriptionSummary } from "@/lib/db/entitlement";
 import { getPaymentHistoryForUser } from "@/lib/db/payments";
+import { getUsageSummary } from "@/lib/db/usage";
 import { PLANS } from "@/lib/config/plans";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 
@@ -22,6 +23,7 @@ export default async function BillingPage() {
 
   const currentPlan = PLANS[billing.effectivePlan];
   const isFreeOrExpired = billing.effectivePlan === "free";
+  const usage = isFreeOrExpired ? null : await getUsageSummary(userId, billing.effectivePlan);
 
   return (
     <Container className="mx-auto max-w-3xl">
@@ -51,6 +53,35 @@ export default async function BillingPage() {
             Access valid through {billing.currentPeriodEnd.toLocaleDateString()}. HUMANORA doesn&apos;t auto-renew —
             choose a plan again when this period ends to continue.
           </p>
+        )}
+
+        {usage && (
+          <div className="mt-4 border-t border-border pt-4">
+            <div className="flex items-center justify-between text-xs text-foreground-subtle">
+              <span>Humanizations</span>
+              <span>
+                {usage.humanizeCount} / {usage.humanizeLimit}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full border border-border">
+              <div
+                className="bg-brand-gradient h-full rounded-full"
+                style={{ width: `${Math.min(100, (usage.humanizeCount / usage.humanizeLimit) * 100)}%` }}
+              />
+            </div>
+            <div className="mt-3 flex items-center justify-between text-xs text-foreground-subtle">
+              <span>Words this period</span>
+              <span>
+                {usage.wordsProcessed.toLocaleString()} / {usage.wordsLimit.toLocaleString()}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full border border-border">
+              <div
+                className="bg-brand-gradient h-full rounded-full"
+                style={{ width: `${Math.min(100, (usage.wordsProcessed / usage.wordsLimit) * 100)}%` }}
+              />
+            </div>
+          </div>
         )}
 
         {isFreeOrExpired && (

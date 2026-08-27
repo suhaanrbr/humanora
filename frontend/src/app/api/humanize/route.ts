@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { humanize, HumanizeError, type RewriteStrength, type WritingMode } from "@/lib/ai/humanize";
 import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { checkEntitlement, reserveFreeTrial, releaseFreeTrial } from "@/lib/db/entitlement";
-import { checkAndReserveQuota, releaseQuotaUnit, recordWordsProcessed } from "@/lib/db/usage";
+import { checkAndReserveQuota, releaseQuotaUnit } from "@/lib/db/usage";
 import { saveHumanization } from "@/lib/db/history";
 import { getEffectiveVoiceProfile } from "@/lib/db/voice";
 import { buildStyleDirectives } from "@/lib/ai/voiceAnalysis";
@@ -98,11 +98,11 @@ export async function POST(req: NextRequest) {
   }
 
   const plan = decision.plan;
+  const words = wordCount(trimmed);
 
   // --- Reserve entitlement BEFORE calling Gemini (concurrency-safe) ---
-  let reserved = false;
   if (plan === "free") {
-    reserved = await reserveFreeTrial(userId);
+    const reserved = await reserveFreeTrial(userId);
     if (!reserved) {
       // Lost a race with a concurrent request — the trial is now used.
       return NextResponse.json(
@@ -115,14 +115,14 @@ export async function POST(req: NextRequest) {
       );
     }
   } else {
-    const quota = await checkAndReserveQuota(userId, plan);
+    const quota = await checkAndReserveQuota(userId, plan, words);
     if (!quota.allowed) {
-      return NextResponse.json(
-        { error: `You've reached your ${plan} plan's monthly humanization limit (${quota.limit}). It resets next month.` },
-        { status: 429 }
-      );
+      const message =
+        quota.reason === "word_allowance_exceeded"
+          ? `You've reached your ${plan} plan's monthly word allowance (${PLANS[plan].monthlyWordAllowance.toLocaleString()} words). It resets next month.`
+          : `You've reached your ${plan} plan's monthly humanization limit (${quota.limit}). It resets next month.`;
+      return NextResponse.json({ error: message }, { status: 429 });
     }
-    reserved = true;
   }
 
   // My Voice: only ever loaded for the authenticated user's own id
@@ -154,10 +154,9 @@ export async function POST(req: NextRequest) {
       styleDirectives,
       customInstructions: safeCustomInstructions,
       variations: PLANS[plan].outputVariations,
+      outputTokenLimit: PLANS[plan].outputTokenLimit,
     });
-    const words = wordCount(trimmed);
 
-    await recordWordsProcessed(userId, plan, words);
     await saveHumanization({
       userId,
       mode: safeMode,
@@ -180,7 +179,7 @@ export async function POST(req: NextRequest) {
     if (plan === "free") {
       await releaseFreeTrial(userId);
     } else {
-      await releaseQuotaUnit(userId, plan);
+      await releaseQuotaUnit(userId, plan, words);
     }
     return handleHumanizeError(err);
   }

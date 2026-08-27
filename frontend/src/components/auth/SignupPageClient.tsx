@@ -46,7 +46,7 @@ export function SignupPageClient({ googleEnabled }: { googleEnabled: boolean }) 
           <Logo size="md" />
         </Link>
 
-        <div className="relative z-10 flex max-w-md flex-col gap-8">
+        <div className="relative z-10 flex max-w-md flex-col gap-6">
           <div>
             <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
               Free to start. No card required.
@@ -57,25 +57,36 @@ export function SignupPageClient({ googleEnabled }: { googleEnabled: boolean }) 
             </p>
           </div>
           <TransformationPreview className="w-64" />
+          <HumanoraRibbon className="h-8 w-40 opacity-60" animated />
         </div>
 
-        <HumanoraRibbon
-          className="pointer-events-none absolute inset-x-0 bottom-16 h-24 w-full opacity-[0.12]"
-          animated
-        />
         <p className="relative z-10 text-xs text-foreground-subtle">
           &copy; {new Date().getFullYear()} HUMANORA
         </p>
       </div>
 
       <div className="bg-ambient-glow-soft relative flex flex-1 flex-col items-center justify-center px-6 py-16">
-        <Link href="/" className="focus-ring absolute left-6 top-6 w-fit rounded-md lg:hidden">
-          <Logo size="sm" />
-        </Link>
+        <div className="mb-8 flex flex-col items-center gap-3 text-center lg:hidden">
+          <Link href="/" className="focus-ring w-fit rounded-md">
+            <Logo size="sm" />
+          </Link>
+          <p className="max-w-xs text-sm text-foreground-muted">
+            Free to start — no card required, ready in under a minute.
+          </p>
+        </div>
 
         <div className="pearl-glass w-full max-w-sm rounded-2xl p-8 sm:p-10">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
           <p className="mt-2 text-sm text-foreground-muted">Free — no credit card required.</p>
+
+          {/* Signup carries more hesitation than login ("I'm deciding
+              whether to start" vs. "get me in") — a little concrete
+              reassurance up front, without turning this into a second
+              landing page. */}
+          <p className="mt-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
+            <CheckIcon className="h-3.5 w-3.5 shrink-0 text-success" />
+            One complimentary humanization included, no card required
+          </p>
 
           {googleEnabled && (
             <div className="mt-6 flex flex-col gap-4">
@@ -165,6 +176,14 @@ function LockIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.6" />
       <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <path d="m4 10 4 4 8-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

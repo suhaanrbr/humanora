@@ -44,7 +44,7 @@ async function getOrCreateCurrentPeriod(userId: string, plan: PlanId) {
 
 export interface QuotaCheckResult {
   allowed: boolean;
-  reason?: "quota_exceeded";
+  reason?: "quota_exceeded" | "word_allowance_exceeded";
   remaining: number;
   limit: number;
   plan: PlanId;
@@ -52,56 +52,77 @@ export interface QuotaCheckResult {
 
 /**
  * Server-side-only, concurrency-safe quota reservation for PAID plans.
- * Same pattern as the free-trial reservation in entitlement.ts: a
- * single conditional UPDATE (`WHERE humanize_count < limit`) — Postgres'
+ * Reserves BOTH the humanization count AND the input word count this
+ * request is about to consume in a single conditional UPDATE — Postgres'
  * row lock during the UPDATE means concurrent callers serialize and
- * each re-checks the committed count, so usage can never overshoot the
- * plan limit under concurrent requests.
+ * each re-checks the committed counters, so neither can ever overshoot
+ * its plan limit under concurrent requests, same guarantee as the
+ * free-trial reservation in entitlement.ts.
+ *
+ * `words` must be the INPUT word count (the caller already knows this
+ * before calling Gemini) — see docs/AI_COST_MODEL.md for why bounding
+ * total monthly words (not just request count) is necessary: nothing
+ * else stops a plan's full monthly humanization count from each being
+ * submitted at that plan's maximum length.
  */
-export async function checkAndReserveQuota(userId: string, plan: PlanId): Promise<QuotaCheckResult> {
+export async function checkAndReserveQuota(userId: string, plan: PlanId, words: number): Promise<QuotaCheckResult> {
   const db = getDb();
-  const limit = PLANS[plan].monthlyHumanizations;
+  const humanizeLimit = PLANS[plan].monthlyHumanizations;
+  const wordLimit = PLANS[plan].monthlyWordAllowance;
   const period = await getOrCreateCurrentPeriod(userId, plan);
 
   const [updated] = await db
     .update(usagePeriod)
-    .set({ humanizeCount: sql`${usagePeriod.humanizeCount} + 1`, updatedAt: new Date() })
-    .where(and(eq(usagePeriod.id, period.id), lt(usagePeriod.humanizeCount, limit)))
-    .returning({ humanizeCount: usagePeriod.humanizeCount });
+    .set({
+      humanizeCount: sql`${usagePeriod.humanizeCount} + 1`,
+      wordsProcessed: sql`${usagePeriod.wordsProcessed} + ${words}`,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(usagePeriod.id, period.id),
+        lt(usagePeriod.humanizeCount, humanizeLimit),
+        lt(sql`${usagePeriod.wordsProcessed} + ${words}`, wordLimit + 1)
+      )
+    )
+    .returning({ humanizeCount: usagePeriod.humanizeCount, wordsProcessed: usagePeriod.wordsProcessed });
 
   if (!updated) {
-    return { allowed: false, reason: "quota_exceeded", remaining: 0, limit, plan };
+    // Distinguish which limit actually blocked the request — a second,
+    // cheap read is fine here since it only runs on the rejection path.
+    const [current] = await db.select().from(usagePeriod).where(eq(usagePeriod.id, period.id));
+    const reason: QuotaCheckResult["reason"] =
+      current.humanizeCount >= humanizeLimit ? "quota_exceeded" : "word_allowance_exceeded";
+    return { allowed: false, reason, remaining: 0, limit: humanizeLimit, plan };
   }
-  return { allowed: true, remaining: limit - updated.humanizeCount, limit, plan };
+  return { allowed: true, remaining: humanizeLimit - updated.humanizeCount, limit: humanizeLimit, plan };
 }
 
-/** Compensating action if a reserved quota unit's Gemini call fails. */
-export async function releaseQuotaUnit(userId: string, plan: PlanId): Promise<void> {
+/** Compensating action if a reserved quota unit's Gemini call fails —
+ * releases both the humanization count and the word count reserved for
+ * that attempt, so a failed call never permanently costs the user
+ * quota they didn't get a result for. */
+export async function releaseQuotaUnit(userId: string, plan: PlanId, words: number): Promise<void> {
   const db = getDb();
   const period = await getOrCreateCurrentPeriod(userId, plan);
   await db
     .update(usagePeriod)
-    .set({ humanizeCount: sql`GREATEST(${usagePeriod.humanizeCount} - 1, 0)`, updatedAt: new Date() })
-    .where(eq(usagePeriod.id, period.id));
-}
-
-export async function recordWordsProcessed(userId: string, plan: PlanId, words: number) {
-  const db = getDb();
-  const period = await getOrCreateCurrentPeriod(userId, plan);
-  await db
-    .update(usagePeriod)
-    .set({ wordsProcessed: sql`${usagePeriod.wordsProcessed} + ${words}`, updatedAt: new Date() })
+    .set({
+      humanizeCount: sql`GREATEST(${usagePeriod.humanizeCount} - 1, 0)`,
+      wordsProcessed: sql`GREATEST(${usagePeriod.wordsProcessed} - ${words}, 0)`,
+      updatedAt: new Date(),
+    })
     .where(eq(usagePeriod.id, period.id));
 }
 
 export async function getUsageSummary(userId: string, plan: PlanId) {
   const period = await getOrCreateCurrentPeriod(userId, plan);
-  const limit = PLANS[plan].monthlyHumanizations;
   return {
     plan,
     humanizeCount: period.humanizeCount,
-    humanizeLimit: limit,
+    humanizeLimit: PLANS[plan].monthlyHumanizations,
     wordsProcessed: period.wordsProcessed,
+    wordsLimit: PLANS[plan].monthlyWordAllowance,
     periodEnd: period.periodEnd,
   };
 }

@@ -88,7 +88,7 @@ export const pricingPlans: PricingPlan[] = [
     monthlyPrice: PLANS.ultra.monthlyPriceInr,
     audience: "For power users and high-volume workflows.",
     features: [
-      { label: "Unlimited humanizations*" },
+      { label: `${PLANS.ultra.monthlyHumanizations} humanizations per month` },
       { label: `Up to ${Math.round(PLANS.ultra.maxInputChars / 6).toLocaleString()} words per request` },
       { label: `${PLANS.ultra.outputVariations} output variations` },
       { label: "Everything in Pro" },
@@ -99,9 +99,10 @@ export const pricingPlans: PricingPlan[] = [
   },
 ];
 
-/** Footnote for the Ultra plan's "Unlimited humanizations*" claim. */
-export const ultraFairUseNote =
-  "*Subject to fair-use limits — Ultra is built for heavy everyday use, not automated bulk processing.";
+/** Every paid plan states a real, specific monthly humanization number —
+ * see docs/AI_COST_MODEL.md for why "Unlimited*" (even with a fair-use
+ * asterisk) isn't used here. This note now explains the real cap. */
+export const ultraFairUseNote = `Ultra includes ${PLANS.ultra.monthlyHumanizations} humanizations per month, built for heavy everyday use rather than automated bulk processing.`;
 
 export interface ComparisonRow {
   label: string;
@@ -134,9 +135,42 @@ export const comparisonCategories: ComparisonCategory[] = [
   {
     title: "Usage",
     rows: [
-      { label: "Humanizations", values: ["1 (lifetime)", "100/mo", "300/mo", "Unlimited*"] },
-      { label: "Words per request", values: ["~35", "1,500", "3,000", "5,000"] },
-      { label: "Output variations", values: ["1", "2", "3", "5"] },
+      {
+        label: "Humanizations",
+        values: [
+          "1 (lifetime)",
+          `${PLANS.essential.monthlyHumanizations}/mo`,
+          `${PLANS.pro.monthlyHumanizations}/mo`,
+          `${PLANS.ultra.monthlyHumanizations}/mo`,
+        ],
+      },
+      {
+        label: "Words per request",
+        values: [
+          `~${Math.round(PLANS.free.maxInputChars / 6)}`,
+          Math.round(PLANS.essential.maxInputChars / 6).toLocaleString(),
+          Math.round(PLANS.pro.maxInputChars / 6).toLocaleString(),
+          Math.round(PLANS.ultra.maxInputChars / 6).toLocaleString(),
+        ],
+      },
+      {
+        label: "Monthly word allowance",
+        values: [
+          "—",
+          PLANS.essential.monthlyWordAllowance.toLocaleString(),
+          PLANS.pro.monthlyWordAllowance.toLocaleString(),
+          PLANS.ultra.monthlyWordAllowance.toLocaleString(),
+        ],
+      },
+      {
+        label: "Output variations",
+        values: [
+          String(PLANS.free.outputVariations),
+          String(PLANS.essential.outputVariations),
+          String(PLANS.pro.outputVariations),
+          String(PLANS.ultra.outputVariations),
+        ],
+      },
       { label: "History", values: ["Limited", "Full", "Full", "Full"] },
     ],
   },

@@ -53,7 +53,11 @@ export function AppHeader() {
         </nav>
 
         <div className="shrink-0">
-          <AccountMenu />
+          {/* showAppLinks=false: the nav above already covers every app
+              destination — repeating them inside the account dropdown
+              here (unlike on the marketing site, which has no other
+              path into the app) would just be the same links twice. */}
+          <AccountMenu showAppLinks={false} />
         </div>
       </div>
 

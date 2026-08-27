@@ -135,7 +135,7 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
           <Logo size="md" />
         </Link>
 
-        <div className="relative z-10 flex max-w-md flex-col gap-8">
+        <div className="relative z-10 flex max-w-md flex-col gap-6">
           <div>
             <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
               Writing that sounds like you.
@@ -146,12 +146,14 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
             </p>
           </div>
           <TransformationPreview className="w-64" />
+          {/* The signature motif closes the composed moment — structured
+              text resolving into human rhythm, right where the preview
+              card just showed exactly that happen. A small deliberate
+              flourish here, not the barely-visible background wash a
+              generic auth template would use. */}
+          <HumanoraRibbon className="h-8 w-40 opacity-60" animated />
         </div>
 
-        <HumanoraRibbon
-          className="pointer-events-none absolute inset-x-0 bottom-16 h-24 w-full opacity-[0.12]"
-          animated
-        />
         <p className="relative z-10 text-xs text-foreground-subtle">
           &copy; {new Date().getFullYear()} HUMANORA
         </p>
@@ -159,9 +161,17 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
 
       {/* Right: the actual form, on its own quiet surface. */}
       <div className="bg-ambient-glow-soft relative flex flex-1 flex-col items-center justify-center px-6 py-16">
-        <Link href="/" className="focus-ring absolute left-6 top-6 w-fit rounded-md lg:hidden">
-          <Logo size="sm" />
-        </Link>
+        <div className="mb-8 flex flex-col items-center gap-3 text-center lg:hidden">
+          <Link href="/" className="focus-ring w-fit rounded-md">
+            <Logo size="sm" />
+          </Link>
+          {/* Mobile has no split-screen brand panel — this one line is
+              the entire brand story on a 390px screen, so the form can
+              dominate immediately below it. */}
+          <p className="max-w-xs text-sm text-foreground-muted">
+            Writing that sounds like you — without losing your meaning.
+          </p>
+        </div>
         <Suspense fallback={null}>
           <LoginForm googleEnabled={googleEnabled} />
         </Suspense>
