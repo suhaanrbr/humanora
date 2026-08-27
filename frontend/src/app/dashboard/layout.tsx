@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { AppHeader } from "@/components/dashboard/AppHeader";
+import { AppShell } from "@/components/dashboard/AppShell";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
@@ -26,9 +26,9 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
  * one-off DB error unrelated to their session's validity. See
  * lib/auth-session.ts for the full reasoning.
  *
- * Uses AppHeader (the app's own nav), not the marketing Header — a
- * separate concern from auth, but this is the one place both are
- * assembled together for every /dashboard/* page.
+ * Uses AppShell (Stage 2's persistent rail/bottom-nav environment), not
+ * the marketing Header — a separate concern from auth, but this is the
+ * one place both are assembled together for every /dashboard/* page.
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const result = await getVerifiedSession();
@@ -39,30 +39,22 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   if (result.status === "error") {
     return (
-      <>
-        <AppHeader />
-        <main className="flex-1 py-16">
-          <Container className="mx-auto max-w-md text-center">
-            <Card className="p-8">
-              <p className="text-sm font-medium text-foreground">HUMANORA is temporarily unavailable</p>
-              <p className="mt-2 text-sm text-foreground-muted">
-                We couldn&apos;t confirm your session just now — this is usually momentary. Your login is
-                not affected.
-              </p>
-              <ButtonLink href="/dashboard" variant="primary" size="sm" className="mt-5">
-                Try again
-              </ButtonLink>
-            </Card>
-          </Container>
-        </main>
-      </>
+      <AppShell>
+        <Container className="mx-auto max-w-md text-center">
+          <Card className="p-8">
+            <p className="text-sm font-medium text-foreground">HUMANORA is temporarily unavailable</p>
+            <p className="mt-2 text-sm text-foreground-muted">
+              We couldn&apos;t confirm your session just now — this is usually momentary. Your login is
+              not affected.
+            </p>
+            <ButtonLink href="/dashboard" variant="primary" size="sm" className="mt-5">
+              Try again
+            </ButtonLink>
+          </Card>
+        </Container>
+      </AppShell>
     );
   }
 
-  return (
-    <>
-      <AppHeader />
-      <main className="flex-1 py-10 sm:py-14">{children}</main>
-    </>
-  );
+  return <AppShell>{children}</AppShell>;
 }

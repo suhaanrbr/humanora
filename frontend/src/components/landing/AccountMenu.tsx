@@ -94,8 +94,9 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
             </div>
           )}
           {/* Billing and Settings live under Account everywhere, not as
-              main product destinations — inside the dashboard, AppHeader's
-              own top nav already covers Home/Write/Study/My Voice/Library,
+              main product destinations — inside the dashboard, AppShell's
+              own nav rail/bottom bar already covers Home/Write/Study/My
+              Voice/Library,
               so repeating those here would just be the same destinations
               twice (showAppLinks=false skips them there). */}
           <div className={cn("flex flex-col gap-0.5", showAppLinks ? "border-t border-border pt-1.5" : "py-1.5")}>

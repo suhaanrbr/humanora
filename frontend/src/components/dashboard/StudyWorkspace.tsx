@@ -111,8 +111,8 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
   }
 
   return (
-    <Container className="mx-auto max-w-5xl pb-28 lg:pb-10">
-      <div className="sticky top-[6.5rem] z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 lg:top-4 lg:mx-0 lg:px-0">
+    <Container className="mx-auto max-w-5xl pb-36 md:pb-24 lg:pb-10">
+      <div className="sticky top-14 z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 md:top-4 lg:mx-0 lg:px-0">
         <div className="pearl-glass flex flex-wrap items-center gap-2 rounded-full px-2.5 py-2 shadow-glow-sm">
           <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1 text-xs">
             {MODES.map((m) => (
@@ -244,7 +244,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-lg lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-lg md:bottom-0 lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <p className="hidden text-xs text-foreground-subtle sm:block">
             Draws from your {plan} plan&apos;s shared monthly word allowance — the same one Humanize uses.
