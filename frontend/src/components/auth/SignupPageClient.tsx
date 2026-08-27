@@ -145,8 +145,22 @@ export function SignupPageClient({ googleEnabled }: { googleEnabled: boolean }) 
               Log in
             </Link>
           </p>
+
+          <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-foreground-subtle">
+            <LockIcon className="h-3 w-3" />
+            Secure sign-up — your writing is never shared or sold.
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
   );
 }
