@@ -12,7 +12,14 @@ import { getVoiceOverview } from "@/lib/db/voice";
 import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { RecentWorkCard } from "@/components/dashboard/RecentWorkCard";
+import { TransformationPreview } from "@/components/brand/TransformationPreview";
 import { PLANS } from "@/lib/config/plans";
+
+const GETTING_STARTED_STEPS = [
+  { title: "Paste a draft", description: "AI-assisted or your own — anything that reads a little stiff." },
+  { title: "Pick a mode", description: "Natural, Academic, Professional, and three more." },
+  { title: "Get your result", description: "Compare original and rewrite, with a meaning check." },
+] as const;
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
@@ -74,15 +81,30 @@ export default async function DashboardPage() {
 
           {history.status === "fulfilled" ? (
             history.value.length === 0 ? (
-              <Card className="flex flex-col items-center gap-3 p-10 text-center">
-                <p className="text-sm text-foreground-muted">Nothing humanized yet.</p>
-                <p className="max-w-xs text-xs text-foreground-subtle">
-                  Paste a draft into the Humanizer and your work will show up here, ready to reopen,
-                  copy, or reuse.
-                </p>
-                <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm" className="mt-1">
-                  Humanize your first draft
-                </ButtonLink>
+              <Card className="grid grid-cols-1 items-center gap-8 p-7 sm:grid-cols-[1fr_auto] sm:p-9">
+                <div>
+                  <p className="text-base font-semibold text-foreground">Let&apos;s write something.</p>
+                  <p className="mt-1 max-w-sm text-sm text-foreground-muted">
+                    Your humanized work will show up here, ready to reopen, copy, or reuse.
+                  </p>
+                  <div className="mt-6 flex flex-col gap-4">
+                    {GETTING_STARTED_STEPS.map((step, i) => (
+                      <div key={step.title} className="flex gap-3">
+                        <span className="bg-brand-gradient flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white">
+                          {i + 1}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{step.title}</p>
+                          <p className="text-xs text-foreground-subtle">{step.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="mt-6">
+                    Humanize your first draft
+                  </ButtonLink>
+                </div>
+                <TransformationPreview className="hidden w-56 shrink-0 sm:block" />
               </Card>
             ) : (
               <div className="flex flex-col gap-3">

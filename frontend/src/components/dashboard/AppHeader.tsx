@@ -62,7 +62,7 @@ export function AppHeader() {
           so a scrollable row of pills is simpler and more discoverable
           at a glance than hiding them behind a menu button. */}
       <nav
-        className="flex items-center gap-1.5 overflow-x-auto border-t border-border px-4 py-2 sm:px-6 lg:hidden"
+        className="scrollbar-hide flex items-center gap-1.5 overflow-x-auto border-t border-border px-4 py-2 sm:px-6 lg:hidden"
         aria-label="App navigation"
       >
         {NAV_ITEMS.map((item) => (

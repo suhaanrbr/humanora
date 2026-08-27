@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
+import { TransformationPreview } from "@/components/brand/TransformationPreview";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
@@ -134,14 +135,17 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
           <Logo size="md" />
         </Link>
 
-        <div className="relative z-10 max-w-md">
-          <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
-            Writing that sounds like you.
-          </p>
-          <p className="mt-4 text-base text-foreground-muted">
-            HUMANORA turns stiff, AI-assisted drafts into natural writing —
-            without losing your meaning, facts, or voice.
-          </p>
+        <div className="relative z-10 flex max-w-md flex-col gap-8">
+          <div>
+            <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
+              Writing that sounds like you.
+            </p>
+            <p className="mt-4 text-base text-foreground-muted">
+              HUMANORA turns stiff, AI-assisted drafts into natural writing —
+              without losing your meaning, facts, or voice.
+            </p>
+          </div>
+          <TransformationPreview className="w-64" />
         </div>
 
         <HumanoraRibbon
