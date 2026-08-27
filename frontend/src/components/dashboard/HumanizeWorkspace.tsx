@@ -208,12 +208,12 @@ export function HumanizeWorkspace({
   const currentMode = writingModes.find((m) => m.name.toLowerCase() === mode);
 
   return (
-    <Container className="mx-auto max-w-5xl pb-28 lg:pb-10">
+    <Container className="mx-auto max-w-5xl pb-36 md:pb-24 lg:pb-10">
       {/* Floating toolbar — every control the current plan actually
           supports, in one continuous strip instead of scattered cards.
           Sticky so it stays reachable while a long draft scrolls, but
           it's the editor beneath it that owns the page. */}
-      <div className="sticky top-[6.5rem] z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 lg:top-4 lg:mx-0 lg:px-0">
+      <div className="sticky top-14 z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 md:top-4 lg:mx-0 lg:px-0">
         <div className="pearl-glass flex flex-wrap items-center gap-2 rounded-full px-2.5 py-2 shadow-glow-sm">
           <label className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-foreground-muted">
             <span className="text-foreground-subtle">Mode</span>
@@ -551,7 +551,7 @@ export function HumanizeWorkspace({
       {/* Primary action — sticky at the bottom on mobile (always
           reachable without scrolling back up through a long draft),
           inline on desktop. */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-lg lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-lg md:bottom-0 lg:static lg:mt-8 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           <p className="hidden text-xs text-foreground-subtle sm:block">
             {currentMode
