@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { HumanoraRibbon } from "@/components/brand/HumanoraRibbon";
 import { TransformationPreview } from "@/components/brand/TransformationPreview";
+import { LoginCosmicScene } from "@/components/auth/LoginCosmicScene";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
@@ -51,7 +52,7 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   }
 
   return (
-    <div className="pearl-glass w-full max-w-sm rounded-2xl p-8 sm:p-10">
+    <div className="login-glass-panel relative w-full max-w-sm overflow-hidden rounded-2xl p-8 sm:p-10">
       <h1 className="text-2xl font-bold tracking-tight text-foreground">Log in</h1>
       <p className="mt-2 text-sm text-foreground-muted">Welcome back to HUMANORA.</p>
 
@@ -130,17 +131,24 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
           full-screen auth moment, deliberately without the marketing
           header/footer chrome, matching how premium products (not
           copied from any one of them) treat sign-in as its own space. */}
-      <div className="bg-ambient-glow bg-grid-texture relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
+      <div className="relative hidden overflow-hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-14 xl:p-16">
+        <LoginCosmicScene className="absolute inset-0" />
         <Link href="/" className="focus-ring relative z-10 w-fit rounded-md">
           <Logo size="md" />
         </Link>
 
         <div className="relative z-10 flex max-w-md flex-col gap-6">
+          <span className="login-badge inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted">
+            <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
+            AI-powered writing
+          </span>
           <div>
-            <p className="text-brand-gradient text-brand-gradient-glow text-3xl font-bold tracking-tight">
-              Writing that sounds like you.
+            <p className="text-3xl font-bold tracking-tight text-foreground xl:text-4xl">
+              Writing that
+              <br />
+              <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
             </p>
-            <p className="mt-4 text-base text-foreground-muted">
+            <p className="mt-4 max-w-sm text-base leading-relaxed text-foreground-muted">
               HUMANORA turns stiff, AI-assisted drafts into natural writing —
               without losing your meaning, facts, or voice.
             </p>
@@ -177,6 +185,19 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
         </Suspense>
       </div>
     </div>
+  );
+}
+
+function SparkleIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 

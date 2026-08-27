@@ -928,6 +928,50 @@ h4,
   );
 }
 
+/* The login card's glass material — scoped to the login page only, not
+   a change to the shared .pearl-glass primitive (whose dark-theme
+   treatment is a flat opaque surface, not actual glass; light-theme's
+   blur treatment doesn't apply here since HUMANORA runs dark-only).
+   Genuine translucency + blur so the cosmic scene behind it reads
+   through faintly, plus two soft directional highlights (violet
+   upper-left, blue lower-right) standing in for "environmental light
+   reflecting on glass" rather than a gradient wash across the whole
+   card. */
+.login-glass-panel {
+  background-color: rgba(10, 14, 32, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  box-shadow:
+    0 24px 60px -20px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+.login-glass-panel::before,
+.login-glass-panel::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.login-glass-panel::before {
+  inset: 0;
+  background: radial-gradient(60% 50% at 8% 0%, rgba(139, 92, 246, 0.14) 0%, transparent 60%);
+}
+.login-glass-panel::after {
+  inset: 0;
+  background: radial-gradient(55% 55% at 100% 100%, rgba(59, 130, 246, 0.12) 0%, transparent 60%);
+}
+
+/* Small premium badge on the login page ("AI-powered writing") — dark
+   transparent glass, thin brand-tinted border, no fill. */
+.login-badge {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 /* Consistent, accessible focus ring across custom primitives */
 .focus-ring {
   outline: none;
@@ -968,6 +1012,22 @@ h4,
   50% {
     opacity: 0.9;
     transform: scale(1.08);
+  }
+}
+
+/* The login page's light path (LoginCosmicScene) — an extremely slow
+   dash-offset creep, using the SVG's own normalized pathLength so the
+   dash pattern scales correctly regardless of the path's actual pixel
+   length. Reads as a faint, barely-there flow of energy, not a
+   marching-ants effect. */
+@keyframes path-flow {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .animate-path-flow {
+    animation: path-flow 14s linear infinite;
   }
 }
 
