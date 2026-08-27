@@ -2,31 +2,31 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
+import { ButtonLink } from "@/components/ui/ButtonLink";
+import { TRAIT_META, VOICE_TRAITS } from "@/lib/ai/voiceAnalysis";
 
-const traits = [
-  { label: "Vocabulary", strength: "Strong" },
-  { label: "Sentence Structure", strength: "Strong" },
-  { label: "Tone & Style", strength: "Developing" },
-  { label: "Writing Patterns", strength: "Strong" },
-];
+// Illustrative sample data for this example card only — matches the
+// REAL traits HUMANORA's My Voice actually analyzes (see
+// lib/ai/voiceAnalysis.ts) so this preview never promises something
+// the shipped feature doesn't do. No real account's data is shown here.
+const exampleTraitValues: Record<(typeof VOICE_TRAITS)[number], string> = {
+  vocabularyLevel: "moderate",
+  sentenceLength: "varied",
+  formality: "neutral",
+  directness: "balanced",
+  punctuationStyle: "standard",
+  transitionStyle: "moderate",
+  conversationalTone: "conversational",
+  rhythmVariation: "varied",
+};
 
 const samples = [
-  { name: "Essay_Example.docx", words: "1,245 words" },
-  { name: "Personal_Statement.pdf", words: "982 words" },
-  { name: "Blog_Post_Sample.txt", words: "1,035 words" },
-];
-
-const voiceProfiles = ["Personal", "Academic", "Professional"];
-
-const styleSliders = [
-  { left: "Direct", right: "Expressive" },
-  { left: "Casual", right: "Formal" },
-  { left: "Simple", right: "Sophisticated" },
-  { left: "Reserved", right: "Energetic" },
+  { name: "Personal essay", words: "1,245 words" },
+  { name: "Cover letter draft", words: "982 words" },
+  { name: "Blog post", words: "1,035 words" },
 ];
 
 const COMPLETENESS = 78;
@@ -34,10 +34,11 @@ const RADIUS = 27;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /**
- * "My Voice" product preview. Illustrative mock UI, clearly labeled as a
- * demonstration. The completeness percentage is explicitly scoped to
- * profile completeness, never identity or authorship certainty. The ring
- * animates from 0 to its final value the first time it scrolls into view.
+ * "My Voice" product preview. An illustrative EXAMPLE (clearly badged
+ * as such), never live account data — the completeness percentage and
+ * sample names are staged for demonstration. Every trait shown here is
+ * a real trait HUMANORA's My Voice actually analyzes end to end (see
+ * /dashboard/voice), not an invented capability.
  */
 function prefersReducedMotion() {
   return (
@@ -82,20 +83,10 @@ export function MyVoicePreview() {
             Even when AI helped draft it.
           </h2>
           <p className="mt-4 text-base text-foreground-muted">
-            Upload a few writing samples and HUMANORA builds a reusable voice
-            profile — vocabulary, sentence structure, tone, and patterns.
+            Paste a few writing samples and HUMANORA builds a real, structured
+            voice profile — vocabulary, sentence rhythm, tone, and more — then
+            applies it when you humanize future drafts.
           </p>
-
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {voiceProfiles.map((profile) => (
-              <span
-                key={profile}
-                className="rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-foreground-muted"
-              >
-                {profile}
-              </span>
-            ))}
-          </div>
         </Reveal>
 
         <Reveal
@@ -103,10 +94,13 @@ export function MyVoicePreview() {
           delay={100}
           className="mx-auto mt-12 max-w-4xl"
         >
-          <Card className="pearl-glass overflow-hidden shadow-glow-sm">
+          <Card className="pearl-glass relative overflow-hidden shadow-glow-sm">
+            <Badge variant="neutral" className="absolute right-4 top-4 z-10">
+              Example
+            </Badge>
             <div className="grid grid-cols-1 divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
               <div className="p-6 sm:p-8">
-                <p className="mb-4 text-sm font-medium text-foreground">Your Writing Samples</p>
+                <p className="mb-4 text-sm font-medium text-foreground">Writing samples</p>
                 <div className="flex flex-col gap-2.5">
                   {samples.map((sample) => (
                     <div
@@ -118,13 +112,13 @@ export function MyVoicePreview() {
                     </div>
                   ))}
                 </div>
-                <Button variant="secondary" size="sm" className="mt-4 w-full">
-                  + Add More Samples
-                </Button>
+                <ButtonLink href="/signup" variant="secondary" size="sm" className="mt-4 w-full">
+                  Build your real voice profile
+                </ButtonLink>
               </div>
 
               <div className="p-6 sm:p-8">
-                <p className="mb-4 text-sm font-medium text-foreground">Your Voice Profile</p>
+                <p className="mb-4 text-sm font-medium text-foreground">Voice profile</p>
 
                 <div ref={ringRef} className="mb-5 flex items-center gap-4">
                   <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
@@ -156,15 +150,14 @@ export function MyVoicePreview() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
-                  {traits.map((trait, i) => (
-                    <Reveal key={trait.label} as="div" delay={200 + i * 90}>
+                <div className="flex flex-col gap-2">
+                  {VOICE_TRAITS.map((trait, i) => (
+                    <Reveal key={trait} as="div" delay={200 + i * 70}>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="flex items-center gap-2 text-foreground-muted">
-                          <CheckIcon className="h-4 w-4 text-success" />
-                          {trait.label}
+                        <span className="text-foreground-muted">{TRAIT_META[trait].label}</span>
+                        <span className="rounded-full border border-border bg-surface px-2.5 py-0.5 text-xs capitalize text-foreground-subtle">
+                          {exampleTraitValues[trait]}
                         </span>
-                        <span className="text-foreground-subtle">{trait.strength}</span>
                       </div>
                     </Reveal>
                   ))}
@@ -175,50 +168,15 @@ export function MyVoicePreview() {
             <div className="flex items-start gap-2.5 border-t border-border bg-background-elevated px-6 py-4 sm:px-8">
               <SparkleIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-purple" />
               <p className="text-sm text-foreground-muted">
-                The more writing samples you provide, the better HUMANORA can
-                match your unique style. This score reflects profile
-                completeness, not identity or authorship verification.
+                This describes writing style only — never used to verify
+                identity or authorship. You can review and correct every
+                trait HUMANORA infers.
               </p>
-            </div>
-
-            {/* Fine-grained style controls — UI preview only. Not wired to
-                any rewrite logic yet, and clearly labeled as such rather
-                than implying they already work. */}
-            <div className="border-t border-border p-6 sm:p-8">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground">Style controls</p>
-                <Badge variant="neutral">Coming soon</Badge>
-              </div>
-              <div className="flex flex-col gap-5">
-                {styleSliders.map((slider) => (
-                  <div key={`${slider.left}-${slider.right}`}>
-                    <div className="mb-2 flex items-center justify-between text-xs text-foreground-subtle">
-                      <span>{slider.left}</span>
-                      <span>{slider.right}</span>
-                    </div>
-                    <div
-                      className="relative h-1.5 w-full cursor-not-allowed rounded-full bg-background-elevated"
-                      aria-disabled="true"
-                    >
-                      <div className="bg-brand-gradient absolute inset-y-0 left-0 w-1/2 rounded-full opacity-40" />
-                      <div className="absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full border-2 border-background bg-foreground-subtle" style={{ left: "50%" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </Card>
         </Reveal>
       </Container>
     </section>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
-      <path d="m4 10 4 4 8-8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
 
