@@ -545,8 +545,8 @@ function ProfilePanel({
 
         {profile && (
           <div className="mt-6 border-t border-border pt-6">
-            <p className="mb-5 text-sm text-foreground-muted">{profile.summary}</p>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <p className="mb-5 max-w-2xl text-sm text-foreground-muted">{profile.summary}</p>
+            <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
               {VOICE_TRAITS.map((trait) => (
                 <div key={trait}>
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-subtle">

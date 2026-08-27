@@ -34,7 +34,7 @@ export default async function VoicePage() {
   );
 
   return (
-    <Container className="mx-auto max-w-4xl">
+    <Container size="medium" className="mx-auto">
       <VoiceWorkspace plan={plan} maxProfiles={PLANS[plan].maxVoiceProfiles} initialProfiles={profileData} />
     </Container>
   );

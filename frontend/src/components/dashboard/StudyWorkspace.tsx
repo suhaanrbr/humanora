@@ -111,7 +111,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
   }
 
   return (
-    <Container className="mx-auto max-w-5xl pb-36 md:pb-24 lg:pb-10">
+    <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
       <div className="sticky top-14 z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 md:top-4 lg:mx-0 lg:px-0">
         <div className="pearl-glass flex flex-wrap items-center gap-2 rounded-full px-2.5 py-2 shadow-glow-sm">
           <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1 text-xs">
@@ -160,7 +160,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
 
       <div
         className={cn(
-          "grid grid-cols-1 gap-x-10 gap-y-8",
+          "grid grid-cols-1 gap-x-10 gap-y-8 xl:gap-x-14",
           (state === "processing" || state === "done" || state === "error") && "lg:grid-cols-2"
         )}
       >
@@ -178,7 +178,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
               rows={6}
               disabled={state === "processing"}
               placeholder={currentMode.placeholder}
-              className="min-h-[38vh] w-full resize-none rounded-xl bg-transparent p-1 text-xl leading-relaxed text-foreground placeholder:text-foreground-subtle focus:outline-none disabled:opacity-60 sm:min-h-[300px] lg:min-h-[420px]"
+              className="min-h-[38vh] w-full resize-none rounded-xl bg-transparent p-1 text-xl leading-relaxed text-foreground placeholder:text-foreground-subtle focus:outline-none disabled:opacity-60 sm:min-h-[300px] lg:min-h-[420px] xl:min-h-[480px]"
             />
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-foreground-subtle">

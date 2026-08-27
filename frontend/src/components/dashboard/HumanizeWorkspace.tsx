@@ -208,7 +208,7 @@ export function HumanizeWorkspace({
   const currentMode = writingModes.find((m) => m.name.toLowerCase() === mode);
 
   return (
-    <Container className="mx-auto max-w-5xl pb-36 md:pb-24 lg:pb-10">
+    <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
       {/* Floating toolbar — every control the current plan actually
           supports, in one continuous strip instead of scattered cards.
           Sticky so it stays reachable while a long draft scrolls, but
@@ -413,7 +413,7 @@ export function HumanizeWorkspace({
 
       <div
         className={cn(
-          "grid grid-cols-1 gap-x-10 gap-y-8",
+          "grid grid-cols-1 gap-x-10 gap-y-8 xl:gap-x-14",
           (state === "processing" || state === "done" || state === "error") && "lg:grid-cols-2"
         )}
       >
@@ -437,7 +437,7 @@ export function HumanizeWorkspace({
               rows={6}
               disabled={state === "processing"}
               placeholder="Paste your AI-assisted draft here, or start typing..."
-              className="min-h-[38vh] w-full resize-none rounded-xl bg-transparent p-1 text-xl leading-relaxed text-foreground placeholder:text-foreground-subtle focus:outline-none disabled:opacity-60 sm:min-h-[300px] lg:min-h-[420px]"
+              className="min-h-[38vh] w-full resize-none rounded-xl bg-transparent p-1 text-xl leading-relaxed text-foreground placeholder:text-foreground-subtle focus:outline-none disabled:opacity-60 sm:min-h-[300px] lg:min-h-[420px] xl:min-h-[480px]"
             />
           </div>
           <div className="mt-2 flex items-center justify-between text-xs text-foreground-subtle">

@@ -48,7 +48,7 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <Container className="flex flex-col gap-8">
+    <Container size="wide" className="flex flex-col gap-8 xl:gap-10">
       <div>
         <p className="text-sm text-foreground-muted">Welcome back,</p>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
@@ -57,13 +57,13 @@ export default async function DashboardPage() {
       {/* "What do you want to work on?" — three real destinations, not a
           wall of tool cards. Log out already lives in the account menu
           (top-right, every page), so this header has exactly one job. */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:gap-4">
         <QuickAction href="/dashboard/humanize" title="Write" description="Humanize a draft, apply My Voice." />
         <QuickAction href="/dashboard/study" title="Study" description="Summarize, explain, or make notes." />
         <QuickAction href="/dashboard/voice" title="My Voice" description="Teach HUMANORA how you write." />
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
         {/* Main column: recent work is the reason someone opens the dashboard daily */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
