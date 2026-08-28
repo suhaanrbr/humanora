@@ -1,6 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { Resend } from "resend";
 import { getDb } from "@/lib/db/client";
+
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 /**
  * HUMANORA authentication (server-side): email/password, plus Google
@@ -30,13 +34,29 @@ export const auth = betterAuth({
   database: drizzleAdapter(getDb(), { provider: "pg" }),
   emailAndPassword: {
     enabled: true,
-    // No email-sending service is configured yet (would require a free-
-    // tier decision of its own — Resend's free tier is the likely
-    // candidate, but that's a separate approval, not assumed here).
     // Accounts are usable immediately; add requireEmailVerification
-    // once a mail provider is wired up.
+    // once verification emails (a separate flow from the reset email
+    // below) are wanted too.
     requireEmailVerification: false,
     minPasswordLength: 8,
+    // Powers the "Forgot password?" flow (ForgotPasswordFormPanel ->
+    // authClient.forgetPassword). Uses Resend's free tier — set
+    // RESEND_API_KEY to enable; without it, `resend` is null and this
+    // throws, which better-auth surfaces to the client as a normal
+    // error rather than silently pretending to send an email.
+    sendResetPassword: async ({ user, url }) => {
+      if (!resend) {
+        throw new Error("Password reset email is not configured (missing RESEND_API_KEY).");
+      }
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL || "HUMANORA <onboarding@resend.dev>",
+        to: user.email,
+        subject: "Reset your HUMANORA password",
+        html: `<p>Someone requested a password reset for this HUMANORA account.</p>
+<p><a href="${url}">Click here to reset your password</a>. This link expires in 1 hour.</p>
+<p>If you didn't request this, you can safely ignore this email.</p>`,
+      });
+    },
   },
   ...(googleClientId && googleClientSecret
     ? {
