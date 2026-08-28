@@ -30,7 +30,7 @@ export function RecentWorkTabs({ items }: { items: RecentWorkItem[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex w-fit flex-wrap gap-1 rounded-full border border-border bg-surface/60 p-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -38,12 +38,12 @@ export function RecentWorkTabs({ items }: { items: RecentWorkItem[] }) {
             disabled={t.disabled}
             onClick={() => setTab(t.key)}
             className={cn(
-              "focus-ring press-feedback rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+              "focus-ring press-feedback rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-200",
               t.disabled
-                ? "cursor-not-allowed border-border text-foreground-subtle/60"
+                ? "cursor-not-allowed text-foreground-subtle/50"
                 : tab === t.key
-                  ? "border-brand-purple/40 bg-surface text-foreground"
-                  : "cursor-pointer border-border text-foreground-muted hover:bg-surface hover:text-foreground"
+                  ? "bg-brand-gradient cursor-default text-white shadow-glow-sm"
+                  : "cursor-pointer text-foreground-muted hover:bg-white/[0.05] hover:text-foreground"
             )}
           >
             {t.label}

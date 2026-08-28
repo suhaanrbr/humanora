@@ -517,6 +517,66 @@
   }
 }
 
+/* ==========================================================================
+   Dashboard Phase 2 — premium surface primitives
+   Small, composable additions on top of the existing token set (glow/
+   shadow/gradient tokens above are untouched) — a handful of reusable
+   classes for the dashboard's hero/stat/glass treatment, so the "premium
+   futuristic AI product" direction lives in a few shared primitives
+   rather than being reinvented per component.
+   ========================================================================== */
+
+/* A frosted, faintly-lit glass panel — for surfaces that should read as
+   floating above .app-atmosphere rather than sitting flush with it (the
+   stat strip, the nav rail). Not a replacement for Card's opaque
+   bg-surface (most content still wants a fully legible solid card) —
+   this is specifically for the handful of places translucency reads as
+   depth instead of muddiness. */
+.glass-panel {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-surface) 88%, transparent) 0%,
+    color-mix(in srgb, var(--color-surface) 72%, transparent) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* The dashboard hero's cinematic backdrop: the settings-background image
+   sits underneath (in markup), this supplies the multi-stop color wash
+   + vignette on top of it — replacing a flat single linear gradient
+   with something closer to volumetric light falling from one corner. */
+.hero-cinematic-overlay {
+  background:
+    radial-gradient(120% 100% at 8% 0%, color-mix(in srgb, var(--color-brand-violet) 30%, transparent) 0%, transparent 55%),
+    radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--color-brand-cyan) 16%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(3, 4, 10, 0.35) 0%, rgba(3, 4, 10, 0.55) 55%, rgba(3, 4, 10, 0.88) 100%);
+}
+
+/* Gradient icon chip used for quick-action tiles and stat tiles — a
+   small consistent "this is a capability" mark instead of bare text,
+   which is most of what read as "admin panel" before. */
+.icon-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-control);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-brand-violet) 22%, var(--color-surface-hover)) 0%,
+    color-mix(in srgb, var(--color-brand-indigo) 14%, var(--color-surface-hover)) 100%
+  );
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-brand-purple);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+}
+.icon-chip-muted {
+  background: var(--color-surface-hover);
+  color: var(--color-foreground-subtle);
+  border: 1px dashed var(--color-border);
+}
+
 /* Application container/gutter — responsive foundation for Stage 2's
    shell to consume; not applied to any page in Stage 1. Gutters widen
    at each breakpoint using the --space-gutter-* tokens above rather

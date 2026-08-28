@@ -21,12 +21,20 @@ interface NavEntry {
 // menu (see AccountMenu.tsx), not here — administration isn't a thing
 // a student "does" in the product, so it doesn't compete for space
 // with the five real capabilities below.
-const NAV_ENTRIES: NavEntry[] = [
+// Two groups, not one flat list of twelve — a single undifferentiated
+// column is exactly what read as "admin panel." "Workspace" is the five
+// real, everyday destinations; "Explore" is where Phase 1's newer nav
+// entries live, several of them still "Coming soon" (see ComingSoon.tsx)
+// — grouping them separately keeps the always-real workspace from being
+// diluted by placeholders, without hiding what's coming.
+const WORKSPACE_ENTRIES: NavEntry[] = [
   { href: "/dashboard", label: "Home", icon: HomeIcon },
   { href: "/dashboard/humanize", label: "Write", icon: WriteIcon },
   { href: "/dashboard/study", label: "Study", icon: StudyIcon },
   { href: "/dashboard/voice", label: "My Voice", icon: VoiceIcon },
   { href: "/dashboard/history", label: "Library", icon: LibraryIcon },
+];
+const EXPLORE_ENTRIES: NavEntry[] = [
   { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
   { href: "/dashboard/templates", label: "Templates", icon: TemplatesIcon },
   { href: "/dashboard/ai-detector", label: "AI Detector", icon: DetectorIcon },
@@ -35,6 +43,7 @@ const NAV_ENTRIES: NavEntry[] = [
   { href: "/dashboard/integrations", label: "Integrations", icon: IntegrationsIcon },
   { href: "/dashboard/analytics", label: "Analytics", icon: AnalyticsIcon },
 ];
+const NAV_ENTRIES: NavEntry[] = [...WORKSPACE_ENTRIES, ...EXPLORE_ENTRIES];
 
 // Mobile keeps only the original five real, everyday destinations — the
 // ones a thumb reaches for constantly. The newer nav entries (Projects
@@ -76,10 +85,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-atmosphere" aria-hidden="true" />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
 
-      {/* Desktop/tablet: persistent left rail. */}
+      {/* Desktop/tablet: persistent left rail. Glass, not flat opaque —
+          a hairline right border plus a very faint inner glow is what
+          separates "floating panel in a lit environment" from "sidebar
+          div with a border," at negligible visual cost. */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-border bg-background/85 backdrop-blur-lg md:flex lg:w-60"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-white/[0.06] bg-background/80 backdrop-blur-xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.03)] md:flex lg:w-64"
       >
         <Link href="/dashboard" className="focus-ring flex h-16 shrink-0 items-center justify-center px-3 lg:justify-start lg:px-5" aria-label="HUMANORA home">
           <span className="lg:hidden">
@@ -109,36 +121,19 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-1 px-2.5 py-3 lg:px-3.5">
-          {NAV_ENTRIES.map((entry) => {
-            const active = isActive(entry.href);
-            return (
-              <Link
-                key={entry.href}
-                href={entry.href}
-                aria-current={active ? "page" : undefined}
-                title={entry.label}
-                className={cn(
-                  "focus-ring group relative flex items-center gap-3 rounded-md px-2.5 py-2.5 text-sm font-medium transition-colors lg:px-3",
-                  active ? "bg-surface text-foreground" : "text-foreground-muted hover:bg-surface hover:text-foreground"
-                )}
-              >
-                {active && <span aria-hidden="true" className="nav-illuminated bg-brand-gradient absolute -left-2.5 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full lg:-left-3.5" />}
-                <entry.icon className="h-5 w-5 shrink-0" />
-                <span className="hidden lg:inline">{entry.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 py-3 lg:px-3.5">
+          <NavGroup label="Workspace" entries={WORKSPACE_ENTRIES} isActive={isActive} />
+          <NavGroup label="Explore" entries={EXPLORE_ENTRIES} isActive={isActive} />
         </div>
 
-        <div className="flex items-center justify-center border-t border-border p-3 lg:justify-start lg:px-5">
+        <div className="flex items-center justify-center border-t border-white/[0.06] p-3 lg:justify-start lg:px-5">
           <AccountMenu showAppLinks={false} />
         </div>
       </nav>
 
       {/* Mobile: slim top bar (brand + command trigger) plus a bottom
           bar for the four primary destinations. */}
-      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-lg md:hidden">
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-background/90 px-4 backdrop-blur-xl md:hidden">
         <Link href="/dashboard" className="focus-ring shrink-0 rounded-md" aria-label="HUMANORA home">
           <LogoMark size="sm" />
         </Link>
@@ -152,7 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-border bg-background/95 backdrop-blur-lg md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-white/[0.06] bg-background/95 backdrop-blur-xl md:hidden"
       >
         {MOBILE_NAV_ENTRIES.map((entry) => {
           const active = isActive(entry.href);
@@ -173,7 +168,51 @@ export function AppShell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <main className="relative z-10 pb-24 pt-8 sm:pt-10 md:ml-[76px] md:pb-14 lg:ml-60">{children}</main>
+      <main className="relative z-10 pb-24 pt-8 sm:pt-10 md:ml-[76px] md:pb-14 lg:ml-64">{children}</main>
+    </div>
+  );
+}
+
+function NavGroup({
+  label,
+  entries,
+  isActive,
+}: {
+  label: string;
+  entries: NavEntry[];
+  isActive: (href: string) => boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="hidden px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground-subtle/70 lg:block">
+        {label}
+      </p>
+      {entries.map((entry) => {
+        const active = isActive(entry.href);
+        return (
+          <Link
+            key={entry.href}
+            href={entry.href}
+            aria-current={active ? "page" : undefined}
+            title={entry.label}
+            className={cn(
+              "focus-ring group relative flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm font-medium transition-colors lg:px-3",
+              active
+                ? "bg-white/[0.06] text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
+                : "text-foreground-muted hover:bg-white/[0.04] hover:text-foreground"
+            )}
+          >
+            {active && (
+              <span
+                aria-hidden="true"
+                className="nav-illuminated bg-brand-gradient absolute -left-2.5 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full shadow-[0_0_12px_2px_rgba(168,85,247,0.55)] lg:-left-3.5"
+              />
+            )}
+            <entry.icon className={cn("h-5 w-5 shrink-0", active && "text-brand-purple")} />
+            <span className="hidden lg:inline">{entry.label}</span>
+          </Link>
+        );
+      })}
     </div>
   );
 }

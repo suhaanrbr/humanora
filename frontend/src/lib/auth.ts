@@ -1,6 +1,31 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { getDb } from "@/lib/db/client";
+import { SITE_URL } from "@/lib/config/site";
+
+/**
+ * Better Auth rejects state-changing requests whose Origin isn't in this
+ * list. .env.local's BETTER_AUTH_URL is pinned to the production domain
+ * (so the same file works when someone forgets to override it locally),
+ * which otherwise makes `npm run dev` on localhost fail with "Invalid
+ * origin" — this list restores localhost for dev, keeps the real
+ * production domain, and trusts this specific Vercel deployment's own
+ * unique hostname (VERCEL_URL/VERCEL_BRANCH_URL, set automatically per
+ * deployment) rather than a `*.vercel.app` wildcard, which would trust
+ * every Vercel account's deployments, not just this project's. Same
+ * fix as on feature/forgot-password (auth.ts); duplicated narrowly here
+ * rather than merging that branch's unrelated password-reset work in.
+ */
+const vercelPreviewOrigins = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
+  .filter((host): host is string => !!host)
+  .map((host) => `https://${host}`);
+
+const trustedOrigins = [
+  "http://localhost:3100",
+  "http://localhost:3000",
+  SITE_URL,
+  ...vercelPreviewOrigins,
+];
 
 /**
  * HUMANORA authentication (server-side): email/password, plus Google
@@ -28,6 +53,7 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 export const auth = betterAuth({
   database: drizzleAdapter(getDb(), { provider: "pg" }),
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     // No email-sending service is configured yet (would require a free-

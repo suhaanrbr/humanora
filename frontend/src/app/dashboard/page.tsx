@@ -17,6 +17,7 @@ import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
 import { formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
+import { cn } from "@/lib/cn";
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
@@ -26,14 +27,16 @@ export const metadata = { title: "Dashboard — HUMANORA" };
 // Notes tabs — see StudyWorkspace.tsx). Each tile still names the
 // specific capability the mockup called out; the tiles that don't yet
 // have a real backing feature (AI Detector, Chat with Document) route to
-// their real "coming soon" pages rather than nowhere.
+// their real "coming soon" pages rather than nowhere — marked `soon`
+// here so the tile can look intentional (a real preview of what's
+// arriving) rather than identical to a live tool and quietly broken.
 const QUICK_ACTIONS = [
-  { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you." },
-  { href: "/dashboard/study", title: "Summarize Text", description: "Condense long material fast." },
-  { href: "/dashboard/study", title: "Explain Like I'm 5", description: "Break a hard topic down simply." },
-  { href: "/dashboard/study", title: "Study Notes Generator", description: "Turn material into revision notes." },
-  { href: "/dashboard/ai-detector", title: "AI Detector", description: "Coming soon." },
-  { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Coming soon." },
+  { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you.", icon: SparkIcon },
+  { href: "/dashboard/study", title: "Summarize Text", description: "Condense long material fast.", icon: SummarizeIcon },
+  { href: "/dashboard/study", title: "Explain Like I'm 5", description: "Break a hard topic down simply.", icon: ExplainIcon },
+  { href: "/dashboard/study", title: "Study Notes Generator", description: "Turn material into revision notes.", icon: NotesIcon },
+  { href: "/dashboard/ai-detector", title: "AI Detector", description: "AI-likelihood scoring — in development.", icon: DetectorIcon, soon: true },
+  { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Ask questions of an upload — in development.", icon: ChatIcon, soon: true },
 ] as const;
 
 export default async function DashboardPage() {
@@ -60,40 +63,55 @@ export default async function DashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
-    <Container size="wide" className="flex flex-col gap-8 xl:gap-10">
-      {/* Same technique as the Settings page banner: next/image + a dark
-          gradient overlay, contained to a rounded block — not the full
-          viewport, so the sidebar/rail stays on its own dark surface. */}
-      <div className="relative overflow-hidden rounded-3xl">
-        <Image
-          src="/images/settings-background.png"
-          alt=""
-          fill
-          sizes="(min-width: 1280px) 1152px, 100vw"
-          className="object-cover"
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/70" aria-hidden="true" />
-        <div className="relative px-6 py-8 sm:px-8">
-          <p className="text-sm text-white/80">{greeting},</p>
-          <h1 className="text-2xl font-bold tracking-tight text-white">{session.user.name}</h1>
+    <Container size="wide" className="flex flex-col gap-10 xl:gap-12">
+      {/* Cinematic hero — the settings-background art underneath, but
+          hero-cinematic-overlay (globals.css) replaces the flat top-to-
+          bottom fade with volumetric corner light + vignette, and the
+          stat strip is pulled up to physically overlap the banner's
+          bottom edge (glass, floating) rather than sitting as its own
+          separate block below — one composed scene, not "image, then a
+          row of boxes." */}
+      <div>
+        <div className="relative isolate overflow-hidden rounded-[2rem] shadow-elevation-floating">
+          <Image
+            src="/images/settings-background.png"
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 1280px) 1152px, 100vw"
+            className="object-cover"
+            aria-hidden="true"
+          />
+          <div className="hero-cinematic-overlay absolute inset-0" aria-hidden="true" />
+          <div className="relative flex flex-col gap-6 px-7 py-10 sm:px-10 sm:py-14 lg:py-16">
+            <span className="w-fit rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/70 backdrop-blur-sm">
+              Workspace
+            </span>
+            <div>
+              <p className="text-sm text-white/70">{greeting},</p>
+              <h1 className="text-hero font-bold tracking-tight text-white">{session.user.name}</h1>
+            </div>
+          </div>
         </div>
+
+        {/* Stat strip — real lifetime totals (lib/db/stats.ts), glass,
+            anchored to the hero so it reads as one composed panel. */}
+        {lifetime.status === "fulfilled" ? (
+          <div className="glass-panel relative z-10 mx-3 -mt-8 grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl shadow-elevation-raised sm:mx-6 sm:-mt-10 xl:grid-cols-4 xl:divide-y-0">
+            <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized.toLocaleString()} icon={SparkIcon} emphasize />
+            <StatTile label="Documents Created" value={lifetime.value.documentsCreated.toLocaleString()} icon={DocumentIcon} />
+            <StatTile label="Study Sessions" value={lifetime.value.studySessions.toLocaleString()} icon={StudyStatIcon} />
+            <StatTile label="Time Saved (est.)" value={`${lifetime.value.timeSavedHoursEstimate} hrs`} icon={ClockIcon} />
+          </div>
+        ) : (
+          <div className="mt-4">
+            <ErrorState message="Couldn't load your stats right now." />
+          </div>
+        )}
       </div>
 
-      {/* Stat tiles — real lifetime totals, see lib/db/stats.ts. */}
-      {lifetime.status === "fulfilled" ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:gap-4">
-          <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized.toLocaleString()} />
-          <StatTile label="Documents Created" value={lifetime.value.documentsCreated.toLocaleString()} />
-          <StatTile label="Study Sessions" value={lifetime.value.studySessions.toLocaleString()} />
-          <StatTile label="Time Saved (est.)" value={`${lifetime.value.timeSavedHoursEstimate} hrs`} />
-        </div>
-      ) : (
-        <ErrorState message="Couldn't load your stats right now." />
-      )}
-
       <div>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
           What do you want to do?
         </h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:gap-4">
@@ -120,12 +138,17 @@ export default async function DashboardPage() {
 
           {recentWork.status === "fulfilled" ? (
             recentWork.value.length === 0 ? (
-              <Card className="p-7 sm:p-9">
-                <p className="text-base font-semibold text-foreground">Let&apos;s write something.</p>
-                <p className="mt-1 max-w-sm text-sm text-foreground-muted">
+              <Card className="glass-panel relative overflow-hidden p-7 sm:p-9">
+                <div
+                  className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-40 blur-3xl"
+                  style={{ background: "var(--mesh-1)" }}
+                  aria-hidden="true"
+                />
+                <p className="relative text-base font-semibold text-foreground">Let&apos;s write something.</p>
+                <p className="relative mt-1 max-w-sm text-sm text-foreground-muted">
                   Your humanized drafts and study sessions will show up here.
                 </p>
-                <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="mt-6">
+                <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="relative mt-6">
                   Humanize your first draft
                 </ButtonLink>
               </Card>
@@ -142,7 +165,7 @@ export default async function DashboardPage() {
           <section>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">Plan</h2>
             {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
-              <Card className="p-5">
+              <Card className="glass-panel p-5">
                 {plan === "free" ? (
                   <>
                     <div className="flex items-center justify-between">
@@ -199,7 +222,7 @@ export default async function DashboardPage() {
           <section>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
             {voice.status === "fulfilled" ? (
-              <Card className="p-5">
+              <Card className="glass-panel p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-medium text-foreground">
                     {voice.value.hasAnalyzedProfile ? "Profile ready" : "Not set up"}
@@ -236,15 +259,34 @@ export default async function DashboardPage() {
               recentWork.value.length === 0 ? (
                 <p className="text-xs text-foreground-subtle">Nothing yet.</p>
               ) : (
-                <Card className="divide-y divide-border p-0">
-                  {recentWork.value.slice(0, 5).map((item) => (
-                    <div key={`${item.kind}-${item.id}`} className="p-4">
-                      <p className="text-sm text-foreground">
-                        {item.kind === "humanized" ? "Humanized" : "Studied"} &ldquo;{deriveTitle(item.inputText)}&rdquo;
-                      </p>
-                      <p className="mt-0.5 text-xs text-foreground-subtle">{formatDateTime(item.createdAt)}</p>
-                    </div>
-                  ))}
+                <Card className="glass-panel p-4">
+                  <ul className="flex flex-col gap-4">
+                    {recentWork.value.slice(0, 5).map((item, i) => (
+                      <li key={`${item.kind}-${item.id}`} className="relative flex gap-3 pl-0.5">
+                        {/* Connecting line between dots — a real timeline,
+                            not a stack of disconnected list rows. */}
+                        {i < Math.min(recentWork.value.length, 5) - 1 && (
+                          <span
+                            aria-hidden="true"
+                            className="absolute left-[5px] top-4 h-[calc(100%+0.75rem)] w-px bg-white/[0.08]"
+                          />
+                        )}
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "mt-1.5 h-[10px] w-[10px] shrink-0 rounded-full",
+                            item.kind === "humanized" ? "bg-brand-gradient shadow-glow-sm" : "bg-brand-cyan"
+                          )}
+                        />
+                        <div className="min-w-0">
+                          <p className="text-sm text-foreground">
+                            {item.kind === "humanized" ? "Humanized" : "Studied"} &ldquo;{deriveTitle(item.inputText)}&rdquo;
+                          </p>
+                          <p className="mt-0.5 text-xs text-foreground-subtle">{formatDateTime(item.createdAt)}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </Card>
               )
             ) : (
@@ -264,12 +306,34 @@ export default async function DashboardPage() {
   );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({
+  label,
+  value,
+  icon: Icon,
+  emphasize,
+}: {
+  label: string;
+  value: string;
+  icon: (props: { className?: string }) => React.ReactElement;
+  emphasize?: boolean;
+}) {
   return (
-    <Card className="p-4">
-      <p className="text-xs text-foreground-subtle">{label}</p>
-      <p className="mt-1 text-xl font-bold tracking-tight text-foreground">{value}</p>
-    </Card>
+    <div className="flex items-center gap-3 p-4 sm:p-5">
+      <span className={cn("icon-chip h-10 w-10 shrink-0", emphasize && "shadow-glow-sm")}>
+        <Icon className="h-[18px] w-[18px]" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs leading-snug text-foreground-subtle">{label}</p>
+        <p
+          className={cn(
+            "mt-0.5 text-xl font-bold tracking-tight sm:text-2xl",
+            emphasize ? "text-brand-gradient" : "text-foreground"
+          )}
+        >
+          {value}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -284,14 +348,113 @@ function UsageBar({ current, limit }: { current: number; limit: number }) {
   );
 }
 
-function QuickAction({ href, title, description }: { href: string; title: string; description: string }) {
+function QuickAction({
+  href,
+  title,
+  description,
+  icon: Icon,
+  soon,
+}: {
+  href: string;
+  title: string;
+  description: string;
+  icon: (props: { className?: string }) => React.ReactElement;
+  soon?: boolean;
+}) {
   return (
     <Link
       href={href}
-      className="focus-ring hover-lift group rounded-lg border border-border bg-surface p-4 transition-[border-color,box-shadow] hover:border-brand-purple/35 hover:shadow-glow-sm"
+      className={cn(
+        "focus-ring hover-lift group relative flex items-start gap-3.5 overflow-hidden rounded-xl border p-4.5 transition-[border-color,box-shadow]",
+        soon
+          ? "border-dashed border-border bg-surface/60 hover:border-border-strong"
+          : "border-border bg-surface hover:border-brand-purple/35 hover:shadow-glow-sm"
+      )}
     >
-      <p className="text-sm font-semibold text-foreground">{title}</p>
-      <p className="mt-1 text-xs text-foreground-subtle">{description}</p>
+      <span className={cn("icon-chip h-10 w-10 shrink-0", soon && "icon-chip-muted")}>
+        <Icon className="h-[18px] w-[18px]" />
+      </span>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          {soon && (
+            <Badge variant="neutral" className="shrink-0 text-[10px]">
+              Soon
+            </Badge>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-foreground-subtle">{description}</p>
+      </div>
     </Link>
+  );
+}
+
+function SparkIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function SummarizeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 6h16M4 12h10M4 18h13" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ExplainIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M12 16v.01M12 8a2.2 2.2 0 0 1 2.2 2.2c0 1.6-2.2 1.8-2.2 3.6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function NotesIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4.5" y="3.5" width="15" height="17" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M8 8.5h8M8 12.5h8M8 16.5h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function DetectorIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m20.5 20.5-4.3-4.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ChatIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 5.5h16v10H9l-4 3.5v-3.5H4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function DocumentIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M6.5 3.5h8l4 4v13a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1v-16a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M14 3.5V8h4.5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function StudyStatIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4" y="4" width="7" height="16" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13" y="4" width="7" height="9.5" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M12 7.5V12l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
