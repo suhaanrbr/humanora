@@ -21,7 +21,7 @@ import type { ReactNode } from "react";
  */
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex h-dvh w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-[#02030b]">
+    <div className="relative flex h-dvh w-full [align-items:safe_center] justify-center overflow-x-hidden overflow-y-auto bg-[#02030b]">
       {/* `absolute`, not `fixed`. Login and Signup have different form
           heights, so — with the root pinned to a CONSTANT `h-dvh`
           instead of the old content-growable `min-h-screen` — the
@@ -37,7 +37,19 @@ export function AuthShell({ children }: { children: ReactNode }) {
           `overflow-hidden` (blocked scrolling entirely) to
           `overflow-y-auto` so a route whose content is taller than a
           short/landscape viewport can still be scrolled to, instead of
-          being clipped. */}
+          being clipped.
+
+          `items-[safe_center]`, not plain `items-center` — on a real
+          phone's actual visible viewport (address bar/chrome eating
+          into it, not the full device height), Signup's extra field
+          made it taller than login and taller than the space
+          available. Plain `center` clips an overflow SYMMETRICALLY
+          top-and-bottom, which hid the logo above the fold entirely
+          and made the rest read as an oversized crop rather than a
+          whole page. `safe center` centers only while it fits, and
+          falls back to top-alignment (scrollable, logo visible first)
+          the moment it doesn't — exactly the "safe" behavior its name
+          describes. */}
       {/* Phones (<md): the real artwork stays gated off for perf (see
           LoginArtworkLayer), but a flat #02030b behind a translucent
           glass panel read as a dead black rectangle with nothing for
