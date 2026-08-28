@@ -27,13 +27,24 @@ const NAV_ENTRIES: NavEntry[] = [
   { href: "/dashboard/study", label: "Study", icon: StudyIcon },
   { href: "/dashboard/voice", label: "My Voice", icon: VoiceIcon },
   { href: "/dashboard/history", label: "Library", icon: LibraryIcon },
+  { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
+  { href: "/dashboard/templates", label: "Templates", icon: TemplatesIcon },
+  { href: "/dashboard/ai-detector", label: "AI Detector", icon: DetectorIcon },
+  { href: "/dashboard/chat-with-docs", label: "Chat with Docs", icon: ChatIcon },
+  { href: "/dashboard/brand-voice", label: "Brand Voice", icon: BrandVoiceIcon },
+  { href: "/dashboard/integrations", label: "Integrations", icon: IntegrationsIcon },
+  { href: "/dashboard/analytics", label: "Analytics", icon: AnalyticsIcon },
 ];
 
-// Mobile keeps only four — the ones a thumb reaches for constantly.
-// Library/Billing/Settings live one tap away in the account menu
-// rather than competing for space in a bottom bar built to scale as
-// HUMANORA grows past five destinations.
-const MOBILE_NAV_ENTRIES = NAV_ENTRIES.filter((e) => e.href !== "/dashboard/history");
+// Mobile keeps only the original five real, everyday destinations — the
+// ones a thumb reaches for constantly. The newer nav entries (Projects
+// through Analytics) are mostly "coming soon" placeholders today (see
+// ComingSoon.tsx) and, even once real, are lower-frequency than Write/
+// Study/My Voice/Library; they stay one tap away via the desktop/tablet
+// rail rather than crowding a bottom bar built for five items.
+const MOBILE_NAV_ENTRIES = NAV_ENTRIES.filter((e) =>
+  ["/dashboard", "/dashboard/humanize", "/dashboard/study", "/dashboard/voice"].includes(e.href)
+);
 
 /**
  * HUMANORA's application shell — a persistent environment the
@@ -203,6 +214,63 @@ function LibraryIcon({ className }: { className?: string }) {
       <path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M3.5 4.5V9h4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M12 8v4.5l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ProjectsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="3.5" y="6" width="17" height="13" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M3.5 6.5 6 4h4l1.6 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function TemplatesIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4" y="4" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13" y="4" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="4" y="13" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13" y="13" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+function DetectorIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m20.5 20.5-4.3-4.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ChatIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 5.5h16v10H9l-4 3.5v-3.5H4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function BrandVoiceIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M8 4h8l3 4-3 4H8l-3-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M12 12v8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IntegrationsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="3.5" y="9.5" width="6" height="6" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="14.5" y="9.5" width="6" height="6" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M9.5 12.5h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function AnalyticsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M5 19V10M12 19V5M19 19v-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

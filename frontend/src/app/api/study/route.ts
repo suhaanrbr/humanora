@@ -3,6 +3,7 @@ import { generateStudyOutput, StudyError, type StudyMode, type ExplainDepth } fr
 import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { getUserPlan } from "@/lib/db/entitlement";
 import { checkAndReserveQuota, releaseQuotaUnit } from "@/lib/db/usage";
+import { saveStudySession } from "@/lib/db/study";
 import { PLANS } from "@/lib/config/plans";
 import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
@@ -80,6 +81,15 @@ export async function POST(req: NextRequest) {
       depth: safeMode === "explain" ? safeDepth : undefined,
       outputTokenLimit: PLANS[plan].outputTokenLimit,
     });
+
+    await saveStudySession({
+      userId,
+      mode: safeMode,
+      inputText: trimmed,
+      outputText: result.output,
+      wordCount: words,
+    });
+
     return NextResponse.json({ output: result.output });
   } catch (err) {
     await releaseQuotaUnit(userId, plan, words);

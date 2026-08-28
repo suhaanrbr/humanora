@@ -13,12 +13,16 @@ export function RecentWorkCard({
   mode,
   strength,
   createdAt,
+  kind = "humanized",
 }: {
   inputText: string;
   outputText: string;
   mode: string;
-  strength: string;
+  /** Study sessions have no rewrite "strength" — omit for those. */
+  strength?: string;
   createdAt: string;
+  /** Which real destination this row's title should link back to. */
+  kind?: "humanized" | "study";
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -40,7 +44,10 @@ export function RecentWorkCard({
         </Badge>
         <span>{formatDateTime(createdAt)}</span>
       </div>
-      <Link href="/dashboard/history" className="focus-ring press-feedback -mx-1 block rounded-md px-1 py-0.5">
+      <Link
+        href={kind === "study" ? "/dashboard/study" : "/dashboard/history"}
+        className="focus-ring press-feedback -mx-1 block rounded-md px-1 py-0.5"
+      >
         <p className="text-sm font-medium text-foreground hover:text-brand-purple">{deriveTitle(inputText)}</p>
         <p className="mt-1.5 line-clamp-2 text-sm text-foreground-muted">{outputText}</p>
       </Link>
@@ -52,7 +59,7 @@ export function RecentWorkCard({
         >
           {copied ? "Copied" : "Copy result"}
         </button>
-        <span className="text-xs text-foreground-subtle capitalize">{strength} strength</span>
+        {strength && <span className="text-xs text-foreground-subtle capitalize">{strength} strength</span>}
       </div>
     </Card>
   );

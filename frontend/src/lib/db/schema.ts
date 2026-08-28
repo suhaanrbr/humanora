@@ -9,10 +9,12 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "
  *
  * Deliberately NOT built yet (left as extension points, not tables,
  * until there's a real product need):
- *   - voice_samples (individual uploaded writing samples) — Phase 3,
- *     once My Voice moves past "profile exists" to "profile has content".
- *   - a separate `subscriptions` table — folded into `usagePeriod` below
- *     since there is no billing yet; split out once Stripe is introduced.
+ *   - project, template, integration, activity-event, and a real
+ *     AI-detector-scan table — scoped in the dashboard-redesign plan's
+ *     later phases (Projects, Templates, AI Detector, Brand Voice,
+ *     Integrations, Analytics); the dashboard nav links to real, minimal
+ *     pages for these today, but the tables land with each feature's
+ *     own phase rather than being pre-created empty.
  */
 
 // ---------------------------------------------------------------------------
@@ -152,6 +154,30 @@ export const humanization = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [index("humanization_user_idx").on(table.userId, table.createdAt)]
+);
+
+/**
+ * A saved Study action (Summarize / Explain Like I'm 5 / Study Notes).
+ * Mirrors `humanization` in shape and ownership pattern — Study was
+ * previously stateless (nothing persisted per call); this table is what
+ * makes "Study Sessions" a real, countable stat and gives Study a Recent
+ * Work / Library presence instead of vanishing the moment the tab closes.
+ */
+export const studySessionModeEnum = ["summarize", "explain", "notes"] as const;
+export type StudySessionMode = (typeof studySessionModeEnum)[number];
+
+export const studySession = pgTable(
+  "study_session",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    mode: text("mode", { enum: studySessionModeEnum }).notNull(),
+    inputText: text("input_text").notNull(),
+    outputText: text("output_text").notNull(),
+    wordCount: integer("word_count").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("study_session_user_idx").on(table.userId, table.createdAt)]
 );
 
 /**
