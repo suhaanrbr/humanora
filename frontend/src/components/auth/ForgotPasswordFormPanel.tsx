@@ -53,7 +53,9 @@ export function ForgotPasswordFormPanel() {
               className="flex items-start gap-2 rounded-xl border border-brand-purple/25 bg-brand-purple/[0.08] px-3.5 py-2.5 text-sm text-foreground"
             >
               <MailIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand-purple" />
-              If an account exists for <span className="font-medium">{email}</span>, a reset link is on its way.
+              <span>
+                If an account exists for <span className="font-medium">{email}</span>, a reset link is on its way.
+              </span>
             </p>
             <Button
               type="button"
