@@ -13,7 +13,7 @@ export default async function HistoryPage() {
   const history = await getHistoryForUser(result.session.user.id, 200);
 
   return (
-    <Container className="mx-auto max-w-3xl">
+    <Container className="mx-auto max-w-5xl">
       <HistoryWorkspace
         initialEntries={history.map((h) => ({
           id: h.id,
