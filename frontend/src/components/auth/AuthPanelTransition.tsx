@@ -17,8 +17,18 @@ import type { ReactNode } from "react";
  */
 export function AuthPanelTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // Always centered, never `lg:justify-end` — this component is shared
+  // by BOTH the desktop two-column grid and the stacked tablet/phone
+  // layout in AuthShell. In the desktop grid the wrapping column is
+  // exactly the panel's own max-width, so `justify-end` was always
+  // visually inert there (no room to shift). But at 1024-1279px the
+  // *stacked* tablet layout is what's active, and its wrapper spans the
+  // full viewport width — there `justify-end` had real room to work
+  // with, and shoved the panel to the far right instead of centering
+  // it. `justify-center` is correct (and visually identical to the old
+  // `justify-end`) in the desktop case, and fixes the tablet one.
   return (
-    <div key={pathname} className="animate-nav-panel-fade-in w-full lg:flex lg:justify-end">
+    <div key={pathname} className="animate-nav-panel-fade-in flex w-full justify-center">
       {children}
     </div>
   );
