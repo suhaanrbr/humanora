@@ -68,7 +68,18 @@ export function AuthShell({ children }: { children: ReactNode }) {
           }}
         />
       </div>
-      <LoginArtworkLayer className="absolute inset-0 hidden md:block" />
+      {/* Two separate instances, not one shared "hidden md:block" — the
+          tablet range (768-1279px) gets a slightly higher encode
+          quality (less visible compression softness, since this is
+          exactly the range where the artwork sits closest to the
+          panel with fewer competing elements around it) and a subtle
+          dark overlay so the glass panel reads with a bit more
+          contrast against it. Desktop (1280px+) keeps the original
+          defaults untouched — each instance's own matchMedia range
+          means only one is ever mounted/fetching at a time, so tuning
+          one never affects or re-fetches the other. */}
+      <LoginArtworkLayer className="absolute inset-0 hidden md:block xl:hidden" minWidth={768} maxWidth={1279} quality={92} dim={0.14} />
+      <LoginArtworkLayer className="absolute inset-0 hidden xl:block" minWidth={1280} />
 
       <div className="relative z-10 w-full">
         {/* >= xl (1280px): side-by-side layout — copy column on the left,
