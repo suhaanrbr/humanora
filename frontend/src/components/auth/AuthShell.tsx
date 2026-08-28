@@ -100,22 +100,37 @@ export function AuthShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* < xl (1280px): one stacked, centered column — logo, badge, and
-            the real headline at proper phone/tablet proportions (not a
-            shrunk-down copy of the desktop composition), then the panel
-            sized to ~88% of the viewport. Covers phones through the full
-            tablet range, including 1024px (iPad Pro 12.9" portrait).
-            Phones (<md) sit on the gradient wash above instead of the
-            real artwork (perf gate in LoginArtworkLayer), but otherwise
-            get the same badge + headline treatment tablets do — just at
-            a smaller, phone-appropriate type scale. */}
+        {/* < xl (1280px): one stacked, centered column. Tablet (md-xl,
+            768-1279px) gets the real artwork behind it plus the full
+            badge + headline treatment. Phones (<md) go back to the
+            smaller, quieter version — compact logo and a single muted
+            strap line instead of the badge/headline — since that's the
+            version that read better at phone size; the real artwork
+            also stays off phones for perf (LoginArtworkLayer's own
+            gate), so the fuller headline treatment had less to sit on
+            anyway. Covers the full tablet range including 1024px (iPad
+            Pro 12.9" portrait), which used to fall into the desktop
+            grid before the xl cutover below. */}
         <div className="flex flex-col items-center gap-7 px-6 py-10 text-center sm:gap-9 sm:px-8 sm:py-14 xl:hidden">
           <div className="flex flex-col items-center gap-4 sm:gap-6">
             <Link href="/" className="focus-ring w-fit rounded-md">
-              <Logo size="md" />
+              {/* Two Logo instances, each in its own display-only wrapper —
+                  not one Logo with a responsive className — because
+                  passing `md:hidden` straight into Logo's own className
+                  competes with the display utility already baked into
+                  its root element for the same CSS property, and which
+                  one wins the cascade isn't guaranteed by class order.
+                  A dedicated wrapper's `hidden`/`block` never touches
+                  Logo's own classes, so there's nothing to compete with. */}
+              <span className="block md:hidden">
+                <Logo size="sm" />
+              </span>
+              <span className="hidden md:block">
+                <Logo size="md" />
+              </span>
             </Link>
 
-            <span className="login-badge inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted">
+            <span className="login-badge hidden w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted md:inline-flex">
               <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
               AI-powered writing
             </span>
@@ -128,10 +143,14 @@ export function AuthShell({ children }: { children: ReactNode }) {
                 at all (invisible). Forcing "sounds like you." onto its own
                 single line keeps the whole phrase on one line box, so the
                 gradient always has one line to paint, never two. */}
-            <p className="max-w-xs text-2xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:max-w-sm sm:text-3xl md:text-4xl">
+            <p className="hidden max-w-sm text-3xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:text-4xl md:block">
               Writing that
               <br />
               <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
+            </p>
+
+            <p className="max-w-xs text-sm text-foreground-muted md:hidden">
+              Writing that sounds like you — without losing your meaning.
             </p>
           </div>
 
