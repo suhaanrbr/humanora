@@ -937,14 +937,57 @@ h4,
    upper-left, blue lower-right) standing in for "environmental light
    reflecting on glass" rather than a gradient wash across the whole
    card. */
-.login-glass-panel {
-  background-color: rgba(17, 25, 40, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+/* A soft, slightly organic silhouette echoing the approved reference's
+   blob shape — WITHOUT using percentage radii, which curve the entire
+   edge (not just the corner) and clipped real content (the "Log in"
+   heading, the footer line) behind the curve at this panel's actual
+   440px width. Fixed pixel radii only round each corner locally,
+   leaving the rest of every edge straight, so the real form content
+   (full-width inputs/button, an actual heading, actual footer text)
+   never collides with the silhouette regardless of how much text a
+   given account's error message or plan name runs to. One shared
+   value so the outer rim frame and the inner glass fill stay
+   concentric. */
+:root {
+  --auth-panel-radius: 44px 64px 48px 72px;
+}
+
+/* The rim frame — a thin gradient "border" using the classic
+   gradient-border trick (a gradient-filled background-clip:border-box
+   behind a solid inner fill, exposed only through the 1.5px gap
+   between the two). Several radial-gradients at different points
+   around the perimeter, not one linear sweep — so the illumination
+   genuinely VARIES (bright cyan top-left, violet at the right where
+   the planets sit, soft magenta lower-left, and a stretch of the
+   bottom-right edge left to fade into the dark) rather than reading
+   as a single uniform neon outline. A soft outer glow stands in for
+   "light catching optical glass" rather than a hard border. */
+.auth-panel-frame {
+  position: relative;
+  border-radius: var(--auth-panel-radius);
+  padding: 1.5px;
+  background:
+    radial-gradient(120px 90px at 12% 0%, rgba(147, 197, 253, 0.95) 0%, transparent 70%),
+    radial-gradient(140px 160px at 100% 35%, rgba(139, 92, 246, 0.85) 0%, transparent 65%),
+    radial-gradient(130px 110px at 8% 92%, rgba(217, 70, 239, 0.6) 0%, transparent 70%),
+    radial-gradient(160px 140px at 90% 100%, rgba(59, 130, 246, 0.5) 0%, transparent 65%),
+    linear-gradient(180deg, rgba(120, 140, 200, 0.22) 0%, rgba(80, 60, 130, 0.16) 100%);
   box-shadow:
-    0 30px 70px -24px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+    0 30px 80px -24px rgba(0, 0, 0, 0.55),
+    0 0 50px -10px rgba(139, 92, 246, 0.3);
+}
+
+.login-glass-panel {
+  position: relative;
+  border-radius: var(--auth-panel-radius);
+  /* Genuinely translucent — the artwork should read clearly through
+     the panel, not just tint it. Readability comes from the blur
+     (softening the artwork's own detail/contrast behind the text)
+     plus each text element's own color/weight, not from opacity. */
+  background-color: rgba(12, 16, 30, 0.32);
+  backdrop-filter: blur(24px) saturate(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
 }
 .login-glass-panel::before,
 .login-glass-panel::after {
@@ -982,11 +1025,19 @@ h4,
    the approved reference exactly. Not a change to Input.tsx itself —
    every other consumer of Input keeps its own default look. */
 .login-field {
-  background-color: rgba(255, 255, 255, 0.03) !important;
-  border-color: rgba(139, 92, 246, 0.15) !important;
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(139, 92, 246, 0.18) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
 }
 .login-field:hover {
-  border-color: rgba(139, 92, 246, 0.3) !important;
+  border-color: rgba(139, 92, 246, 0.32) !important;
+}
+.login-field:focus {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(99, 140, 248, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(99, 140, 248, 0.14) !important;
 }
 .login-field::placeholder {
   color: #64748b;
@@ -997,12 +1048,19 @@ h4,
    three-stop indigo/violet/purple used for every other primary button
    in the app. Layered on top of Button's own primary variant (which
    already provides the inner-highlight/hover-sweep treatment), so this
-   only overrides the fill color. */
+   only overrides the fill color. A soft bloom stands in for "slightly
+   luminous inside the glass" — restrained, not a hard neon glow. */
 .login-cta {
-  background-image: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%) !important;
+  background-image: linear-gradient(90deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%) !important;
+  box-shadow:
+    0 8px 24px -8px rgba(99, 102, 241, 0.5),
+    0 0 32px -10px rgba(139, 92, 246, 0.45) !important;
 }
-
-/* Consistent, accessible focus ring across custom primitives */
+.login-cta:hover {
+  box-shadow:
+    0 10px 28px -8px rgba(99, 102, 241, 0.6),
+    0 0 40px -8px rgba(139, 92, 246, 0.55) !important;
+}
 
 /* Consistent, accessible focus ring across custom primitives */
 .focus-ring {
