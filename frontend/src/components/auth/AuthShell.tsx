@@ -22,6 +22,15 @@ import type { ReactNode } from "react";
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#02030b]">
+      {/* `fixed`, not `absolute` — pinned to the viewport instead of to
+          this container's own (content-dependent) height. Login and
+          Signup have different form heights, so the container this
+          sits in is taller on one route than the other; an `absolute`
+          background resizes/repositions along with that height change,
+          which is exactly the "zoom/fluctuate" a Login<->Signup switch
+          was producing. `fixed` never resizes when the page's content
+          height changes — same frame, always, regardless of which
+          panel is showing. */}
       {/* Phones (<md): the real artwork stays gated off for perf (see
           LoginArtworkLayer), but a flat #02030b behind a translucent
           glass panel read as a dead black rectangle with nothing for
@@ -29,7 +38,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           evoke the same violet/blue cosmic palette at zero image cost,
           so the glass has something to glow against. Hidden at md+
           where the real artwork takes over. */}
-      <div className="pointer-events-none absolute inset-0 md:hidden" aria-hidden="true">
+      <div className="pointer-events-none fixed inset-0 md:hidden" aria-hidden="true">
         <div
           className="absolute inset-0"
           style={{
@@ -40,7 +49,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           }}
         />
       </div>
-      <LoginArtworkLayer className="absolute inset-0 hidden md:block" />
+      <LoginArtworkLayer className="fixed inset-0 hidden md:block" />
 
       <div className="relative z-10 w-full">
         {/* >= lg: side-by-side layout — copy column on the left, panel on the right. */}
