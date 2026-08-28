@@ -4,18 +4,21 @@ import { Resend } from "resend";
 import { getDb } from "@/lib/db/client";
 import { SITE_URL } from "@/lib/config/site";
 
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
 /**
- * Better Auth rejects state-changing requests whose Origin isn't in this
- * list. .env.local's BETTER_AUTH_URL is pinned to the production domain
- * (so the same file works when someone forgets to override it locally),
- * which otherwise makes `npm run dev` on localhost fail with "Invalid
- * origin" — this list restores localhost for dev, keeps the real
- * production domain, and trusts this specific Vercel deployment's own
- * unique hostname (VERCEL_URL/VERCEL_BRANCH_URL, set automatically per
- * deployment) rather than a `*.vercel.app` wildcard, which would trust
- * every Vercel account's deployments, not just this project's. Same
- * fix as on feature/forgot-password (auth.ts); duplicated narrowly here
- * rather than merging that branch's unrelated password-reset work in.
+ * Better Auth rejects state-changing requests (e.g. forget-password)
+ * whose Origin isn't in this list — a CSRF defense, not something to
+ * relax with a `*.vercel.app` wildcard (that would trust every Vercel
+ * account's deployments, not just this project's). Instead, list exact
+ * origins:
+ *  - localhost, for local dev (matches .env.example's BETTER_AUTH_URL)
+ *  - SITE_URL, the production domain
+ *  - VERCEL_URL / VERCEL_BRANCH_URL, which Vercel sets automatically to
+ *    *this specific* deployment's own unique hostname — exact matches,
+ *    never a pattern, so every preview deployment trusts only itself.
+ * See https://www.better-auth.com/docs/reference/security#trusted-origins
  */
 const vercelPreviewOrigins = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
   .filter((host): host is string => !!host)
@@ -27,9 +30,6 @@ const trustedOrigins = [
   SITE_URL,
   ...vercelPreviewOrigins,
 ];
-
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 /**
  * HUMANORA authentication (server-side): email/password, plus Google
