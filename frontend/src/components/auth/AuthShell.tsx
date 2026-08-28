@@ -21,16 +21,23 @@ import type { ReactNode } from "react";
  */
 export function AuthShell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#02030b]">
-      {/* `fixed`, not `absolute` — pinned to the viewport instead of to
-          this container's own (content-dependent) height. Login and
-          Signup have different form heights, so the container this
-          sits in is taller on one route than the other; an `absolute`
-          background resizes/repositions along with that height change,
-          which is exactly the "zoom/fluctuate" a Login<->Signup switch
-          was producing. `fixed` never resizes when the page's content
-          height changes — same frame, always, regardless of which
-          panel is showing. */}
+    <div className="relative flex h-dvh w-full items-center justify-center overflow-x-hidden overflow-y-auto bg-[#02030b]">
+      {/* `absolute`, not `fixed`. Login and Signup have different form
+          heights, so — with the root pinned to a CONSTANT `h-dvh`
+          instead of the old content-growable `min-h-screen` — the
+          background never needs to resize when a route's content is
+          taller: `absolute inset-0` on a fixed-height parent is already
+          stable. `fixed` was tried here first and does stop the resize,
+          but Android Chrome has a long-standing bug where `position:
+          fixed` elements detach from the visual viewport under a
+          viewport override (exactly what "Request Desktop Site" on
+          Android applies) — producing a shifted/cropped background.
+          `absolute` on a stable-height parent gets the same stillness
+          without that failure mode. Root also switched from
+          `overflow-hidden` (blocked scrolling entirely) to
+          `overflow-y-auto` so a route whose content is taller than a
+          short/landscape viewport can still be scrolled to, instead of
+          being clipped. */}
       {/* Phones (<md): the real artwork stays gated off for perf (see
           LoginArtworkLayer), but a flat #02030b behind a translucent
           glass panel read as a dead black rectangle with nothing for
@@ -38,7 +45,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           evoke the same violet/blue cosmic palette at zero image cost,
           so the glass has something to glow against. Hidden at md+
           where the real artwork takes over. */}
-      <div className="pointer-events-none fixed inset-0 md:hidden" aria-hidden="true">
+      <div className="pointer-events-none absolute inset-0 md:hidden" aria-hidden="true">
         <div
           className="absolute inset-0"
           style={{
@@ -49,11 +56,19 @@ export function AuthShell({ children }: { children: ReactNode }) {
           }}
         />
       </div>
-      <LoginArtworkLayer className="fixed inset-0 hidden md:block" />
+      <LoginArtworkLayer className="absolute inset-0 hidden md:block" />
 
       <div className="relative z-10 w-full">
-        {/* >= lg: side-by-side layout — copy column on the left, panel on the right. */}
-        <div className="hidden lg:grid lg:grid-cols-[1fr_440px] lg:gap-16 lg:p-16 xl:p-20">
+        {/* >= xl (1280px): side-by-side layout — copy column on the left,
+            panel on the right. Deliberately xl, not lg (1024) — 1024 is
+            the iPad Pro 12.9" portrait width, and the two-column grid
+            squeezed into that is a scaled-down desktop composition, not
+            a real tablet layout. Pushing the cutover to xl keeps the
+            entire tablet range (up to 1279px) on the stacked layout
+            below; every actual desktop width (1440+) renders identically
+            to before — only the breakpoint prefix changed, not any of
+            the classes or content. */}
+        <div className="hidden xl:grid xl:grid-cols-[1fr_440px] xl:gap-16 xl:p-20">
           <div className="flex flex-col justify-between">
             <Link href="/" className="focus-ring w-fit rounded-md">
               <Logo size="md" />
@@ -85,17 +100,22 @@ export function AuthShell({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* < lg: one stacked, centered column — logo, badge + headline
-            (tablet/md gets the real artwork behind it; phones/<md get a
-            plain dark background and a shorter one-line strap instead,
-            per LoginArtworkLayer's own perf gate), then the panel. */}
-        <div className="flex flex-col items-center gap-8 px-5 py-10 text-center sm:gap-10 sm:px-8 sm:py-14 lg:hidden">
-          <div className="flex flex-col items-center gap-5 sm:gap-6">
+        {/* < xl (1280px): one stacked, centered column — logo, badge, and
+            the real headline at proper phone/tablet proportions (not a
+            shrunk-down copy of the desktop composition), then the panel
+            sized to ~88% of the viewport. Covers phones through the full
+            tablet range, including 1024px (iPad Pro 12.9" portrait).
+            Phones (<md) sit on the gradient wash above instead of the
+            real artwork (perf gate in LoginArtworkLayer), but otherwise
+            get the same badge + headline treatment tablets do — just at
+            a smaller, phone-appropriate type scale. */}
+        <div className="flex flex-col items-center gap-7 px-6 py-10 text-center sm:gap-9 sm:px-8 sm:py-14 xl:hidden">
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
             <Link href="/" className="focus-ring w-fit rounded-md">
-              <Logo size="sm" />
+              <Logo size="md" />
             </Link>
 
-            <span className="login-badge hidden w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted md:inline-flex">
+            <span className="login-badge inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted">
               <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
               AI-powered writing
             </span>
@@ -108,14 +128,10 @@ export function AuthShell({ children }: { children: ReactNode }) {
                 at all (invisible). Forcing "sounds like you." onto its own
                 single line keeps the whole phrase on one line box, so the
                 gradient always has one line to paint, never two. */}
-            <p className="hidden max-w-sm text-3xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:text-4xl md:block">
+            <p className="max-w-xs text-2xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:max-w-sm sm:text-3xl md:text-4xl">
               Writing that
               <br />
               <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
-            </p>
-
-            <p className="max-w-xs text-sm text-foreground-muted md:hidden">
-              Writing that sounds like you — without losing your meaning.
             </p>
           </div>
 
