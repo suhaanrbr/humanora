@@ -100,8 +100,17 @@ export function AuthShell({ children }: { children: ReactNode }) {
               AI-powered writing
             </span>
 
+            {/* The `<br/>` (matching the desktop copy below) is load-bearing,
+                not stylistic — a `background-clip: text` gradient span that
+                wraps across two lines paints its gradient relative to the
+                union of both line boxes, so glyphs on the line that starts
+                further left than that union box render with no background
+                at all (invisible). Forcing "sounds like you." onto its own
+                single line keeps the whole phrase on one line box, so the
+                gradient always has one line to paint, never two. */}
             <p className="hidden max-w-sm text-3xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:text-4xl md:block">
-              Writing that{" "}
+              Writing that
+              <br />
               <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
             </p>
 
