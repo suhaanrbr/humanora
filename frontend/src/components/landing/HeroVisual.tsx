@@ -1,3 +1,31 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { cn } from "@/lib/cn";
+
+type CardId = "readability" | "meaning" | "voice";
+
+/**
+ * Short, human microcopy for the three real capabilities behind these
+ * panels — product education, not documentation. `learnMore` only
+ * appears where a real destination exists (My Voice has its own
+ * dashboard page; Readability and Meaning Check don't have dedicated
+ * pages yet, so they get copy only — no dead links).
+ */
+const CARD_COPY: Record<CardId, { lines: string[]; learnMore?: { label: string; href: string } }> = {
+  readability: {
+    lines: ["Easy on the eyes.", "Even easier on the reader."],
+  },
+  meaning: {
+    lines: ["Different words.", "Same point.", "That's the trick."],
+  },
+  voice: {
+    lines: ["Sounding human is good.", "Sounding like you is better."],
+    learnMore: { label: "See My Voice", href: "/dashboard/voice" },
+  },
+};
+
 /**
  * Hero product showcase — a layered composition of REAL HUMANORA
  * interface fragments (not abstract decoration, and not invented
@@ -10,13 +38,37 @@
  * HUMANORA makes no detector-evasion claim, so no panel here implies
  * one, even decoratively.
  *
+ * The three satellite panels are real, keyboard-accessible buttons —
+ * clicking (or Enter/Space) reveals a short, honest explanation of
+ * what that panel represents. Values shown (82/100, the sample dates/
+ * numbers) remain clearly illustrative demo UI, same as before; the
+ * popover text is product education, not a claim about live data.
+ *
  * Pure CSS/SVG, no animation library — every motion class is gated
  * under prefers-reduced-motion in globals.css, so this degrades to a
  * calm, fully static layout for anyone who asks for less motion.
  */
 export function HeroVisual() {
+  const [openCard, setOpenCard] = useState<CardId | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenCard(null);
+    }
+    function onClickOutside(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpenCard(null);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("mousedown", onClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="relative mx-auto flex h-[500px] w-full max-w-lg items-center justify-center sm:h-[580px]">
+    <div ref={rootRef} className="relative mx-auto flex h-[500px] w-full max-w-lg items-center justify-center sm:h-[580px]">
       {/* Ambient glow — light emerging from the dark, sets the depth
           the floating panels sit inside without being visual noise */}
       <div
@@ -73,11 +125,17 @@ export function HeroVisual() {
         </div>
       </div>
 
-      {/* Readability panel — real feature (Flesch score), floats behind
-          the top-left corner of the anchor card */}
-      <div
-        aria-hidden="true"
-        className="pearl-glass animate-float-gentle-delayed-3 absolute left-0 top-6 z-20 hidden w-40 -rotate-6 rounded-lg p-3.5 shadow-glow-sm sm:block"
+      {/* Readability — real feature (Flesch score), floats behind the
+          top-left corner of the anchor card. Now a real interactive
+          control: a handful of these panels reward curiosity without
+          demanding it — everything else in the composition stays
+          decorative. */}
+      <FloatingCard
+        id="readability"
+        openCard={openCard}
+        setOpenCard={setOpenCard}
+        className="left-0 top-6 hidden w-40 -rotate-6 sm:block"
+        popoverAlign="left"
       >
         <p className="mb-2 text-[9px] font-medium uppercase tracking-wide text-foreground-subtle">Readability</p>
         <div className="flex items-center gap-2.5">
@@ -100,13 +158,16 @@ export function HeroVisual() {
             <p className="text-[10px] text-foreground-subtle">82 / 100</p>
           </div>
         </div>
-      </div>
+      </FloatingCard>
 
-      {/* Meaning Check panel — real feature, floats above-right,
-          overlapping the anchor card's corner */}
-      <div
-        aria-hidden="true"
-        className="pearl-glass animate-float-gentle absolute right-0 top-0 z-20 hidden w-44 rotate-3 rounded-lg p-3.5 shadow-glow-sm sm:block"
+      {/* Meaning Check — real feature, floats above-right, overlapping
+          the anchor card's corner */}
+      <FloatingCard
+        id="meaning"
+        openCard={openCard}
+        setOpenCard={setOpenCard}
+        className="right-0 top-0 hidden w-44 rotate-3 sm:block"
+        popoverAlign="right"
       >
         <div className="mb-2 flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-success" />
@@ -117,13 +178,18 @@ export function HeroVisual() {
           <span>✓ Number: 1,000</span>
           <span>✓ Link preserved</span>
         </div>
-      </div>
+      </FloatingCard>
 
-      {/* My Voice panel — real feature (actual trait vocabulary), floats
-          at the bottom, overlapping the anchor card's lower edge */}
-      <div
-        aria-hidden="true"
-        className="pearl-glass surface-violet-tint animate-float-gentle-delayed-2 absolute -bottom-4 left-4 z-20 hidden w-52 rounded-lg !border-brand-purple/30 p-3.5 shadow-glow-sm sm:block"
+      {/* My Voice — real feature (actual trait vocabulary), floats at
+          the bottom, overlapping the anchor card's lower edge */}
+      <FloatingCard
+        id="voice"
+        openCard={openCard}
+        setOpenCard={setOpenCard}
+        className="-bottom-4 left-4 hidden w-52 !border-brand-purple/30 sm:block"
+        tint
+        popoverAlign="left"
+        popoverSide="top"
       >
         <p className="text-brand-gradient mb-2 text-[9px] font-semibold uppercase tracking-wide">My Voice</p>
         <div className="flex flex-wrap gap-1.5">
@@ -136,6 +202,93 @@ export function HeroVisual() {
             </span>
           ))}
         </div>
+      </FloatingCard>
+    </div>
+  );
+}
+
+function FloatingCard({
+  id,
+  openCard,
+  setOpenCard,
+  className,
+  tint,
+  popoverAlign,
+  popoverSide = "bottom",
+  children,
+}: {
+  id: CardId;
+  openCard: CardId | null;
+  setOpenCard: (id: CardId | null) => void;
+  className: string;
+  tint?: boolean;
+  popoverAlign: "left" | "right";
+  popoverSide?: "top" | "bottom";
+  children: React.ReactNode;
+}) {
+  const open = openCard === id;
+  const copy = CARD_COPY[id];
+
+  return (
+    <div className={cn("absolute z-20", className)}>
+      <button
+        type="button"
+        onClick={() => setOpenCard(open ? null : id)}
+        aria-expanded={open}
+        aria-label={`${id === "voice" ? "My Voice" : id === "meaning" ? "Meaning check" : "Readability"} — click to learn more`}
+        className={cn(
+          "pearl-glass focus-ring press-feedback group relative w-full cursor-pointer rounded-lg p-3.5 text-left shadow-glow-sm transition-[transform,border-color] duration-200",
+          "hover:-translate-y-0.5 hover:border-brand-purple/40",
+          tint && "surface-violet-tint",
+          id === "readability" && "animate-float-gentle-delayed-3",
+          id === "meaning" && "animate-float-gentle",
+          id === "voice" && "animate-float-gentle-delayed-2",
+          open && "-translate-y-0.5 border-brand-purple/50"
+        )}
+      >
+        {children}
+        {/* A quiet discoverability cue — a small dot that brightens on
+            hover/focus, not a "CLICK ME" label. */}
+        <span
+          aria-hidden="true"
+          className={cn(
+            "bg-brand-gradient absolute right-2 top-2 h-1.5 w-1.5 rounded-full opacity-30 transition-opacity duration-200 group-hover:opacity-90",
+            open && "opacity-90"
+          )}
+        />
+      </button>
+
+      <div
+        role="status"
+        className={cn(
+          "pearl-glass absolute z-30 w-56 rounded-lg p-4 shadow-glow-md transition-[opacity,transform] duration-200 ease-out",
+          popoverSide === "bottom" ? "top-full mt-2" : "bottom-full mb-2",
+          popoverAlign === "left"
+            ? popoverSide === "bottom"
+              ? "left-0 origin-top-left"
+              : "left-0 origin-bottom-left"
+            : popoverSide === "bottom"
+              ? "right-0 origin-top-right"
+              : "right-0 origin-bottom-right",
+          open
+            ? "translate-y-0 opacity-100"
+            : cn("pointer-events-none opacity-0", popoverSide === "bottom" ? "-translate-y-1" : "translate-y-1")
+        )}
+      >
+        {copy.lines.map((line, i) => (
+          <p key={i} className={cn("text-sm text-foreground", i === 0 ? "font-medium" : "text-foreground-muted")}>
+            {line}
+          </p>
+        ))}
+        {copy.learnMore && (
+          <Link
+            href={copy.learnMore.href}
+            className="focus-ring press-feedback mt-3 inline-flex items-center gap-1 text-xs font-semibold text-brand-purple hover:text-brand-pink"
+          >
+            {copy.learnMore.label}
+            <span aria-hidden="true">→</span>
+          </Link>
+        )}
       </div>
     </div>
   );

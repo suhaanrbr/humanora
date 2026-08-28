@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getVerifiedSession } from "@/lib/auth-session";
-import { LoginPageClient } from "@/components/auth/LoginPageClient";
+import { LoginFormPanel } from "@/components/auth/LoginFormPanel";
 
 export const metadata = { title: "Log in — HUMANORA" };
 
@@ -18,5 +19,9 @@ export default async function LoginPage() {
   if (result.status === "authenticated") {
     redirect("/dashboard");
   }
-  return <LoginPageClient googleEnabled={!!process.env.GOOGLE_CLIENT_ID} />;
+  return (
+    <Suspense fallback={null}>
+      <LoginFormPanel googleEnabled={!!process.env.GOOGLE_CLIENT_ID} />
+    </Suspense>
+  );
 }

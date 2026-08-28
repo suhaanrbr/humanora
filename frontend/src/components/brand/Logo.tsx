@@ -36,9 +36,11 @@ const wordmarkSizes: Record<LogoSize, string> = {
   xl: "text-3xl",
 };
 
+// Deliberate breathing room between mark and wordmark — the mark
+// stands beside "HUMANORA", not in place of its H.
 const gapSizes: Record<LogoSize, string> = {
   xs: "gap-1.5",
-  sm: "gap-2.5",
+  sm: "gap-2",
   md: "gap-2.5",
   lg: "gap-3",
   xl: "gap-3.5",
@@ -104,6 +106,15 @@ export function LogoMark({ size = "md", tone = "gradient", className }: { size?:
  * caller should use; reach for `LogoMark` alone only where space is
  * genuinely too tight for the wordmark (a collapsed nav rail, a mobile
  * tab) or where the wordmark would duplicate an adjacent page title.
+ *
+ * The wordmark keeps its own "H" — the mark sits beside "HUMANORA",
+ * not in place of a letter. Color is deliberately restrained: the mark
+ * carries the full brand gradient, but the wordmark itself uses
+ * `--color-wordmark` (see globals.css), a near-white with only ~8%
+ * violet mixed in — reads as white at a glance, brand-tinted on
+ * closer inspection. `mono-light` still forces pure white (for
+ * placement over photography/video, where even that 8% would be lost
+ * in the surrounding contrast anyway).
  */
 export function Logo({ size = "md", showWordmark = true, tone = "gradient", className }: LogoProps) {
   return (
@@ -112,9 +123,9 @@ export function Logo({ size = "md", showWordmark = true, tone = "gradient", clas
       {showWordmark && (
         <span
           className={cn(
-            "font-display font-bold tracking-tight text-foreground",
+            "font-display font-bold tracking-tight",
             wordmarkSizes[size],
-            tone === "mono-light" && "text-white"
+            tone === "mono-light" ? "text-white" : "text-wordmark"
           )}
         >
           HUMANORA
