@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { Container } from "@/components/ui/Container";
@@ -7,28 +8,35 @@ import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { getUsageSummary } from "@/lib/db/usage";
-import { getHistoryForUser } from "@/lib/db/history";
 import { getVoiceOverview } from "@/lib/db/voice";
 import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
+import { getLifetimeStats } from "@/lib/db/stats";
+import { getRecentWork } from "@/lib/db/recentWork";
 import { BillingActions } from "@/components/dashboard/BillingActions";
-import { RecentWorkCard } from "@/components/dashboard/RecentWorkCard";
-import { TransformationPreview } from "@/components/brand/TransformationPreview";
+import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
+import { formatDateTime } from "@/lib/formatDate";
+import { deriveTitle } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
-
-const GETTING_STARTED_STEPS = [
-  { title: "Paste a draft", description: "AI-assisted or your own — anything that reads a little stiff." },
-  { title: "Pick a mode", description: "Natural, Academic, Professional, and three more." },
-  { title: "Get your result", description: "Compare original and rewrite, with a meaning check." },
-] as const;
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
+// Real destinations only — no "Long Form Editor"/"Paraphrase Content"/
+// "Explain Like I'm 5" as their own routes, since those aren't separate
+// tools today (Study is one workspace with internal Summarize/Explain/
+// Notes tabs — see StudyWorkspace.tsx). Each tile still names the
+// specific capability the mockup called out; the tiles that don't yet
+// have a real backing feature (AI Detector, Chat with Document) route to
+// their real "coming soon" pages rather than nowhere.
+const QUICK_ACTIONS = [
+  { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you." },
+  { href: "/dashboard/study", title: "Summarize Text", description: "Condense long material fast." },
+  { href: "/dashboard/study", title: "Explain Like I'm 5", description: "Break a hard topic down simply." },
+  { href: "/dashboard/study", title: "Study Notes Generator", description: "Turn material into revision notes." },
+  { href: "/dashboard/ai-detector", title: "AI Detector", description: "Coming soon." },
+  { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Coming soon." },
+] as const;
+
 export default async function DashboardPage() {
-  // getVerifiedSession() is request-memoized (see lib/auth-session.ts) —
-  // this reuses the exact same lookup the layout already made, no
-  // second DB round trip. The layout already redirects on "unauthenticated"
-  // and renders its own error state on "error", but this branch is kept
-  // as a defensive fallback rather than assuming that can never reach here.
   const result = await getVerifiedSession();
   if (result.status !== "authenticated") {
     redirect("/login");
@@ -37,40 +45,70 @@ export default async function DashboardPage() {
   const userId = session.user.id;
   const plan = await getUserPlan(userId);
 
-  // Each data source degrades independently — a database hiccup on one
-  // (e.g. usage) shouldn't take down the whole dashboard.
-  const [usage, history, voice, freeTrial, billing] = await Promise.allSettled([
+  // Each data source degrades independently — a hiccup on one shouldn't
+  // take down the whole dashboard.
+  const [usage, recentWork, voice, freeTrial, billing, lifetime] = await Promise.allSettled([
     getUsageSummary(userId, plan),
-    getHistoryForUser(userId, 5),
+    getRecentWork(userId, 10),
     getVoiceOverview(userId),
     getFreeTrialStatus(userId),
     getSubscriptionSummary(userId),
+    getLifetimeStats(userId),
   ]);
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <Container size="wide" className="flex flex-col gap-8 xl:gap-10">
-      <div>
-        <p className="text-sm text-foreground-muted">Welcome back,</p>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">{session.user.name}</h1>
+      {/* Same technique as the Settings page banner: next/image + a dark
+          gradient overlay, contained to a rounded block — not the full
+          viewport, so the sidebar/rail stays on its own dark surface. */}
+      <div className="relative overflow-hidden rounded-3xl">
+        <Image
+          src="/images/settings-background.png"
+          alt=""
+          fill
+          sizes="(min-width: 1280px) 1152px, 100vw"
+          className="object-cover"
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/70" aria-hidden="true" />
+        <div className="relative px-6 py-8 sm:px-8">
+          <p className="text-sm text-white/80">{greeting},</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white">{session.user.name}</h1>
+        </div>
       </div>
 
-      {/* "What do you want to work on?" — three real destinations, not a
-          wall of tool cards. Log out already lives in the account menu
-          (top-right, every page), so this header has exactly one job. */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:gap-4">
-        <QuickAction href="/dashboard/humanize" title="Write" description="Humanize a draft, apply My Voice." />
-        <QuickAction href="/dashboard/study" title="Study" description="Summarize, explain, or make notes." />
-        <QuickAction href="/dashboard/voice" title="My Voice" description="Teach HUMANORA how you write." />
+      {/* Stat tiles — real lifetime totals, see lib/db/stats.ts. */}
+      {lifetime.status === "fulfilled" ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:gap-4">
+          <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized.toLocaleString()} />
+          <StatTile label="Documents Created" value={lifetime.value.documentsCreated.toLocaleString()} />
+          <StatTile label="Study Sessions" value={lifetime.value.studySessions.toLocaleString()} />
+          <StatTile label="Time Saved (est.)" value={`${lifetime.value.timeSavedHoursEstimate} hrs`} />
+        </div>
+      ) : (
+        <ErrorState message="Couldn't load your stats right now." />
+      )}
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+          What do you want to do?
+        </h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:gap-4">
+          {QUICK_ACTIONS.map((action) => (
+            <QuickAction key={action.title} {...action} />
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        {/* Main column: recent work is the reason someone opens the dashboard daily */}
+        {/* Main column: recent work */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-              Recent work
-            </h2>
-            {history.status === "fulfilled" && history.value.length > 0 && (
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">Recent work</h2>
+            {recentWork.status === "fulfilled" && recentWork.value.length > 0 && (
               <Link
                 href="/dashboard/history"
                 className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground"
@@ -80,58 +118,29 @@ export default async function DashboardPage() {
             )}
           </div>
 
-          {history.status === "fulfilled" ? (
-            history.value.length === 0 ? (
-              <Card className="grid grid-cols-1 items-center gap-8 p-7 sm:grid-cols-[1fr_auto] sm:p-9">
-                <div>
-                  <p className="text-base font-semibold text-foreground">Let&apos;s write something.</p>
-                  <p className="mt-1 max-w-sm text-sm text-foreground-muted">
-                    Your humanized work will show up here, ready to reopen, copy, or reuse.
-                  </p>
-                  <div className="mt-6 flex flex-col gap-4">
-                    {GETTING_STARTED_STEPS.map((step, i) => (
-                      <div key={step.title} className="flex gap-3">
-                        <span className="bg-brand-gradient flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white">
-                          {i + 1}
-                        </span>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{step.title}</p>
-                          <p className="text-xs text-foreground-subtle">{step.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="mt-6">
-                    Humanize your first draft
-                  </ButtonLink>
-                </div>
-                <TransformationPreview className="hidden w-56 shrink-0 sm:block" />
+          {recentWork.status === "fulfilled" ? (
+            recentWork.value.length === 0 ? (
+              <Card className="p-7 sm:p-9">
+                <p className="text-base font-semibold text-foreground">Let&apos;s write something.</p>
+                <p className="mt-1 max-w-sm text-sm text-foreground-muted">
+                  Your humanized drafts and study sessions will show up here.
+                </p>
+                <ButtonLink href="/dashboard/humanize" variant="primary" size="md" className="mt-6">
+                  Humanize your first draft
+                </ButtonLink>
               </Card>
             ) : (
-              <div className="flex flex-col gap-3">
-                {history.value.map((entry) => (
-                  <RecentWorkCard
-                    key={entry.id}
-                    inputText={entry.inputText}
-                    outputText={entry.outputText}
-                    mode={entry.mode}
-                    strength={entry.strength}
-                    createdAt={entry.createdAt.toISOString()}
-                  />
-                ))}
-              </div>
+              <RecentWorkTabs items={recentWork.value} />
             )
           ) : (
             <ErrorState message="Couldn't load your recent work right now." />
           )}
         </section>
 
-        {/* Sidebar: account state you'd otherwise have to go hunting for */}
+        {/* Sidebar */}
         <aside className="flex flex-col gap-6">
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-              Plan
-            </h2>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">Plan</h2>
             {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
               <Card className="p-5">
                 {plan === "free" ? (
@@ -161,14 +170,7 @@ export default async function DashboardPage() {
                       <p className="text-sm font-medium capitalize text-foreground">{usage.value.plan}</p>
                       <Badge variant="brand">Active</Badge>
                     </div>
-                    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full border border-border">
-                      <div
-                        className="bg-brand-gradient h-full rounded-full"
-                        style={{
-                          width: `${Math.min(100, (usage.value.humanizeCount / usage.value.humanizeLimit) * 100)}%`,
-                        }}
-                      />
-                    </div>
+                    <UsageBar current={usage.value.humanizeCount} limit={usage.value.humanizeLimit} />
                     <p className="mt-2 text-xs text-foreground-subtle">
                       {usage.value.humanizeCount} / {usage.value.humanizeLimit} humanizations ·{" "}
                       {usage.value.wordsProcessed.toLocaleString()} / {usage.value.wordsLimit.toLocaleString()} words
@@ -195,9 +197,7 @@ export default async function DashboardPage() {
           </section>
 
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
-              My Voice
-            </h2>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
             {voice.status === "fulfilled" ? (
               <Card className="p-5">
                 <div className="flex items-center justify-between">
@@ -223,6 +223,34 @@ export default async function DashboardPage() {
               <ErrorState message="Couldn't load your Voice profile right now." />
             )}
           </section>
+
+          {/* Recent Activity — the same real rows as "Recent work" above,
+              read as a compact feed rather than fabricated event types
+              (no "Logged in from Windows"/"Password changed" entries —
+              there's no event log backing those yet, see schema.ts). */}
+          <section>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
+              Recent Activity
+            </h2>
+            {recentWork.status === "fulfilled" ? (
+              recentWork.value.length === 0 ? (
+                <p className="text-xs text-foreground-subtle">Nothing yet.</p>
+              ) : (
+                <Card className="divide-y divide-border p-0">
+                  {recentWork.value.slice(0, 5).map((item) => (
+                    <div key={`${item.kind}-${item.id}`} className="p-4">
+                      <p className="text-sm text-foreground">
+                        {item.kind === "humanized" ? "Humanized" : "Studied"} &ldquo;{deriveTitle(item.inputText)}&rdquo;
+                      </p>
+                      <p className="mt-0.5 text-xs text-foreground-subtle">{formatDateTime(item.createdAt)}</p>
+                    </div>
+                  ))}
+                </Card>
+              )
+            ) : (
+              <ErrorState message="Couldn't load recent activity right now." />
+            )}
+          </section>
         </aside>
       </div>
 
@@ -233,6 +261,26 @@ export default async function DashboardPage() {
         </Link>
       </p>
     </Container>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="p-4">
+      <p className="text-xs text-foreground-subtle">{label}</p>
+      <p className="mt-1 text-xl font-bold tracking-tight text-foreground">{value}</p>
+    </Card>
+  );
+}
+
+function UsageBar({ current, limit }: { current: number; limit: number }) {
+  return (
+    <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full border border-border">
+      <div
+        className="bg-brand-gradient h-full rounded-full"
+        style={{ width: `${Math.min(100, (current / limit) * 100)}%` }}
+      />
+    </div>
   );
 }
 
