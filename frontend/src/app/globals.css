@@ -977,19 +977,6 @@ h4,
   -webkit-backdrop-filter: blur(8px);
 }
 
-/* The small HUMANORA-result preview on the login page — same
-   translucent material as the login card itself (not the shared
-   TransformationPreview's default flat .pearl-glass), so the two
-   surfaces read as belonging to the same lit environment. Equal
-   specificity to .pearl-glass, defined later in this file, so it
-   wins without needing !important. */
-.login-preview-glass {
-  background-color: rgba(17, 25, 40, 0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-color: rgba(139, 92, 246, 0.16);
-}
-
 /* Login form inputs — scoped overrides on top of the shared Input
    primitive's classes (via `cn`, applied last so they win), matching
    the approved reference exactly. Not a change to Input.tsx itself —

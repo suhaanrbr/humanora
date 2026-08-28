@@ -4,8 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
-import { TransformationPreview } from "@/components/brand/TransformationPreview";
-import { LoginCosmicScene } from "@/components/auth/LoginCosmicScene";
+import { LoginArtworkLayer } from "@/components/auth/LoginArtworkLayer";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
@@ -141,12 +140,11 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
 export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#02030b]">
-      {/* One continuous, full-bleed backdrop — logo, copy, product
-          preview, and the login card all sit on top of the SAME
-          cosmic scene, not two visually separate halves. The login
-          card floats on the right, exactly as in the reference —
-          no outer frame/border, the whole viewport is the canvas. */}
-      <LoginCosmicScene className="absolute inset-0 hidden lg:block" />
+      {/* The approved artwork — desktop only, full-bleed. Logo, copy,
+          and the login card sit on top of it in normal document flow
+          (Layers 4-5); this is Layer 2. No procedural scenery is
+          layered over or behind it. */}
+      <LoginArtworkLayer className="absolute inset-0 hidden lg:block" />
 
       <div className="relative z-10 w-full">
         <div className="grid grid-cols-1 gap-10 p-6 sm:p-10 lg:grid-cols-[1fr_440px] lg:gap-16 lg:p-16 xl:p-20">
@@ -174,7 +172,6 @@ export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
                   without losing your meaning, facts, or voice.
                 </p>
               </div>
-              <TransformationPreview className="login-preview-glass w-64" />
             </div>
 
             <p className="text-xs text-foreground-subtle">&copy; {new Date().getFullYear()} HUMANORA</p>
