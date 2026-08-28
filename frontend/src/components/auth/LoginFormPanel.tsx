@@ -83,7 +83,8 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   }
 
   return (
-    <div className="login-glass-panel relative w-full max-w-[440px] overflow-hidden rounded-[20px] p-8">
+    <div className="auth-panel-frame w-full max-w-[440px]">
+    <div className="login-glass-panel relative w-full overflow-hidden p-8">
       <h1 className="text-2xl font-bold tracking-tight text-foreground">Log in</h1>
       <p className="mt-2 text-sm text-foreground-muted">Welcome back to HUMANORA.</p>
 
@@ -98,7 +99,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className={cn("flex flex-col gap-4", googleEnabled ? "mt-4" : "mt-8")}>
+      <form onSubmit={handleSubmit} className={cn("flex flex-col gap-5", googleEnabled ? "mt-4" : "mt-8")}>
         <div>
           <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
             Email
@@ -113,7 +114,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="you@example.com"
-              className="login-field h-[52px] rounded-xl pl-10"
+              className="login-field h-[52px] rounded-full pl-10"
             />
           </div>
         </div>
@@ -130,7 +131,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="login-field h-[52px] rounded-xl"
+            className="login-field h-[52px] rounded-full"
           />
         </div>
 
@@ -149,9 +150,9 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           variant="primary"
           size="lg"
           loading={loading}
-          className="login-cta mt-2 h-14 w-full rounded-xl text-base font-semibold"
+          className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
         >
-          Log in
+          Log in <span aria-hidden="true">→</span>
         </Button>
       </form>
 
@@ -166,6 +167,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         <LockIcon className="h-3 w-3" />
         Secure sign-in — your writing is never shared or sold.
       </div>
+    </div>
     </div>
   );
 }

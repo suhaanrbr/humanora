@@ -68,7 +68,8 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   }
 
   return (
-    <div className="login-glass-panel relative w-full max-w-[440px] overflow-hidden rounded-[20px] p-8">
+    <div className="auth-panel-frame w-full max-w-[440px]">
+    <div className="login-glass-panel relative w-full overflow-hidden p-8">
       <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
       <p className="mt-2 text-sm text-foreground-muted">Free — no credit card required.</p>
 
@@ -92,7 +93,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className={`flex flex-col gap-4 ${googleEnabled ? "mt-4" : "mt-8"}`}>
+      <form onSubmit={handleSubmit} className={`flex flex-col gap-5 ${googleEnabled ? "mt-4" : "mt-8"}`}>
         <div>
           <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
             Name
@@ -107,7 +108,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="login-field h-[52px] rounded-xl pl-10"
+              className="login-field h-[52px] rounded-full pl-10"
             />
           </div>
         </div>
@@ -125,7 +126,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="you@example.com"
-              className="login-field h-[52px] rounded-xl pl-10"
+              className="login-field h-[52px] rounded-full pl-10"
             />
           </div>
         </div>
@@ -141,7 +142,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
-            className="login-field h-[52px] rounded-xl"
+            className="login-field h-[52px] rounded-full"
           />
         </div>
 
@@ -160,9 +161,9 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           variant="primary"
           size="lg"
           loading={loading}
-          className="login-cta mt-2 h-14 w-full rounded-xl text-base font-semibold"
+          className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
         >
-          Create account
+          Create account <span aria-hidden="true">→</span>
         </Button>
       </form>
 
@@ -177,6 +178,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         <LockIcon className="h-3 w-3" />
         Secure sign-up — your writing is never shared or sold.
       </div>
+    </div>
     </div>
   );
 }
