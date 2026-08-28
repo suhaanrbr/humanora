@@ -126,12 +126,12 @@ export function AuthShell({ children }: { children: ReactNode }) {
                 <Logo size="sm" />
               </span>
               <span className="hidden md:block">
-                <Logo size="md" />
+                <Logo size="lg" />
               </span>
             </Link>
 
-            <span className="login-badge hidden w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted md:inline-flex">
-              <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
+            <span className="login-badge hidden w-fit items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium text-foreground-muted md:inline-flex">
+              <SparkleIcon className="h-4 w-4 text-brand-purple" />
               AI-powered writing
             </span>
 
@@ -143,7 +143,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
                 at all (invisible). Forcing "sounds like you." onto its own
                 single line keeps the whole phrase on one line box, so the
                 gradient always has one line to paint, never two. */}
-            <p className="hidden max-w-sm text-3xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground sm:text-4xl md:block">
+            <p className="hidden max-w-md text-4xl font-bold leading-[1.15] tracking-[-0.01em] text-foreground md:block lg:text-5xl">
               Writing that
               <br />
               <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
