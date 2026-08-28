@@ -2,9 +2,34 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { Resend } from "resend";
 import { getDb } from "@/lib/db/client";
+import { SITE_URL } from "@/lib/config/site";
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+/**
+ * Better Auth rejects state-changing requests (e.g. forget-password)
+ * whose Origin isn't in this list — a CSRF defense, not something to
+ * relax with a `*.vercel.app` wildcard (that would trust every Vercel
+ * account's deployments, not just this project's). Instead, list exact
+ * origins:
+ *  - localhost, for local dev (matches .env.example's BETTER_AUTH_URL)
+ *  - SITE_URL, the production domain
+ *  - VERCEL_URL / VERCEL_BRANCH_URL, which Vercel sets automatically to
+ *    *this specific* deployment's own unique hostname — exact matches,
+ *    never a pattern, so every preview deployment trusts only itself.
+ * See https://www.better-auth.com/docs/reference/security#trusted-origins
+ */
+const vercelPreviewOrigins = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
+  .filter((host): host is string => !!host)
+  .map((host) => `https://${host}`);
+
+const trustedOrigins = [
+  "http://localhost:3100",
+  "http://localhost:3000",
+  SITE_URL,
+  ...vercelPreviewOrigins,
+];
 
 /**
  * HUMANORA authentication (server-side): email/password, plus Google
@@ -32,6 +57,7 @@ const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 export const auth = betterAuth({
   database: drizzleAdapter(getDb(), { provider: "pg" }),
+  trustedOrigins,
   emailAndPassword: {
     enabled: true,
     // Accounts are usable immediately; add requireEmailVerification
