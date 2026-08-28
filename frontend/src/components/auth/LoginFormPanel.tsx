@@ -123,6 +123,12 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             <label htmlFor="password" className="auth-field-label block">
               Password
             </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink"
+            >
+              Forgot password?
+            </Link>
           </div>
           <PasswordInput
             id="password"
