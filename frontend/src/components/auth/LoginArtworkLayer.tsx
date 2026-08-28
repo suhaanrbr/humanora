@@ -8,17 +8,19 @@ import Image from "next/image";
  * generated artwork (not procedural CSS/SVG; see LoginCosmicScene.tsx,
  * kept in the repo as a fallback but no longer rendered).
  *
- * Renders nothing until confirmed we're on a desktop-width viewport.
+ * Renders nothing until confirmed we're on at least a tablet-width
+ * viewport (>= 768px) — phones stay on the lightweight no-image
+ * treatment, tablets and desktops get the real artwork.
  * `priority` (needed so this doesn't lazy-load in behind the LCP-
  * critical logo/headline) forces the browser to fetch the image the
  * moment the <img> exists in the DOM, REGARDLESS of CSS `display`
- * state — a `hidden lg:block` wrapper alone would still cost mobile
+ * state — a `hidden md:block` wrapper alone would still cost phone
  * visitors the full download. Gating the mount itself on a real
  * `matchMedia` check is the only way to make "don't load this on
- * mobile" actually true rather than just visually true.
+ * phones" actually true rather than just visually true.
  */
 export function LoginArtworkLayer({ className }: { className?: string }) {
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isTabletUp, setIsTabletUp] = useState(false);
 
   /* eslint-disable react-hooks/set-state-in-effect --
      Deliberate: reading a browser-only API (matchMedia) can't happen
@@ -26,15 +28,15 @@ export function LoginArtworkLayer({ className }: { className?: string }) {
      mismatch — same accepted pattern as the sessionStorage-restore
      effects elsewhere in this codebase (e.g. HumanizeWorkspace). */
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    const mq = window.matchMedia("(min-width: 768px)");
+    setIsTabletUp(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setIsTabletUp(e.matches);
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (!isDesktop) return null;
+  if (!isTabletUp) return null;
 
   return (
     <div className={className} aria-hidden="true">
