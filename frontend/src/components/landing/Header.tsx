@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
@@ -97,7 +97,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeGroup, setActiveGroup] = useState<GroupId | null>(null);
-  const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null);
+  const [openMobileGroup, setOpenMobileGroup] = useState<GroupId | null>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
   const navRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -183,16 +183,19 @@ export function Header() {
             : "border-transparent bg-background/80 backdrop-blur-sm"
       )}
     >
-      {/* Three deliberate zones (logo / nav / account), not a plain
-          justify-between — the center column is free-sized so the nav
-          group can sit with its own consistent rhythm regardless of
-          how wide the left/right zones are. */}
-      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-6 px-4 sm:px-6 lg:px-8">
+      {/* Explicit flex justify-between (not grid-cols-[auto_1fr_auto]) —
+          the grid version let an empty, `hidden`-below-lg middle track
+          still eat into the layout on narrow screens, leaving the
+          hamburger stranded near the logo instead of pinned to the
+          true right edge. flex + justify-between anchors the logo and
+          the right-side group to their edges unconditionally; the nav
+          itself opts into the middle only at lg+ via its own flex-1. */}
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="focus-ring rounded-md" aria-label="HUMANORA home">
           <Logo size="sm" />
         </Link>
 
-        <nav ref={navRef} className="hidden items-center justify-center gap-1.5 lg:flex" aria-label="Primary">
+        <nav ref={navRef} className="hidden flex-1 items-center justify-center gap-1.5 lg:flex" aria-label="Primary">
           {GROUP_ORDER.map((group, i) => (
             <button
               key={group}
@@ -250,29 +253,34 @@ export function Header() {
           )}
           <button
             type="button"
-            className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground"
+            className={cn(
+              "focus-ring press-feedback inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors duration-200",
+              menuOpen
+                ? "border-brand-purple/40 bg-brand-purple/10 text-foreground"
+                : "border-border text-foreground-muted hover:border-brand-purple/30 hover:bg-white/[0.03] hover:text-foreground"
+            )}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             onClick={() => setMenuOpen((open) => !open)}
           >
-            <span className="relative block h-4 w-5" aria-hidden="true">
+            <span className="relative block h-3.5 w-4" aria-hidden="true">
               <span
                 className={cn(
-                  "absolute left-0 top-0 h-0.5 w-5 bg-current transition-transform duration-200",
-                  menuOpen && "translate-y-[7px] rotate-45"
+                  "absolute left-0 top-0 h-[1.5px] w-4 rounded-full bg-current transition-transform duration-200",
+                  menuOpen && "translate-y-[6.5px] rotate-45"
                 )}
               />
               <span
                 className={cn(
-                  "absolute left-0 top-1/2 h-0.5 w-5 -translate-y-1/2 bg-current transition-opacity duration-200",
+                  "absolute left-0 top-1/2 h-[1.5px] w-3 -translate-y-1/2 rounded-full bg-current transition-opacity duration-200",
                   menuOpen && "opacity-0"
                 )}
               />
               <span
                 className={cn(
-                  "absolute bottom-0 left-0 h-0.5 w-5 bg-current transition-transform duration-200",
-                  menuOpen && "-translate-y-[7px] -rotate-45"
+                  "absolute bottom-0 left-0 h-[1.5px] w-4 rounded-full bg-current transition-transform duration-200",
+                  menuOpen && "-translate-y-[6.5px] -rotate-45"
                 )}
               />
             </span>
@@ -343,33 +351,138 @@ export function Header() {
         />
       </div>
 
+      {/* The mobile/tablet counterpart to the desktop mega-panel — same
+          surface (bg-background/98 + backdrop-blur-2xl, the exact
+          treatment #nav-panel uses above) and the same idea (each
+          destination expands into its own real content: blurbs,
+          descriptions, live plan numbers, a code sample — not a bare
+          link list), just laid out as an accordion of cards instead of
+          a wide grid, since there's no room to spread it sideways
+          below lg. `lg:hidden` keeps this the ONE mobile/tablet
+          treatment across every width under the desktop breakpoint. */}
       <div
         id="mobile-nav"
         className={cn(
-          "relative z-50 overflow-hidden border-t border-border bg-background transition-[max-height] duration-300 ease-in-out lg:hidden",
-          menuOpen ? "max-h-[36rem] overflow-y-auto" : "max-h-0 border-t-0"
+          "relative z-50 overflow-hidden border-t border-border bg-background/98 backdrop-blur-2xl transition-[max-height] duration-300 ease-in-out lg:hidden",
+          menuOpen ? "max-h-[80vh] overflow-y-auto" : "max-h-0 border-t-0"
         )}
       >
-        <nav className="flex flex-col gap-1 px-4 py-4 sm:px-6" aria-label="Mobile">
-          <MobileGroup label="Product" open={openMobileGroup === "Product"} onToggle={() => setOpenMobileGroup((g) => (g === "Product" ? null : "Product"))}>
-            {PRODUCT_CAPABILITIES.map((item) => (
-              <MobileLink key={item.id} href={item.href} label={item.label} onNavigate={() => setMenuOpen(false)} />
-            ))}
-          </MobileGroup>
-          <MobileGroup label="Solutions" open={openMobileGroup === "Solutions"} onToggle={() => setOpenMobileGroup((g) => (g === "Solutions" ? null : "Solutions"))}>
-            {SOLUTIONS.map((item) => (
-              <MobileLink key={item.id} href="/#use-cases" label={item.label} onNavigate={() => setMenuOpen(false)} />
-            ))}
-          </MobileGroup>
-          <MobileLink href="/#pricing" label="Pricing" onNavigate={() => setMenuOpen(false)} top />
-          <MobileLink href="/api" label="Developers" onNavigate={() => setMenuOpen(false)} top />
-          <MobileGroup label="Resources" open={openMobileGroup === "Resources"} onToggle={() => setOpenMobileGroup((g) => (g === "Resources" ? null : "Resources"))}>
-            <MobileLink href="/blog" label="Blog" onNavigate={() => setMenuOpen(false)} />
-            <MobileLink href="/#pricing" label="FAQ" onNavigate={() => setMenuOpen(false)} />
-            <MobileLink href="/affiliates" label="Affiliates" onNavigate={() => setMenuOpen(false)} />
-          </MobileGroup>
+        <nav className="flex flex-col gap-2.5 px-4 py-5 sm:px-6" aria-label="Mobile">
+          <MobileAccordion
+            id="product"
+            label="Product"
+            eyebrow="Product"
+            open={openMobileGroup === "product"}
+            onToggle={() => setOpenMobileGroup((g) => (g === "product" ? null : "product"))}
+          >
+            <div className="flex flex-col divide-y divide-border">
+              {PRODUCT_CAPABILITIES.map((item) => (
+                <MobileRichLink key={item.id} href={item.href} label={item.label} blurb={item.blurb} onNavigate={() => setMenuOpen(false)} />
+              ))}
+            </div>
+          </MobileAccordion>
 
-          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+          <MobileAccordion
+            id="solutions"
+            label="Solutions"
+            eyebrow="Solutions"
+            open={openMobileGroup === "solutions"}
+            onToggle={() => setOpenMobileGroup((g) => (g === "solutions" ? null : "solutions"))}
+          >
+            <div className="flex flex-col divide-y divide-border">
+              {SOLUTIONS.map((item) => (
+                <MobileRichLink
+                  key={item.id}
+                  href="/#use-cases"
+                  label={item.label}
+                  blurb={item.description}
+                  meta={`Helps with: ${item.helps}`}
+                  onNavigate={() => setMenuOpen(false)}
+                />
+              ))}
+            </div>
+          </MobileAccordion>
+
+          <MobileAccordion
+            id="pricing"
+            label="Pricing"
+            eyebrow="Pricing"
+            open={openMobileGroup === "pricing"}
+            onToggle={() => setOpenMobileGroup((g) => (g === "pricing" ? null : "pricing"))}
+          >
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {PAID_PLAN_IDS.map((id) => {
+                const plan = PLANS[id];
+                return (
+                  <Link
+                    key={id}
+                    href="/#pricing"
+                    onClick={() => setMenuOpen(false)}
+                    className="focus-ring flex flex-col gap-1 rounded-xl border border-border bg-background-elevated p-3 transition-colors hover:border-brand-purple/30 hover:bg-surface"
+                  >
+                    <span className="text-sm font-semibold text-foreground">{plan.name}</span>
+                    <span className="font-display text-lg font-bold text-foreground">
+                      ₹{plan.monthlyPriceInr}
+                      <span className="text-xs font-normal text-foreground-subtle">/mo</span>
+                    </span>
+                    <span className="text-xs text-foreground-subtle">{plan.monthlyHumanizations} humanizations/mo</span>
+                  </Link>
+                );
+              })}
+            </div>
+            <Link
+              href="/#pricing"
+              onClick={() => setMenuOpen(false)}
+              className="focus-ring press-feedback mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-purple hover:text-brand-pink"
+            >
+              Compare all plans
+              <ArrowRightIcon className="h-3.5 w-3.5" />
+            </Link>
+          </MobileAccordion>
+
+          <MobileAccordion
+            id="developers"
+            label="Developers"
+            eyebrow="Developers"
+            open={openMobileGroup === "developers"}
+            onToggle={() => setOpenMobileGroup((g) => (g === "developers" ? null : "developers"))}
+          >
+            <p className="text-sm text-foreground-muted">
+              A REST endpoint for the same rewrite engine behind Humanize — currently in developer preview.
+            </p>
+            <pre className="mt-3 overflow-x-auto rounded-lg border border-border bg-background-elevated p-3 font-mono text-xs text-foreground-muted">
+              <code>{`POST https://api.humanora.dev/v1/humanize
+{ "text": "...", "mode": "professional" }`}</code>
+            </pre>
+            <Link
+              href="/api"
+              onClick={() => setMenuOpen(false)}
+              className="focus-ring press-feedback mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-purple hover:text-brand-pink"
+            >
+              View the API overview
+              <ArrowRightIcon className="h-3.5 w-3.5" />
+            </Link>
+          </MobileAccordion>
+
+          <MobileAccordion
+            id="resources"
+            label="Resources"
+            eyebrow="Resources"
+            open={openMobileGroup === "resources"}
+            onToggle={() => setOpenMobileGroup((g) => (g === "resources" ? null : "resources"))}
+          >
+            <Link href="/blog" onClick={() => setMenuOpen(false)} className="focus-ring group block rounded-xl border border-border bg-background-elevated p-3 transition-colors hover:border-brand-purple/30 hover:bg-surface">
+              <p className="text-app-label text-foreground-subtle">Featured</p>
+              <p className="font-display mt-1 text-base font-bold text-foreground transition-colors group-hover:text-brand-purple">The HUMANORA blog</p>
+              <p className="mt-1 text-xs text-foreground-muted">Writing tips, product updates, and how HUMANORA is built.</p>
+            </Link>
+            <div className="mt-2 flex flex-col divide-y divide-border">
+              <MobileRichLink href="/#pricing" label="FAQ" onNavigate={() => setMenuOpen(false)} />
+              <MobileRichLink href="/affiliates" label="Affiliates" onNavigate={() => setMenuOpen(false)} />
+            </div>
+          </MobileAccordion>
+
+          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-4">
             {!isPending && session ? (
               <>
                 <ButtonLink href="/dashboard" variant="secondary" size="md" className="w-full" onClick={() => setMenuOpen(false)}>
@@ -653,45 +766,93 @@ function ResourcesPanel({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 
-function MobileGroup({
+/**
+ * One card in the mobile/tablet accordion — the mobile counterpart to
+ * a desktop mega-panel destination. Header row (eyebrow + label +
+ * chevron) always visible; the body is real content (blurbs,
+ * descriptions, plan cards, a code sample), not a bare link list,
+ * matching what the desktop panel shows for the same destination.
+ * Height animates via the same grid-template-rows (0fr -> 1fr) trick
+ * used by #nav-panel above, so it doesn't need to measure content —
+ * a plain Pricing card and a longer Product list both "just work".
+ */
+function MobileAccordion({
+  id,
   label,
+  eyebrow,
   open,
   onToggle,
   children,
 }: {
+  id: string;
   label: string;
+  eyebrow: string;
   open: boolean;
   onToggle: () => void;
-  children: ReactElement | ReactElement[];
+  children: ReactNode;
 }) {
   return (
-    <div>
+    <div
+      className={cn(
+        "overflow-hidden rounded-2xl border transition-colors duration-200",
+        open ? "border-brand-purple/25 bg-surface/60" : "border-border bg-background-elevated/40"
+      )}
+    >
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="focus-ring flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-2.5 text-sm text-foreground-muted hover:bg-surface hover:text-foreground"
+        aria-controls={`mobile-panel-${id}`}
+        className="focus-ring press-feedback flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3.5 text-left"
       >
-        {label}
-        <ChevronIcon className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} />
+        <span className="flex items-baseline gap-2">
+          <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full transition-colors", open ? "bg-brand-purple" : "bg-border-strong")} />
+          <span className={cn("text-sm font-semibold transition-colors", open ? "text-foreground" : "text-foreground-muted")}>{label}</span>
+        </span>
+        <ChevronIcon className={cn("h-3.5 w-3.5 shrink-0 text-foreground-subtle transition-transform duration-200", open && "rotate-180")} />
       </button>
-      {open && <div className="ml-2 flex flex-col gap-1 border-l border-border pl-3">{children}</div>}
+      <div
+        id={`mobile-panel-${id}`}
+        role="region"
+        className={cn("grid transition-[grid-template-rows] duration-250 ease-out", open ? "grid-rows-[1fr]" : "grid-rows-[0fr]")}
+      >
+        <div className="overflow-hidden">
+          <div className="border-t border-border/80 px-4 pb-4 pt-3.5">
+            <p className="text-app-label text-brand-purple">{eyebrow}</p>
+            <div className="mt-2">{children}</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-function MobileLink({ href, label, onNavigate, top }: { href: string; label: string; onNavigate: () => void; top?: boolean }) {
+function MobileRichLink({
+  href,
+  label,
+  blurb,
+  meta,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  blurb?: string;
+  meta?: string;
+  onNavigate: () => void;
+}) {
   return (
-    <a
+    <Link
       href={href}
       onClick={onNavigate}
-      className={cn(
-        "focus-ring block rounded-md text-sm text-foreground-muted hover:bg-surface hover:text-foreground",
-        top ? "px-2 py-2.5" : "px-3 py-2"
-      )}
+      className="focus-ring group flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
     >
-      {label}
-    </a>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-foreground-muted transition-colors group-hover:text-foreground">{label}</span>
+        {blurb && <span className="mt-0.5 block text-xs text-foreground-subtle">{blurb}</span>}
+        {meta && <span className="mt-0.5 block text-xs text-brand-purple/80">{meta}</span>}
+      </span>
+      <ArrowRightIcon className="h-3.5 w-3.5 shrink-0 -translate-x-1 text-foreground-subtle opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-x-0 group-hover:opacity-100" />
+    </Link>
   );
 }
 
