@@ -1389,6 +1389,43 @@ h4,
   line-height: 1.08;
 }
 
+/* Restrained entrance motion — a brief, staggered fade+rise for a list
+   of cards appearing together (Recent Work, Quick Actions), NOT a
+   constant/looping animation. Each direct child gets a slightly later
+   delay via nth-child, capped at 7 groups so a long list doesn't keep
+   staggering for a full second. Respects reduced-motion like every
+   other animation in this file. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-stagger-in > * {
+    animation: stagger-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-stagger-in > *:nth-child(1) { animation-delay: 0ms; }
+  .animate-stagger-in > *:nth-child(2) { animation-delay: 40ms; }
+  .animate-stagger-in > *:nth-child(3) { animation-delay: 80ms; }
+  .animate-stagger-in > *:nth-child(4) { animation-delay: 120ms; }
+  .animate-stagger-in > *:nth-child(5) { animation-delay: 160ms; }
+  .animate-stagger-in > *:nth-child(6) { animation-delay: 200ms; }
+  .animate-stagger-in > *:nth-child(n+7) { animation-delay: 240ms; }
+}
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* A single element's entrance (stat tiles, hero content) — same curve
+   as stagger-in but for one thing, not a list. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-rise-in {
+    animation: stagger-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
 /* Reusable hover-lift for interactive surfaces (cards, panels). */
 .hover-lift {
   transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
