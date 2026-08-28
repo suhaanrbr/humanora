@@ -6,85 +6,96 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ButtonLink } from "@/components/ui/ButtonLink";
+import { ProjectPicker } from "@/components/dashboard/ProjectPicker";
 import { cn } from "@/lib/cn";
 import { deriveTitle } from "@/lib/text";
 import { formatDateTime } from "@/lib/formatDate";
+import type { RecentWorkItem } from "@/lib/db/recentWork";
 
 const DRAFT_STORAGE_KEY = "humanora-draft"; // must match HumanizeWorkspace.tsx
-
-export interface HistoryEntry {
-  id: string;
-  mode: string;
-  strength: string;
-  inputText: string;
-  outputText: string;
-  wordCount: number;
-  createdAt: string; // ISO — serialized from the server component
-}
+const STUDY_MODE_KEY = "humanora-study-mode"; // must match StudyWorkspace.tsx
+const STUDY_DRAFT_KEY = "humanora-study-draft"; // must match StudyWorkspace.tsx
 
 type SortOrder = "newest" | "oldest";
+type FilterKind = "all" | "humanized" | "study";
 
 /**
- * The real History workspace: search across saved work, sort, expand
- * an entry to see both the original and the result, copy, reuse (loads
- * the original back into the Humanize workspace), and delete with
- * confirmation. All data here is what the server actually sent —
- * deletion is optimistic (removed from view immediately) but backed by
- * a real, ownership-scoped API call; a failure restores the row.
+ * The Library workspace — HUMANORA's real memory of a user's work.
+ * Unified across both content tables (humanization, study_session; see
+ * lib/db/recentWork.ts) as of the Connected Workspace phase — Library
+ * used to only show Humanize output even after Study sessions started
+ * being persisted, which meant half a user's real saved work was
+ * invisible here. Search, sort, filter by type, expand to see the
+ * original, copy, reuse (loads the original back into the right
+ * workspace), file under a project, and delete with confirmation — all
+ * backed by real, ownership-scoped API calls; deletion is optimistic
+ * but a failure restores the row.
  */
-export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEntry[] }) {
+export function HistoryWorkspace({ initialEntries }: { initialEntries: RecentWorkItem[] }) {
   const [entries, setEntries] = useState(initialEntries);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortOrder>("newest");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterKind>("all");
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const humanizedCount = useMemo(() => entries.filter((e) => e.kind === "humanized").length, [entries]);
+  const studyCount = entries.length - humanizedCount;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const byType = filter === "all" ? entries : entries.filter((e) => e.kind === filter);
     const filtered = q
-      ? entries.filter(
-          (e) => e.inputText.toLowerCase().includes(q) || e.outputText.toLowerCase().includes(q)
-        )
-      : entries;
+      ? byType.filter((e) => e.inputText.toLowerCase().includes(q) || e.outputText.toLowerCase().includes(q))
+      : byType;
     const sorted = [...filtered].sort((a, b) => {
       const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       return sort === "newest" ? -diff : diff;
     });
     return sorted;
-  }, [entries, query, sort]);
+  }, [entries, query, sort, filter]);
 
-  async function handleCopy(entry: HistoryEntry) {
+  function keyOf(entry: RecentWorkItem) {
+    return `${entry.kind}-${entry.id}`;
+  }
+
+  async function handleCopy(entry: RecentWorkItem) {
     try {
       await navigator.clipboard.writeText(entry.outputText);
-      setCopiedId(entry.id);
-      window.setTimeout(() => setCopiedId((id) => (id === entry.id ? null : id)), 1600);
+      setCopiedKey(keyOf(entry));
+      window.setTimeout(() => setCopiedKey((k) => (k === keyOf(entry) ? null : k)), 1600);
     } catch {
       // clipboard failures aren't worth an error state here
     }
   }
 
-  async function handleDelete(entry: HistoryEntry) {
+  async function handleDelete(entry: RecentWorkItem) {
     const previous = entries;
-    setEntries((cur) => cur.filter((e) => e.id !== entry.id));
-    setConfirmDeleteId(null);
+    setEntries((cur) => cur.filter((e) => keyOf(e) !== keyOf(entry)));
+    setConfirmDeleteKey(null);
     try {
-      const res = await fetch(`/api/history/${entry.id}`, { method: "DELETE" });
+      const url = entry.kind === "humanized" ? `/api/history/${entry.id}` : `/api/study/${entry.id}`;
+      const res = await fetch(url, { method: "DELETE" });
       if (!res.ok) throw new Error("delete failed");
     } catch {
       setEntries(previous); // restore on failure
     }
   }
 
+  function handleAssigned(entry: RecentWorkItem, projectId: string | null) {
+    setEntries((cur) => cur.map((e) => (keyOf(e) === keyOf(entry) ? { ...e, projectId } : e)));
+  }
+
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">History</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Library</h1>
           <p className="mt-1 text-sm text-foreground-muted">
             {entries.length === 0
-              ? "Your humanized work will appear here."
-              : `${entries.length} saved humanization${entries.length === 1 ? "" : "s"}.`}
+              ? "Your humanized drafts and study sessions will appear here."
+              : `${humanizedCount} humanized draft${humanizedCount === 1 ? "" : "s"}, ${studyCount} study session${studyCount === 1 ? "" : "s"}.`}
           </p>
         </div>
         {entries.length > 0 && (
@@ -99,9 +110,24 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEn
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search your history…"
-            className="focus-ring h-10 flex-1 rounded-md border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-foreground-subtle"
+            placeholder="Search your Library…"
+            className="focus-ring h-10 min-w-[200px] flex-1 rounded-md border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-foreground-subtle"
           />
+          <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1 text-xs">
+            {(["all", "humanized", "study"] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={cn(
+                  "focus-ring press-feedback cursor-pointer rounded-full px-3 py-1.5 font-medium capitalize transition-colors",
+                  filter === f ? "bg-brand-gradient text-white" : "text-foreground-muted hover:text-foreground"
+                )}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
           <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1 text-xs">
             {(["newest", "oldest"] as const).map((s) => (
               <button
@@ -121,11 +147,12 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEn
       )}
 
       {entries.length === 0 ? (
-        <Card className="flex flex-col items-center gap-2 p-12 text-center">
-          <HistoryIcon className="h-8 w-8 text-foreground-subtle" />
-          <p className="mt-2 text-sm font-medium text-foreground">No writing history yet</p>
+        <Card className="glass-panel flex flex-col items-center gap-2 p-12 text-center">
+          <LibraryIcon className="h-8 w-8 text-foreground-subtle" />
+          <p className="mt-2 text-sm font-medium text-foreground">Your Library is empty</p>
           <p className="max-w-xs text-xs text-foreground-subtle">
-            Every draft you humanize is saved here automatically — searchable, and ready to reuse.
+            Every draft you humanize and every study session you run is saved here automatically —
+            searchable, and ready to reuse.
           </p>
           <ButtonLink href="/dashboard/humanize" variant="secondary" size="sm" className="mt-3">
             Humanize your first draft
@@ -138,17 +165,18 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEn
       ) : (
         <div className="flex flex-col gap-3">
           {visible.map((entry) => (
-            <HistoryCard
-              key={entry.id}
+            <LibraryCard
+              key={keyOf(entry)}
               entry={entry}
-              expanded={expandedId === entry.id}
-              onToggleExpand={() => setExpandedId((id) => (id === entry.id ? null : entry.id))}
-              confirmingDelete={confirmDeleteId === entry.id}
-              onRequestDelete={() => setConfirmDeleteId(entry.id)}
-              onCancelDelete={() => setConfirmDeleteId(null)}
+              expanded={expandedKey === keyOf(entry)}
+              onToggleExpand={() => setExpandedKey((k) => (k === keyOf(entry) ? null : keyOf(entry)))}
+              confirmingDelete={confirmDeleteKey === keyOf(entry)}
+              onRequestDelete={() => setConfirmDeleteKey(keyOf(entry))}
+              onCancelDelete={() => setConfirmDeleteKey(null)}
               onConfirmDelete={() => handleDelete(entry)}
               onCopy={() => handleCopy(entry)}
-              copied={copiedId === entry.id}
+              copied={copiedKey === keyOf(entry)}
+              onAssigned={(projectId) => handleAssigned(entry, projectId)}
             />
           ))}
         </div>
@@ -157,7 +185,7 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: HistoryEn
   );
 }
 
-function HistoryCard({
+function LibraryCard({
   entry,
   expanded,
   onToggleExpand,
@@ -167,8 +195,9 @@ function HistoryCard({
   onConfirmDelete,
   onCopy,
   copied,
+  onAssigned,
 }: {
-  entry: HistoryEntry;
+  entry: RecentWorkItem;
   expanded: boolean;
   onToggleExpand: () => void;
   confirmingDelete: boolean;
@@ -177,27 +206,35 @@ function HistoryCard({
   onConfirmDelete: () => void;
   onCopy: () => void;
   copied: boolean;
+  onAssigned: (projectId: string | null) => void;
 }) {
   const router = useRouter();
 
   function handleReuse() {
     try {
-      window.sessionStorage.setItem(DRAFT_STORAGE_KEY, entry.inputText);
+      if (entry.kind === "humanized") {
+        window.sessionStorage.setItem(DRAFT_STORAGE_KEY, entry.inputText);
+        router.push("/dashboard/humanize");
+      } else {
+        window.sessionStorage.setItem(STUDY_DRAFT_KEY, entry.inputText);
+        window.sessionStorage.setItem(STUDY_MODE_KEY, entry.mode);
+        router.push("/dashboard/study");
+      }
     } catch {
       // sessionStorage can throw in some private-browsing contexts —
       // the user can still paste manually, not worth blocking on.
+      router.push(entry.kind === "humanized" ? "/dashboard/humanize" : "/dashboard/study");
     }
-    router.push("/dashboard/humanize");
   }
 
   return (
     <Card className="p-5">
       <div className="mb-2 flex items-center justify-between gap-3 text-xs text-foreground-subtle">
         <div className="flex items-center gap-2 capitalize">
-          <Badge variant="neutral" className="capitalize">
-            {entry.mode}
+          <Badge variant={entry.kind === "study" ? "brand" : "neutral"} className="capitalize">
+            {entry.kind === "study" ? `Study · ${entry.mode}` : entry.mode}
           </Badge>
-          <span>{entry.strength}</span>
+          {entry.kind === "humanized" && <span>{entry.strength}</span>}
         </div>
         <span>{formatDateTime(entry.createdAt)}</span>
       </div>
@@ -208,9 +245,7 @@ function HistoryCard({
         className="focus-ring press-feedback -mx-1 block w-full cursor-pointer rounded-md px-1 py-0.5 text-left"
       >
         <p className="text-sm font-medium text-foreground">{deriveTitle(entry.inputText)}</p>
-        <p className={cn("mt-1.5 text-sm text-foreground-muted", !expanded && "line-clamp-2")}>
-          {entry.outputText}
-        </p>
+        <p className={cn("mt-1.5 text-sm text-foreground-muted", !expanded && "line-clamp-2")}>{entry.outputText}</p>
       </button>
 
       {expanded && (
@@ -221,7 +256,7 @@ function HistoryCard({
       )}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <button
             type="button"
             onClick={onCopy}
@@ -236,6 +271,12 @@ function HistoryCard({
           >
             Reuse this draft
           </button>
+          <ProjectPicker
+            kind={entry.kind}
+            itemId={entry.id}
+            currentProjectId={entry.projectId}
+            onAssigned={(projectId) => onAssigned(projectId)}
+          />
           <span className="text-xs text-foreground-subtle">{entry.wordCount} words</span>
         </div>
 
@@ -263,7 +304,7 @@ function HistoryCard({
   );
 }
 
-function HistoryIcon({ className }: { className?: string }) {
+function LibraryIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />

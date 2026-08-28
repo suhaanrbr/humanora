@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -44,6 +44,16 @@ const DEPTHS: { value: ExplainDepth; label: string }[] = [
 
 const MAX_CHARS = 30_000;
 
+// Must match CommandPalette.tsx's STUDY_MODE_KEY — the palette's "Quick
+// actions" (Summarize/Explain/Notes) write this and navigate here, but
+// until now nothing ever read it back, so those entries silently landed
+// on the default Summarize tab regardless of which one was picked. Also
+// used by Home's "Quick Start" capture (send text here as a starting
+// point) — same sessionStorage-bridge pattern as HumanizeWorkspace's
+// DRAFT_STORAGE_KEY / HistoryWorkspace's "Reuse this draft".
+const STUDY_MODE_KEY = "humanora-study-mode";
+const STUDY_DRAFT_KEY = "humanora-study-draft";
+
 function wordCount(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -68,6 +78,31 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
   const [copied, setCopied] = useState(false);
 
   const currentMode = MODES.find((m) => m.value === mode)!;
+
+  /* eslint-disable react-hooks/set-state-in-effect --
+     Deliberate: consuming a one-shot cross-page handoff written to
+     sessionStorage by a DIFFERENT component (CommandPalette, or Home's
+     Quick Start) can't happen during render — same accepted pattern as
+     HumanizeWorkspace's own draft-restore effect. Read once on mount,
+     then clear the keys so returning to Study later doesn't keep
+     re-applying a stale handoff. */
+  useEffect(() => {
+    try {
+      const savedMode = window.sessionStorage.getItem(STUDY_MODE_KEY);
+      if (savedMode === "summarize" || savedMode === "explain" || savedMode === "notes") {
+        setMode(savedMode);
+      }
+      window.sessionStorage.removeItem(STUDY_MODE_KEY);
+
+      const savedDraft = window.sessionStorage.getItem(STUDY_DRAFT_KEY);
+      if (savedDraft) setText(savedDraft);
+      window.sessionStorage.removeItem(STUDY_DRAFT_KEY);
+    } catch {
+      // sessionStorage can throw in some private-browsing contexts — the
+      // workspace still opens fine on its default Summarize tab, empty.
+    }
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   async function run() {
     if (!text.trim() || state === "processing") return;

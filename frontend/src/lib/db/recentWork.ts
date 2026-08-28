@@ -10,6 +10,8 @@ export type RecentWorkItem =
       inputText: string;
       outputText: string;
       createdAt: string;
+      projectId: string | null;
+      wordCount: number;
     }
   | {
       kind: "study";
@@ -18,6 +20,8 @@ export type RecentWorkItem =
       inputText: string;
       outputText: string;
       createdAt: string;
+      projectId: string | null;
+      wordCount: number;
     };
 
 /**
@@ -43,6 +47,8 @@ export async function getRecentWork(userId: string, limit = 20): Promise<RecentW
       inputText: h.inputText,
       outputText: h.outputText,
       createdAt: h.createdAt.toISOString(),
+      projectId: h.projectId,
+      wordCount: h.wordCount,
     })),
     ...studySessions.map((s) => ({
       kind: "study" as const,
@@ -51,6 +57,8 @@ export async function getRecentWork(userId: string, limit = 20): Promise<RecentW
       inputText: s.inputText,
       outputText: s.outputText,
       createdAt: s.createdAt.toISOString(),
+      projectId: s.projectId,
+      wordCount: s.wordCount,
     })),
   ];
 

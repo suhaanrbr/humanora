@@ -9,12 +9,15 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "
  *
  * Deliberately NOT built yet (left as extension points, not tables,
  * until there's a real product need):
- *   - project, template, integration, activity-event, and a real
- *     AI-detector-scan table — scoped in the dashboard-redesign plan's
- *     later phases (Projects, Templates, AI Detector, Brand Voice,
- *     Integrations, Analytics); the dashboard nav links to real, minimal
- *     pages for these today, but the tables land with each feature's
- *     own phase rather than being pre-created empty.
+ *   - template, integration, activity-event, and a real AI-detector-scan
+ *     table. `project` (below) shipped in the "Connected Workspace"
+ *     phase — a real v1 grouping of existing content, not the fuller
+ *     multi-tab "workspace" (chat context, citations, exports) that was
+ *     floated in planning; those stay extension points until there's a
+ *     concrete feature (Chat with Docs, etc.) that actually needs them.
+ *     Templates/Integrations/AI Detector/Brand Voice still show real,
+ *     minimal "in development" pages in the nav rather than fabricated
+ *     data — see ComingSoon.tsx.
  */
 
 // ---------------------------------------------------------------------------
@@ -138,6 +141,27 @@ export const usagePeriod = pgTable(
 );
 
 /**
+ * A Project — a named grouping of a user's existing Humanize/Study
+ * output. Deliberately v1-scoped: a real, persistent grouping that
+ * actually organizes real content, NOT the fuller "workspace" (chat
+ * context, citations, exports) floated in planning — that's a much
+ * larger, separately-justified feature; shipping a real grouping today
+ * beats shipping an empty shell with more tabs.
+ */
+export const project = pgTable(
+  "project",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    description: text("description"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  },
+  (table) => [index("project_user_idx").on(table.userId, table.createdAt)]
+);
+
+/**
  * A saved humanization. Only ever queried/mutated scoped to the owning
  * userId — see lib/db/history.ts for the ownership-checked accessors.
  */
@@ -152,8 +176,17 @@ export const humanization = pgTable(
     outputText: text("output_text").notNull(),
     wordCount: integer("word_count").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
+    // Nullable — most items belong to no project, same as most emails
+    // belong to no folder. ON DELETE SET NULL: deleting a project must
+    // never delete the humanizations/study sessions filed under it,
+    // only un-file them — those rows are real user content in their own
+    // right (they already exist independently in Library).
+    projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
   },
-  (table) => [index("humanization_user_idx").on(table.userId, table.createdAt)]
+  (table) => [
+    index("humanization_user_idx").on(table.userId, table.createdAt),
+    index("humanization_project_idx").on(table.projectId),
+  ]
 );
 
 /**
@@ -176,8 +209,12 @@ export const studySession = pgTable(
     outputText: text("output_text").notNull(),
     wordCount: integer("word_count").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
+    projectId: text("project_id").references(() => project.id, { onDelete: "set null" }),
   },
-  (table) => [index("study_session_user_idx").on(table.userId, table.createdAt)]
+  (table) => [
+    index("study_session_user_idx").on(table.userId, table.createdAt),
+    index("study_session_project_idx").on(table.projectId),
+  ]
 );
 
 /**

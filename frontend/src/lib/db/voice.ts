@@ -246,6 +246,36 @@ export function computeCompleteness(sampleCount: number): number {
   return Math.min(100, Math.round((sampleCount / MAX_SAMPLES_PER_PROFILE) * 100));
 }
 
+/**
+ * A small, REAL snapshot of the user's default Voice profile's analyzed
+ * traits — not a fabricated "personality insight," the exact same
+ * Gemini-derived, Zod-validated VoiceStyleProfile already stored for use
+ * in humanize() calls (see voiceAnalysis.ts), just also surfaced for
+ * display (Home's My Voice card) instead of only ever being consumed
+ * silently inside a prompt. Returns null fields when there's no
+ * analyzed profile — callers must render an honest empty state, never
+ * placeholder trait values.
+ */
+export async function getVoiceSnapshot(userId: string): Promise<{
+  profileName: string | null;
+  summary: string | null;
+  traits: { label: string; value: string }[];
+}> {
+  const profile = await getDefaultVoiceProfile(userId);
+  if (!profile?.styleProfileJson) return { profileName: null, summary: null, traits: [] };
+
+  const parsed = voiceStyleProfileSchema.safeParse(JSON.parse(profile.styleProfileJson));
+  if (!parsed.success) return { profileName: profile.name, summary: null, traits: [] };
+
+  const { TRAIT_META } = await import("@/lib/ai/voiceAnalysis");
+  const highlightTraits: VoiceTrait[] = ["formality", "sentenceLength", "conversationalTone"];
+  return {
+    profileName: profile.name,
+    summary: parsed.data.summary,
+    traits: highlightTraits.map((t) => ({ label: TRAIT_META[t].label, value: parsed.data[t] })),
+  };
+}
+
 /** Lightweight summary used anywhere that just needs "does My Voice have anything set up" (dashboard, account, humanize workspace) without fetching full profile detail. */
 export async function getVoiceOverview(userId: string) {
   const profiles = await listVoiceProfiles(userId);

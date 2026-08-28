@@ -14,10 +14,13 @@ import { getLifetimeStats } from "@/lib/db/stats";
 import { getRecentWork } from "@/lib/db/recentWork";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
+import { QuickStart } from "@/components/dashboard/QuickStart";
+import { CountUp } from "@/components/dashboard/CountUp";
 import { formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
+import { getVoiceSnapshot } from "@/lib/db/voice";
 
 export const metadata = { title: "Dashboard — HUMANORA" };
 
@@ -50,14 +53,17 @@ export default async function DashboardPage() {
 
   // Each data source degrades independently — a hiccup on one shouldn't
   // take down the whole dashboard.
-  const [usage, recentWork, voice, freeTrial, billing, lifetime] = await Promise.allSettled([
+  const [usage, recentWork, voice, freeTrial, billing, lifetime, voiceSnapshot] = await Promise.allSettled([
     getUsageSummary(userId, plan),
     getRecentWork(userId, 10),
     getVoiceOverview(userId),
     getFreeTrialStatus(userId),
     getSubscriptionSummary(userId),
     getLifetimeStats(userId),
+    getVoiceSnapshot(userId),
   ]);
+
+  const mostRecent = recentWork.status === "fulfilled" ? recentWork.value[0] : null;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
@@ -97,11 +103,11 @@ export default async function DashboardPage() {
         {/* Stat strip — real lifetime totals (lib/db/stats.ts), glass,
             anchored to the hero so it reads as one composed panel. */}
         {lifetime.status === "fulfilled" ? (
-          <div className="glass-panel relative z-10 mx-3 -mt-8 grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl shadow-elevation-raised sm:mx-6 sm:-mt-10 xl:grid-cols-4 xl:divide-y-0">
-            <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized.toLocaleString()} icon={SparkIcon} emphasize />
-            <StatTile label="Documents Created" value={lifetime.value.documentsCreated.toLocaleString()} icon={DocumentIcon} />
-            <StatTile label="Study Sessions" value={lifetime.value.studySessions.toLocaleString()} icon={StudyStatIcon} />
-            <StatTile label="Time Saved (est.)" value={`${lifetime.value.timeSavedHoursEstimate} hrs`} icon={ClockIcon} />
+          <div className="glass-panel animate-rise-in relative z-10 mx-3 -mt-8 grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl shadow-elevation-raised sm:mx-6 sm:-mt-10 xl:grid-cols-4 xl:divide-y-0">
+            <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized} icon={SparkIcon} emphasize />
+            <StatTile label="Documents Created" value={lifetime.value.documentsCreated} icon={DocumentIcon} />
+            <StatTile label="Study Sessions" value={lifetime.value.studySessions} icon={StudyStatIcon} />
+            <StatTile label="Time Saved (est.)" value={lifetime.value.timeSavedHoursEstimate} suffix=" hrs" icon={ClockIcon} />
           </div>
         ) : (
           <div className="mt-4">
@@ -110,11 +116,47 @@ export default async function DashboardPage() {
         )}
       </div>
 
+      {/* Contextual nudge — real account state only (free trial still
+          available, or this month's usage running high), never a
+          fabricated "recommendation." Renders at most one line, and
+          nothing at all when neither condition is real. */}
+      {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && (
+        <NudgeBanner plan={plan} freeTrialUsed={freeTrial.value.used} usage={usage.value} />
+      )}
+
+      {/* Continue + Quick Start — the "help me decide what to do next"
+          layer. Continue only renders when there's real recent work to
+          resume (no fabricated "pick up where you left off" for a brand
+          new account); Quick Start is a real shortcut into Write/Study,
+          not a duplicated mini-tool (see QuickStart.tsx). */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {mostRecent && (
+          <Link
+            href={mostRecent.kind === "study" ? "/dashboard/study" : "/dashboard/history"}
+            className="glass-panel hover-lift group flex flex-col justify-between rounded-2xl p-5"
+          >
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Continue</p>
+              <p className="mt-2 text-sm font-semibold text-foreground group-hover:text-brand-purple">
+                {deriveTitle(mostRecent.inputText)}
+              </p>
+              <p className="mt-1 line-clamp-2 text-xs text-foreground-subtle">{mostRecent.outputText}</p>
+            </div>
+            <p className="mt-4 text-xs text-foreground-subtle">
+              {mostRecent.kind === "humanized" ? "Humanized" : "Studied"} {formatDateTime(mostRecent.createdAt)}
+            </p>
+          </Link>
+        )}
+        <div className={cn(!mostRecent && "lg:col-span-2")}>
+          <QuickStart />
+        </div>
+      </div>
+
       <div>
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">
           What do you want to do?
         </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:gap-4">
+        <div className="animate-stagger-in grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:gap-4">
           {QUICK_ACTIONS.map((action) => (
             <QuickAction key={action.title} {...action} />
           ))}
@@ -231,11 +273,30 @@ export default async function DashboardPage() {
                     {voice.value.profileCount} profile{voice.value.profileCount === 1 ? "" : "s"}
                   </Badge>
                 </div>
-                <p className="mt-2 text-xs text-foreground-subtle">
-                  {voice.value.hasAnalyzedProfile
-                    ? "Pick it next to Mode when humanizing text on a paid plan."
-                    : "Teach HUMANORA how you write from a few real samples."}
-                </p>
+                {/* Real trait data (voiceSnapshot), not a fabricated
+                    "personality" — the exact same Gemini-derived,
+                    Zod-validated fields already used to steer humanize()
+                    calls (see lib/ai/voiceAnalysis.ts), just surfaced
+                    here instead of only ever consumed silently. */}
+                {voiceSnapshot.status === "fulfilled" && voiceSnapshot.value.summary ? (
+                  <>
+                    <p className="mt-2 text-xs text-foreground-subtle">{voiceSnapshot.value.summary}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {voiceSnapshot.value.traits.map((t) => (
+                        <span
+                          key={t.label}
+                          className="rounded-full border border-brand-purple/25 bg-brand-purple/[0.08] px-2.5 py-1 text-[11px] capitalize text-brand-purple"
+                        >
+                          {t.label}: {t.value}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-foreground-subtle">
+                    Teach HUMANORA how you write from a few real samples.
+                  </p>
+                )}
                 <div className="mt-3">
                   <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
                     {voice.value.profileCount === 0 ? "Get started" : "Open"}
@@ -306,17 +367,71 @@ export default async function DashboardPage() {
   );
 }
 
+function NudgeBanner({
+  plan,
+  freeTrialUsed,
+  usage,
+}: {
+  plan: string;
+  freeTrialUsed: boolean;
+  usage: { humanizeCount: number; humanizeLimit: number };
+}) {
+  const usageRatio = usage.humanizeLimit > 0 ? usage.humanizeCount / usage.humanizeLimit : 0;
+
+  if (plan === "free" && !freeTrialUsed) {
+    return (
+      <NudgeLine href="/dashboard/humanize" icon={SparkIcon}>
+        Your complimentary transformation is ready — try Humanize on your own draft.
+      </NudgeLine>
+    );
+  }
+  if (plan !== "free" && usageRatio >= 0.8) {
+    return (
+      <NudgeLine href="/dashboard/billing" icon={ClockIcon}>
+        You&apos;ve used {usage.humanizeCount} of {usage.humanizeLimit} humanizations this month.
+      </NudgeLine>
+    );
+  }
+  return null;
+}
+
+function NudgeLine({
+  href,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  icon: (props: { className?: string }) => React.ReactElement;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="focus-ring group flex w-fit items-center gap-2.5 rounded-full border border-brand-purple/25 bg-brand-purple/[0.06] py-2 pl-3 pr-4 text-xs text-foreground-muted transition-colors hover:border-brand-purple/40 hover:text-foreground"
+    >
+      <Icon className="h-3.5 w-3.5 shrink-0 text-brand-purple" />
+      {children}
+      <span aria-hidden="true" className="text-brand-purple transition-transform group-hover:translate-x-0.5">
+        →
+      </span>
+    </Link>
+  );
+}
+
 function StatTile({
   label,
   value,
+  suffix = "",
   icon: Icon,
   emphasize,
 }: {
   label: string;
-  value: string;
+  value: number;
+  suffix?: string;
   icon: (props: { className?: string }) => React.ReactElement;
   emphasize?: boolean;
 }) {
+  const display = `${value.toLocaleString()}${suffix}`;
   return (
     <div className="flex items-center gap-3 p-4 sm:p-5">
       <span className={cn("icon-chip h-10 w-10 shrink-0", emphasize && "shadow-glow-sm")}>
@@ -330,7 +445,7 @@ function StatTile({
             emphasize ? "text-brand-gradient" : "text-foreground"
           )}
         >
-          {value}
+          <CountUp value={value} display={display} />
         </p>
       </div>
     </div>

@@ -1,22 +1,29 @@
-import { ComingSoon } from "@/components/dashboard/ComingSoon";
+import { redirect } from "next/navigation";
+import { getVerifiedSession } from "@/lib/auth-session";
+import { Container } from "@/components/ui/Container";
+import { listProjectsForUser } from "@/lib/db/projects";
+import { ProjectsWorkspace } from "@/components/dashboard/ProjectsWorkspace";
 
 export const metadata = { title: "Projects — HUMANORA" };
 
-export default function ProjectsPage() {
-  return (
-    <ComingSoon
-      title="Projects"
-      description="Group related Humanize and Study work together under one project."
-      icon={ProjectsIcon}
-    />
-  );
-}
+export default async function ProjectsPage() {
+  const result = await getVerifiedSession();
+  if (result.status !== "authenticated") redirect("/login");
 
-function ProjectsIcon({ className }: { className?: string }) {
+  const projects = await listProjectsForUser(result.session.user.id);
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <rect x="3.5" y="6" width="17" height="13" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3.5 6.5 6 4h4l1.6 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Container className="mx-auto max-w-4xl">
+      <ProjectsWorkspace
+        initialProjects={projects.map((p) => ({
+          id: p.id,
+          name: p.name,
+          description: p.description,
+          createdAt: p.createdAt.toISOString(),
+          updatedAt: p.updatedAt.toISOString(),
+          itemCount: p.itemCount,
+        }))}
+      />
+    </Container>
   );
 }

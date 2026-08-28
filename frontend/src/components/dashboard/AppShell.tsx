@@ -22,20 +22,22 @@ interface NavEntry {
 // a student "does" in the product, so it doesn't compete for space
 // with the five real capabilities below.
 // Two groups, not one flat list of twelve — a single undifferentiated
-// column is exactly what read as "admin panel." "Workspace" is the five
-// real, everyday destinations; "Explore" is where Phase 1's newer nav
-// entries live, several of them still "Coming soon" (see ComingSoon.tsx)
-// — grouping them separately keeps the always-real workspace from being
-// diluted by placeholders, without hiding what's coming.
+// column is exactly what read as "admin panel." "Workspace" is the six
+// real, everyday destinations (Projects promoted here in the Connected
+// Workspace phase — it's a real, schema-backed grouping feature now,
+// not a placeholder); "Explore" is where the still-"Coming soon" nav
+// entries live (see ComingSoon.tsx) plus Analytics — grouping them
+// separately keeps the always-real workspace from being diluted by
+// placeholders, without hiding what's coming.
 const WORKSPACE_ENTRIES: NavEntry[] = [
   { href: "/dashboard", label: "Home", icon: HomeIcon },
   { href: "/dashboard/humanize", label: "Write", icon: WriteIcon },
   { href: "/dashboard/study", label: "Study", icon: StudyIcon },
   { href: "/dashboard/voice", label: "My Voice", icon: VoiceIcon },
   { href: "/dashboard/history", label: "Library", icon: LibraryIcon },
+  { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
 ];
 const EXPLORE_ENTRIES: NavEntry[] = [
-  { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
   { href: "/dashboard/templates", label: "Templates", icon: TemplatesIcon },
   { href: "/dashboard/ai-detector", label: "AI Detector", icon: DetectorIcon },
   { href: "/dashboard/chat-with-docs", label: "Chat with Docs", icon: ChatIcon },

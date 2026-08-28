@@ -65,6 +65,13 @@ const ITEMS: CommandItem[] = [
       r.push("/dashboard/study?mode=notes");
     },
   },
+  {
+    id: "action-project",
+    label: "Create a project",
+    hint: "Opens Projects",
+    group: "Quick actions",
+    run: (r) => r.push("/dashboard/projects"),
+  },
 ];
 
 /**
