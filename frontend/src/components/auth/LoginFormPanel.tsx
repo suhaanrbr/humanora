@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
-import { LoginArtworkLayer } from "@/components/auth/LoginArtworkLayer";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Button } from "@/components/ui/Button";
 import { GoogleButton } from "@/components/auth/GoogleButton";
 import { signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/cn";
+
+// Shared with SignupFormPanel — carries an in-progress email across a
+// Login <-> Signup switch (a real convenience, not account data) so
+// retyping isn't necessary. Never used for the password field.
+const AUTH_EMAIL_BRIDGE_KEY = "humanora-auth-email";
 
 /** Only ever redirect within HUMANORA itself — an open `next` param could
  * otherwise be used to bounce a just-authenticated user to an external
@@ -22,7 +25,7 @@ function safeNextPath(raw: string | null): string {
   return "/dashboard";
 }
 
-function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
+export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = safeNextPath(params.get("next"));
@@ -31,6 +34,31 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  /* eslint-disable react-hooks/set-state-in-effect --
+     Deliberate: restoring browser-only sessionStorage state can't
+     happen during SSR or the initial client render without a
+     hydration mismatch — same accepted pattern used throughout this
+     codebase (e.g. HumanizeWorkspace's draft restore). */
+  useEffect(() => {
+    try {
+      const saved = window.sessionStorage.getItem(AUTH_EMAIL_BRIDGE_KEY);
+      if (saved) setEmail(saved);
+    } catch {
+      // sessionStorage can throw in some private-browsing contexts — not worth surfacing
+    }
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  function handleEmailChange(value: string) {
+    setEmail(value);
+    try {
+      if (value) window.sessionStorage.setItem(AUTH_EMAIL_BRIDGE_KEY, value);
+      else window.sessionStorage.removeItem(AUTH_EMAIL_BRIDGE_KEY);
+    } catch {
+      // ignore — this is a nicety, not critical functionality
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +73,11 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
       return;
     }
 
+    try {
+      window.sessionStorage.removeItem(AUTH_EMAIL_BRIDGE_KEY);
+    } catch {
+      // ignore
+    }
     router.push(next);
     router.refresh();
   }
@@ -78,7 +111,7 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
               required
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="you@example.com"
               className="login-field h-[52px] rounded-xl pl-10"
             />
@@ -134,79 +167,6 @@ function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         Secure sign-in — your writing is never shared or sold.
       </div>
     </div>
-  );
-}
-
-export function LoginPageClient({ googleEnabled }: { googleEnabled: boolean }) {
-  return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#02030b]">
-      {/* The approved artwork — desktop only, full-bleed. Logo, copy,
-          and the login card sit on top of it in normal document flow
-          (Layers 4-5); this is Layer 2. No procedural scenery is
-          layered over or behind it. */}
-      <LoginArtworkLayer className="absolute inset-0 hidden lg:block" />
-
-      <div className="relative z-10 w-full">
-        <div className="grid grid-cols-1 gap-10 p-6 sm:p-10 lg:grid-cols-[1fr_440px] lg:gap-16 lg:p-16 xl:p-20">
-          {/* Left: brand story — hidden below lg, matching the
-              reference's desktop-only landscape; mobile gets its own
-              compact header instead (see below). */}
-          <div className="hidden flex-col justify-between lg:flex">
-            <Link href="/" className="focus-ring w-fit rounded-md">
-              <Logo size="md" />
-            </Link>
-
-            <div className="flex max-w-md flex-col gap-6">
-              <span className="login-badge inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-foreground-muted">
-                <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
-                AI-powered writing
-              </span>
-              <div>
-                <p className="text-4xl font-bold leading-[1.05] tracking-[-0.01em] text-foreground xl:text-5xl">
-                  Writing that
-                  <br />
-                  <span className="text-brand-gradient text-brand-gradient-glow">sounds like you.</span>
-                </p>
-                <p className="mt-4 max-w-sm text-base leading-relaxed text-foreground-muted">
-                  HUMANORA turns stiff, AI-assisted drafts into natural writing —
-                  without losing your meaning, facts, or voice.
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-foreground-subtle">&copy; {new Date().getFullYear()} HUMANORA</p>
-          </div>
-
-          {/* Right: the actual form. */}
-          <div className="flex flex-col items-center justify-center lg:items-end">
-            <div className="mb-8 flex flex-col items-center gap-3 text-center lg:hidden">
-              <Link href="/" className="focus-ring w-fit rounded-md">
-                <Logo size="sm" />
-              </Link>
-              <p className="max-w-xs text-sm text-foreground-muted">
-                Writing that sounds like you — without losing your meaning.
-              </p>
-            </div>
-            <Suspense fallback={null}>
-              <LoginForm googleEnabled={googleEnabled} />
-            </Suspense>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SparkleIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
   );
 }
 
