@@ -53,6 +53,10 @@ const MAX_CHARS = 30_000;
 // DRAFT_STORAGE_KEY / HistoryWorkspace's "Reuse this draft".
 const STUDY_MODE_KEY = "humanora-study-mode";
 const STUDY_DRAFT_KEY = "humanora-study-draft";
+// Same "Humanize into this project" mechanism as HumanizeWorkspace.tsx —
+// written by ProjectDetail.tsx's "Study into this project" shortcut.
+const TARGET_PROJECT_ID_KEY = "humanora-target-project-id";
+const TARGET_PROJECT_NAME_KEY = "humanora-target-project-name";
 
 function wordCount(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
@@ -76,6 +80,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
   const [output, setOutput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [targetProject, setTargetProject] = useState<{ id: string; name: string } | null>(null);
 
   const currentMode = MODES.find((m) => m.value === mode)!;
 
@@ -97,6 +102,12 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
       const savedDraft = window.sessionStorage.getItem(STUDY_DRAFT_KEY);
       if (savedDraft) setText(savedDraft);
       window.sessionStorage.removeItem(STUDY_DRAFT_KEY);
+
+      const targetId = window.sessionStorage.getItem(TARGET_PROJECT_ID_KEY);
+      const targetName = window.sessionStorage.getItem(TARGET_PROJECT_NAME_KEY);
+      if (targetId && targetName) setTargetProject({ id: targetId, name: targetName });
+      window.sessionStorage.removeItem(TARGET_PROJECT_ID_KEY);
+      window.sessionStorage.removeItem(TARGET_PROJECT_NAME_KEY);
     } catch {
       // sessionStorage can throw in some private-browsing contexts — the
       // workspace still opens fine on its default Summarize tab, empty.
@@ -112,7 +123,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
       const response = await fetch("/api/study", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, mode, depth }),
+        body: JSON.stringify({ text, mode, depth, projectId: targetProject?.id }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -147,6 +158,12 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
 
   return (
     <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
+      {targetProject && (
+        <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
+          Your result will be filed under <span className="font-medium text-foreground">{targetProject.name}</span>.
+        </p>
+      )}
       <div className="sticky top-14 z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 md:top-4 lg:mx-0 lg:px-0">
         <div className="pearl-glass flex flex-wrap items-center gap-2 rounded-full px-2.5 py-2 shadow-glow-sm">
           <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1 text-xs">

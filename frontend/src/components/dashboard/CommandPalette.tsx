@@ -10,7 +10,7 @@ interface CommandItem {
   id: string;
   label: string;
   hint: string;
-  group: "Go to" | "Quick actions";
+  group: "Go to" | "Quick actions" | "Projects";
   run: (router: ReturnType<typeof useRouter>) => void;
 }
 
@@ -20,6 +20,7 @@ const ITEMS: CommandItem[] = [
   { id: "nav-study", label: "Study", hint: "Go to Study", group: "Go to", run: (r) => r.push("/dashboard/study") },
   { id: "nav-voice", label: "My Voice", hint: "Go to My Voice", group: "Go to", run: (r) => r.push("/dashboard/voice") },
   { id: "nav-library", label: "Library", hint: "Go to Library", group: "Go to", run: (r) => r.push("/dashboard/history") },
+  { id: "nav-projects", label: "Projects", hint: "Go to Projects", group: "Go to", run: (r) => r.push("/dashboard/projects") },
   { id: "nav-billing", label: "Billing", hint: "Go to Billing", group: "Go to", run: (r) => r.push("/dashboard/billing") },
   { id: "nav-settings", label: "Settings", hint: "Go to Settings", group: "Go to", run: (r) => r.push("/dashboard/settings") },
   {
@@ -107,22 +108,70 @@ export function CommandTrigger({ onOpen, className }: { onOpen: () => void; clas
 /**
  * HUMANORA's command palette overlay — mount exactly ONCE per app
  * (AppShell owns this). Ctrl/Cmd+K toggles it globally regardless of
- * which trigger button is visible at the current viewport. Scoped to
- * what's real today: navigating to an existing page, or jumping into
- * Write/Study with a mode pre-selected. Deliberately does NOT include
- * "search Library" — that needs a real unified Write+Study data model
- * (Stage 6's job, not invented here), and a fake/empty search box
- * would be worse than no search box. No AI call happens anywhere in
- * this component.
+ * which trigger button is visible at the current viewport. Static
+ * entries (navigation, Study-mode shortcuts) are always present; a
+ * "Continue <most recent real item>" entry and the user's real Projects
+ * are fetched once per open from /api/workspace/summary and merged in
+ * — never rendered until that resolves, so there's no placeholder
+ * "Continue" row flashing before real data loads. Still deliberately
+ * does NOT do full-text search across Library — that already exists on
+ * the Library page itself; wiring it into this globally-mounted palette
+ * means either fetching a user's full history here too or a real
+ * debounced server search, a separate increment. No AI call happens
+ * anywhere in this component.
  */
 export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [summary, setSummary] = useState<{
+    mostRecent: { kind: "humanized" | "study"; title: string } | null;
+    projects: { id: string; name: string }[];
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
 
-  const filtered = ITEMS.filter((item) => item.label.toLowerCase().includes(query.trim().toLowerCase()));
+  // Real data, fetched once per open — never on every keystroke, and
+  // never rendered until it actually resolves (no placeholder "Continue"
+  // row while loading). A brand-new account gets mostRecent: null and
+  // projects: [] from the API itself, same honest-empty-state rule as
+  // everywhere else — this never fabricates a "Continue" entry.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    fetch("/api/workspace/summary")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setSummary(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const dynamicItems: CommandItem[] = [];
+  if (summary?.mostRecent) {
+    dynamicItems.push({
+      id: "action-continue",
+      label: `Continue "${summary.mostRecent.title}"`,
+      hint: summary.mostRecent.kind === "study" ? "Opens Study" : "Opens Library",
+      group: "Quick actions",
+      run: (r) => r.push(summary!.mostRecent!.kind === "study" ? "/dashboard/study" : "/dashboard/history"),
+    });
+  }
+  for (const p of summary?.projects ?? []) {
+    dynamicItems.push({
+      id: `project-${p.id}`,
+      label: p.name,
+      hint: "Open project",
+      group: "Projects",
+      run: (r) => r.push(`/dashboard/projects/${p.id}`),
+    });
+  }
+
+  const allItems = [...ITEMS, ...dynamicItems];
+  const filtered = allItems.filter((item) => item.label.toLowerCase().includes(query.trim().toLowerCase()));
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -212,7 +261,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
           {filtered.length === 0 && (
             <p className="px-3 py-6 text-center text-sm text-foreground-subtle">No matches for &ldquo;{query}&rdquo;.</p>
           )}
-          {(["Go to", "Quick actions"] as const).map((group) => {
+          {(["Go to", "Quick actions", "Projects"] as const).map((group) => {
             const groupItems = filtered.filter((i) => i.group === group);
             if (groupItems.length === 0) return null;
             return (

@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { getUserPlan } from "@/lib/db/entitlement";
 import { checkAndReserveQuota, releaseQuotaUnit } from "@/lib/db/usage";
 import { saveStudySession } from "@/lib/db/study";
+import { assignItemToProject } from "@/lib/db/projects";
 import { PLANS } from "@/lib/config/plans";
 import { resolveAuthenticatedUserId, authErrorResponse } from "@/lib/api-auth";
 
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { text, mode, depth } = (body ?? {}) as Record<string, unknown>;
+  const { text, mode, depth, projectId } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "Please provide some material to work with." }, { status: 400 });
@@ -82,7 +83,7 @@ export async function POST(req: NextRequest) {
       outputTokenLimit: PLANS[plan].outputTokenLimit,
     });
 
-    await saveStudySession({
+    const savedId = await saveStudySession({
       userId,
       mode: safeMode,
       inputText: trimmed,
@@ -90,7 +91,15 @@ export async function POST(req: NextRequest) {
       wordCount: words,
     });
 
-    return NextResponse.json({ output: result.output });
+    if (typeof projectId === "string" && projectId) {
+      try {
+        await assignItemToProject(userId, { kind: "study", id: savedId }, projectId);
+      } catch (err) {
+        console.error("[study] project assignment failed", err);
+      }
+    }
+
+    return NextResponse.json({ output: result.output, id: savedId });
   } catch (err) {
     await releaseQuotaUnit(userId, plan, words);
     if (err instanceof StudyError) {

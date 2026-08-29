@@ -20,6 +20,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         id={data.project.id}
         name={data.project.name}
         description={data.project.description}
+        createdAt={data.project.createdAt.toISOString()}
         items={data.items.map((item) => ({ ...item, createdAt: item.createdAt.toISOString() }))}
       />
     </Container>

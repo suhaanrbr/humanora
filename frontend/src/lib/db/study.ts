@@ -16,9 +16,10 @@ export interface SaveStudySessionInput {
   wordCount: number;
 }
 
-export async function saveStudySession(input: SaveStudySessionInput) {
+export async function saveStudySession(input: SaveStudySessionInput): Promise<string> {
   const db = getDb();
-  await db.insert(studySession).values({ id: randomUUID(), ...input });
+  const id = randomUUID();
+  await db.insert(studySession).values({ id, ...input });
 
   const rows = await db
     .select({ id: studySession.id })
@@ -28,10 +29,12 @@ export async function saveStudySession(input: SaveStudySessionInput) {
 
   if (rows.length > MAX_SESSIONS_PER_USER) {
     const idsToDelete = rows.slice(MAX_SESSIONS_PER_USER).map((r) => r.id);
-    for (const id of idsToDelete) {
-      await db.delete(studySession).where(eq(studySession.id, id));
+    for (const staleId of idsToDelete) {
+      await db.delete(studySession).where(eq(studySession.id, staleId));
     }
   }
+
+  return id;
 }
 
 /** Scoped by userId at the query level — see history.ts's identical note. */

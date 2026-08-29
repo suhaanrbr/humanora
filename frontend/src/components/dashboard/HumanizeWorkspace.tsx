@@ -15,6 +15,13 @@ import type { MeaningCheckResult } from "@/lib/ai/meaningCheck";
 import type { ReadabilityScore } from "@/lib/ai/readability";
 
 const DRAFT_STORAGE_KEY = "humanora-draft";
+// Written by a Project's "Humanize into this project" shortcut
+// (ProjectDetail.tsx) — read once, sent with the request so the saved
+// result is filed under that project in the SAME request (see
+// api/humanize/route.ts's optional projectId), then cleared so it
+// never silently re-applies to a later, unrelated humanize call.
+const TARGET_PROJECT_ID_KEY = "humanora-target-project-id";
+const TARGET_PROJECT_NAME_KEY = "humanora-target-project-name";
 const MAX_CHARS = 5000 * 6; // Ultra's ceiling — the API enforces the real per-plan limit server-side
 
 // Kept under FREE_TRIAL_MAX_CHARS (200) so a first-time free user's very
@@ -79,6 +86,7 @@ export function HumanizeWorkspace({
   const [readability, setReadability] = useState<ReadabilityScore | null>(null);
   const [compareView, setCompareView] = useState<CompareView>("original");
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [targetProject, setTargetProject] = useState<{ id: string; name: string } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const voiceAvailable = plan !== "free" && voiceProfiles.length > 0;
@@ -103,6 +111,12 @@ export function HumanizeWorkspace({
     try {
       const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
       if (saved) setText(saved);
+
+      const targetId = window.sessionStorage.getItem(TARGET_PROJECT_ID_KEY);
+      const targetName = window.sessionStorage.getItem(TARGET_PROJECT_NAME_KEY);
+      if (targetId && targetName) setTargetProject({ id: targetId, name: targetName });
+      window.sessionStorage.removeItem(TARGET_PROJECT_ID_KEY);
+      window.sessionStorage.removeItem(TARGET_PROJECT_NAME_KEY);
     } catch {
       // sessionStorage can throw in some private-browsing contexts —
       // not worth surfacing, the workspace just starts empty.
@@ -140,6 +154,7 @@ export function HumanizeWorkspace({
           strength,
           voiceProfileId: voiceAvailable && voiceProfileId ? voiceProfileId : undefined,
           customInstructions: customInstructionsAvailable ? customInstructions : undefined,
+          projectId: targetProject?.id,
         }),
       });
       const data = await response.json();
@@ -209,6 +224,12 @@ export function HumanizeWorkspace({
 
   return (
     <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
+      {targetProject && (
+        <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
+          Your result will be filed under <span className="font-medium text-foreground">{targetProject.name}</span>.
+        </p>
+      )}
       {/* Floating toolbar — every control the current plan actually
           supports, in one continuous strip instead of scattered cards.
           Sticky so it stays reachable while a long draft scrolls, but
