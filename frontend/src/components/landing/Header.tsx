@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { AccountMenu } from "@/components/landing/AccountMenu";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
+import { useSignOut } from "@/lib/useSignOut";
 import { writingModes } from "@/lib/config/modes";
 import { PAID_PLAN_IDS, PLANS } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
@@ -857,25 +857,16 @@ function MobileRichLink({
 }
 
 function MobileSignOutLink({ onNavigate }: { onNavigate: () => void }) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
-  async function handleSignOut() {
-    setLoading(true);
-    await signOut();
-    onNavigate();
-    router.push("/");
-    router.refresh();
-  }
+  const { signingOut, handleSignOut } = useSignOut();
 
   return (
     <button
       type="button"
-      onClick={handleSignOut}
-      disabled={loading}
+      onClick={() => handleSignOut(onNavigate)}
+      disabled={signingOut}
       className="focus-ring press-feedback w-full cursor-pointer rounded-md border border-border-strong bg-surface px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-brand-purple/40 disabled:opacity-50"
     >
-      {loading ? "Logging out…" : "Log out"}
+      {signingOut ? "Logging out…" : "Log out"}
     </button>
   );
 }

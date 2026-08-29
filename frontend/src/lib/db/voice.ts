@@ -256,23 +256,32 @@ export function computeCompleteness(sampleCount: number): number {
  * analyzed profile — callers must render an honest empty state, never
  * placeholder trait values.
  */
-export async function getVoiceSnapshot(userId: string): Promise<{
+export async function getVoiceSnapshot(
+  userId: string,
+  options?: { full?: boolean }
+): Promise<{
   profileName: string | null;
   summary: string | null;
   traits: { label: string; value: string }[];
+  quirks: string[];
 }> {
   const profile = await getDefaultVoiceProfile(userId);
-  if (!profile?.styleProfileJson) return { profileName: null, summary: null, traits: [] };
+  if (!profile?.styleProfileJson) return { profileName: null, summary: null, traits: [], quirks: [] };
 
   const parsed = voiceStyleProfileSchema.safeParse(JSON.parse(profile.styleProfileJson));
-  if (!parsed.success) return { profileName: profile.name, summary: null, traits: [] };
+  if (!parsed.success) return { profileName: profile.name, summary: null, traits: [], quirks: [] };
 
-  const { TRAIT_META } = await import("@/lib/ai/voiceAnalysis");
-  const highlightTraits: VoiceTrait[] = ["formality", "sentenceLength", "conversationalTone"];
+  const { TRAIT_META, VOICE_TRAITS } = await import("@/lib/ai/voiceAnalysis");
+  // Full set (all 8 real analyzed fields) for the Profile's own My Voice
+  // tab; the abbreviated 3-trait highlight stays the default for
+  // smaller surfaces (dashboard Home, Settings summary card) that
+  // don't have room for all of them.
+  const traitKeys: VoiceTrait[] = options?.full ? [...VOICE_TRAITS] : ["formality", "sentenceLength", "conversationalTone"];
   return {
     profileName: profile.name,
     summary: parsed.data.summary,
-    traits: highlightTraits.map((t) => ({ label: TRAIT_META[t].label, value: parsed.data[t] })),
+    traits: traitKeys.map((t) => ({ label: TRAIT_META[t].label, value: parsed.data[t] })),
+    quirks: parsed.data.notableQuirks,
   };
 }
 

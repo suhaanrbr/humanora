@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useSession, signOut } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
+import { useSignOut } from "@/lib/useSignOut";
 import { cn } from "@/lib/cn";
 
 const links = [
@@ -26,9 +26,8 @@ const links = [
 export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } = {}) {
   const { data: session, isPending } = useSession();
   const [open, setOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
+  const { signingOut, handleSignOut } = useSignOut();
   const ref = useRef<HTMLDivElement | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -37,14 +36,6 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
-
-  async function handleSignOut() {
-    setSigningOut(true);
-    await signOut();
-    setOpen(false);
-    router.push("/");
-    router.refresh();
-  }
 
   // Reserve the same slot while the session resolves, rather than
   // flashing "Log in" and then swapping to the account menu a moment
@@ -101,6 +92,13 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
               twice (showAppLinks=false skips them there). */}
           <div className={cn("flex flex-col gap-0.5", showAppLinks ? "border-t border-border pt-1.5" : "py-1.5")}>
             <Link
+              href="/dashboard/profile"
+              onClick={() => setOpen(false)}
+              className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
+            >
+              View Profile
+            </Link>
+            <Link
               href="/dashboard/billing"
               onClick={() => setOpen(false)}
               className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
@@ -108,7 +106,7 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
               Billing
             </Link>
             <Link
-              href="/dashboard/settings"
+              href="/dashboard/profile?tab=account"
               onClick={() => setOpen(false)}
               className="focus-ring rounded-md px-3 py-2 text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground"
             >
@@ -118,7 +116,7 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
           <div className="border-t border-border pt-1.5">
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => handleSignOut(() => setOpen(false))}
               disabled={signingOut}
               className="focus-ring press-feedback w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm text-foreground-muted transition-colors hover:bg-background-elevated hover:text-foreground disabled:opacity-50"
             >

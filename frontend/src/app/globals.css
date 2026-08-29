@@ -485,27 +485,35 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  background-color: var(--color-background);
   background-image: radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
   background-size: 36px 36px;
   mask-image: radial-gradient(120% 90% at 50% 0%, black 0%, transparent 85%);
 }
+/* Two off-angle, elongated light sources rather than perfect circles —
+   reads as light spilling in from off-screen, not "glowing spheres." */
 .app-atmosphere::before,
 .app-atmosphere::after {
   content: "";
   position: absolute;
-  width: 42vw;
-  height: 42vw;
-  border-radius: 9999px;
   filter: blur(90px);
 }
 .app-atmosphere::before {
-  top: -12vw;
-  left: -10vw;
+  top: -14vw;
+  left: -14vw;
+  width: 50vw;
+  height: 32vw;
+  border-radius: 50%;
+  transform: rotate(-18deg);
   background: var(--mesh-1);
 }
 .app-atmosphere::after {
-  bottom: -16vw;
-  right: -12vw;
+  bottom: -18vw;
+  right: -16vw;
+  width: 44vw;
+  height: 30vw;
+  border-radius: 50%;
+  transform: rotate(22deg);
   background: var(--mesh-2);
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -515,6 +523,29 @@
   .app-atmosphere::after {
     animation: pulse-slow 11s ease-in-out infinite 1.5s;
   }
+}
+/* H-mark watermark — architectural geometry anchored to the bottom-
+   right corner, mostly out of frame. Stroke-only, extremely faint
+   (opacity ~0.05) so it reads as structure in the environment, never
+   competes with real content. */
+.app-atmosphere-h {
+  position: absolute;
+  right: -6vw;
+  bottom: -8vw;
+  width: min(48vw, 46vh);
+  height: min(48vw, 46vh);
+  opacity: 0.05;
+  fill: none;
+  stroke: var(--color-brand-purple);
+  stroke-width: 1.2;
+}
+/* Faint vignette — far edges recede slightly darker so the viewport's
+   center (where real content sits) always reads as the brightest,
+   most important layer. An inset box-shadow on the layer itself, not
+   a third pseudo-element (::before/::after are already the two light
+   sources above). */
+.app-atmosphere {
+  box-shadow: inset 0 0 18vw 2vw rgba(0, 0, 0, 0.35);
 }
 
 /* ==========================================================================
@@ -889,6 +920,18 @@ h4,
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-card);
 }
+/* Scoped, not global — `.pearl-glass` is also the real product's card
+   surface (AccountMenu's dropdown, PricingCard, the Humanize/Study/
+   Voice workspaces, Profile), where translucent-over-whatever-scrolls-
+   behind would hurt legibility and trust (a pricing card should never
+   look uncertain). Genuine glass transparency is scoped to the landing
+   page's own cinematic text boxes only, via this one extra class
+   layered on top of `.pearl-glass` there. */
+.cinematic-track .pearl-glass {
+  background-color: color-mix(in srgb, var(--color-surface) 45%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
 /* Faint violet-tinted surface — used only for the "after"/result side of
    a before/after comparison (hero visual, live demo), so the transformed
    state reads as distinct without resorting to a saturated fill. */
@@ -1040,35 +1083,16 @@ h4,
 .login-glass-panel {
   position: relative;
   border-radius: var(--auth-panel-radius);
-  /* Genuinely translucent — the artwork should read clearly through
-     the panel, not just tint it. Readability comes from the blur
-     (softening the artwork's own detail/contrast behind the text)
-     plus each text element's own color/weight, not from opacity. */
-  background-color: rgba(12, 16, 30, 0.32);
-  backdrop-filter: blur(24px) saturate(1.15);
-  -webkit-backdrop-filter: blur(24px) saturate(1.15);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
-}
-.login-glass-panel::before,
-.login-glass-panel::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-}
-/* Stronger violet reflection, upper-left — as if the tower's own light
-   were catching the glass — plus a faint gradient washing the whole
-   card so it reads as one lit surface, not a flat panel with two
-   corner-confined blobs. */
-.login-glass-panel::before {
-  inset: 0;
-  background: radial-gradient(65% 55% at 6% -4%, rgba(139, 92, 246, 0.22) 0%, transparent 62%),
-    linear-gradient(160deg, rgba(139, 92, 246, 0.05) 0%, transparent 40%, rgba(59, 130, 246, 0.04) 100%);
-}
-.login-glass-panel::after {
-  inset: 0;
-  background: radial-gradient(55% 55% at 100% 100%, rgba(59, 130, 246, 0.14) 0%, transparent 60%);
+  /* Fully invisible now — no fill, no blur, no reflections. Only the
+     real controls (heading/labels via their own text color, the
+     Email/Password fields via `.login-field`, the button via
+     `.login-cta`) are visible; the card's own surface is gone, so the
+     artwork behind it shows exactly as crisp as everywhere else on
+     the page. */
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 
 /* Small premium badge on the login page ("AI-powered writing") — dark
@@ -1078,6 +1102,24 @@ h4,
   border: 1px solid rgba(139, 92, 246, 0.25);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* Auth page text refinements — Log in / Sign up headings, field
+   labels, and the "AI-powered writing" strap all get a slightly more
+   considered treatment than plain default text: tighter tracking and
+   a soft brand-tinted glow on the heading (it's sitting on a glass
+   panel over a lit scene, so a flat heading reads slightly dead by
+   comparison), a touch of letter-spacing and weight on labels so they
+   read as considered UI rather than a plain HTML label default. */
+.auth-heading {
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 28px rgba(139, 92, 246, 0.25);
+}
+.auth-field-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(226, 226, 245, 0.82);
 }
 
 /* Login form inputs — scoped overrides on top of the shared Input
@@ -1463,6 +1505,190 @@ h4,
     opacity: 1;
     transform: none;
     filter: none;
+    transition: none;
+  }
+}
+
+/* Cinematic embed — forces HUMANORA Dark's token values on a subtree
+   regardless of the site's active theme, WITHOUT touching global theme
+   state (no `data-theme` write, no ThemeProvider change) and without
+   forking ProductShowcase's own logic/markup. ProductShowcase sits
+   between forced-dark cinematic scenes on the landing page; a Light-
+   theme visitor would otherwise see it flip to a bright panel mid-
+   sequence, breaking the one visual continuity this whole page is
+   built around. Custom properties cascade to any descendant that
+   reads them via var(), so wrapping the same component in this class
+   is enough — no duplicate "dark ProductShowcase" component needed.
+   Only used on the landing page; the authenticated app's real theme
+   toggle is completely untouched by this. */
+.cinematic-embed {
+  --color-background: #060812;
+  --color-background-elevated: #0c0f1e;
+  --color-surface: #11142a;
+  --color-surface-subtle: #0c0f1e;
+  --color-surface-hover: #171b38;
+  --color-surface-active: #1f2447;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.2);
+  --color-line: rgba(255, 255, 255, 0.12);
+  --color-foreground: #f8f8fc;
+  --color-foreground-muted: #c6c6e0;
+  --color-foreground-subtle: #9d9dc0;
+  --color-brand-indigo: #3b82f6;
+  --color-brand-purple: #a855f7;
+  --color-brand-violet: #8b5cf6;
+  --color-brand-pink: #d946ef;
+  --color-brand-cyan: #22d3ee;
+  background-color: var(--color-background);
+}
+/* .pearl-glass's Light-theme treatment (below) is a hardcoded literal
+   override keyed to `:root[data-theme="light"]`, not a variable read —
+   redefining --color-surface above can't reach it. Counter it
+   explicitly, same specificity, later in source order so it wins. */
+.cinematic-embed.cinematic-embed .pearl-glass {
+  background-image: none;
+  background-color: var(--color-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* DimensionalH's H mark — sized off vh alone previously, so on a wide
+   but not-especially-tall display (2560x1440, 3840x2160) it stayed
+   visually small relative to how much wider the canvas got, reading
+   as dead space rather than an object filling the environment. min()
+   of a vh and a vw figure means it grows with whichever dimension is
+   more constrained, so it actually gets bigger on wide displays
+   instead of staying pinned to viewport height alone. */
+.dimensional-h-mark {
+  width: min(42vh, 30vw);
+  height: min(42vh, 30vw);
+}
+@media (max-width: 859px) {
+  .dimensional-h-mark {
+    width: 8rem;
+    height: 8rem;
+  }
+}
+
+/* Cinematic scroll scenes (DimensionalH, HumanizeScene, WorkspaceExpansion-
+   Scene, MyVoiceScene, StudyScene, LibraryScene, ConnectedWorkspaceScene)
+   — shared pin-track sizing. Height lives in CSS (keyed off the same
+   media conditions the JS uses to decide whether to engage GSAP's pin),
+   not inline styles computed in an effect, so there is never a frame
+   where a track renders "tall" before JS shrinks it back down on a
+   viewport that isn't going to pin at all. */
+.cinematic-track {
+  position: relative;
+  z-index: 1;
+  height: var(--pin-vh, 200vh);
+}
+.cinematic-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* Deliberately transparent — each scene used to paint its own opaque
+     black wall here, which is the real reason scrolling between them
+     felt like moving between sealed rooms rather than through one
+     environment: even a perfect object hand-off can't read as
+     continuous if every scene fully occludes whatever's behind it.
+     `LandingCinematicEnvironment` (mounted once, behind every scene)
+     now owns the shared dark base + the one persistent H that threads
+     through the whole sequence; each stage's own radial-gradient tint
+     layers on top of that instead of replacing it. */
+  background-color: transparent;
+}
+/* The near-black base itself lives on `.cinematic-world` (the fixed
+   wrapper `LandingCinematicEnvironment` renders, plus a plain CSS
+   background-color so it's present immediately, before any JS/GSAP
+   runs, and unconditionally on no-JS) — see below — not on the track
+   or stage, so there is exactly one base paint for the whole
+   sequence, never seven competing ones. */
+.cinematic-world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background-color: #04050c;
+  pointer-events: none;
+}
+/* Reduced-motion: LandingCinematicEnvironment hides itself via JS
+   (see its own effect) rather than never mounting the shared layer at
+   all, so each `.cinematic-track` needs its OWN opaque dark base back
+   — otherwise these scenes' hardcoded light/white text would sit
+   directly on the page's real (possibly Light-theme, pale) background
+   with nothing behind it, unreadable. Scoped to this media query only
+   — motion-enabled visitors still get the transparent track + shared
+   environment behind it, not a second competing background. */
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-track {
+    background-color: #04050c;
+  }
+}
+@media (max-width: 859px), (max-height: 479px) {
+  .cinematic-track {
+    height: auto;
+  }
+  .cinematic-stage {
+    height: auto;
+    /* NOT min-height: 100vh — that was forcing every mobile scene to
+       pad out to a full viewport regardless of how short its actual
+       stacked content was, which is exactly where the worst "giant
+       dead space" on mobile came from (confirmed scrolling the real
+       page: several hundred px of pure black between one scene's last
+       element and the next scene's first). Content determines height;
+       padding below just gives normal breathing room between scenes. */
+    min-height: 0;
+    /* Several scenes' secondary content (a caption/label div) is a
+       direct sibling of the scene's main content wrapper, not nested
+       inside it — each one drops out of absolute positioning and into
+       normal flow at this breakpoint via its own `max-[859px]:static`,
+       but `.cinematic-stage`'s default flex-direction is row, so two
+       "static" siblings were laying out side-by-side instead of
+       stacking — the caption ending up floated oddly to the right of
+       the real content instead of below it. Column stacks any number
+       of now-static top-level children correctly regardless of which
+       scene they belong to. */
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    padding-block: 2.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-track {
+    height: auto;
+  }
+  .cinematic-stage {
+    height: auto;
+    min-height: auto;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-block: 4rem;
+  }
+}
+
+/* Materialize — a heavier variant of .reveal for the one product panel
+   right after the cinematic H arrival (ProductShowcase): a slight
+   forward tilt settling flat, reinforcing "this object is arriving
+   from the environment" rather than a generic fade-up. Combine with
+   .reveal on the same element — .reveal drives opacity/blur, this
+   drives the 3D settle. */
+.materialize {
+  transform: perspective(1200px) rotateX(9deg) scale(0.94) translateY(18px);
+  transform-origin: 50% 100%;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.materialize.is-visible {
+  transform: perspective(1200px) rotateX(0deg) scale(1) translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .materialize {
+    transform: none;
     transition: none;
   }
 }

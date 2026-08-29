@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { deriveTitle } from "@/lib/text";
 import { formatDateTime } from "@/lib/formatDate";
 import { cn } from "@/lib/cn";
+import { BackToHome } from "@/components/dashboard/BackToHome";
 
 // Must match HumanizeWorkspace.tsx / StudyWorkspace.tsx exactly — the
 // "Humanize/Study into this project" shortcuts below write these, and
@@ -142,6 +143,7 @@ export function ProjectDetail({
 
   return (
     <div>
+      <BackToHome />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         {editing ? (
           <div className="flex w-full max-w-lg flex-col gap-2.5">

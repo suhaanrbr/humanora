@@ -1,11 +1,15 @@
 import { Container } from "@/components/ui/Container";
+import { Reveal } from "@/components/ui/Reveal";
+import { SectionIndex } from "@/components/landing/SectionIndex";
 
-const useCases = [
-  {
-    title: "Academic Writing",
-    description: "Refine essays and coursework for clarity while keeping citations and facts intact. Use responsibly and in line with your institution's policies.",
-    Motif: CitationMotif,
-  },
+const featured = {
+  title: "Academic Writing",
+  description:
+    "Refine essays and coursework for clarity while keeping citations and facts intact. Use responsibly and in line with your institution's policies.",
+  Motif: CitationMotif,
+};
+
+const supporting = [
   {
     title: "Professional Communication",
     description: "Turn AI-drafted emails and messages into writing that sounds like you.",
@@ -34,37 +38,76 @@ const useCases = [
 ];
 
 /**
- * Use-case cards, each with a small motif illustrating the context rather
- * than six identical boxes. HUMANORA is positioned as a writing/refinement
- * assistant — copy avoids encouraging academic dishonesty.
+ * Same six real use cases as before, recomposed so they don't read as
+ * six identical boxes: one featured capability gets a larger, document-
+ * styled surface (its own motif rendered large, like a watermark behind
+ * the copy — echoing the cinematic scenes' typographic-depth language),
+ * the remaining five sit in a tighter supporting rail. Real content
+ * only, just varied hierarchy instead of uniform card repetition.
  */
 export function UseCases() {
   return (
     <section id="use-cases" className="section-glow-top py-16 sm:py-20">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
+          <SectionIndex>09 / APPLICATIONS</SectionIndex>
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Built for how you actually write
           </h2>
           <p className="mt-4 text-base text-foreground-muted">
-            A writing and refinement assistant for the situations where tone
-            and voice matter most.
+            A writing and refinement assistant for the situations where tone and voice matter most.
           </p>
         </div>
 
-        <div className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {useCases.map((useCase) => (
-            <div
-              key={useCase.title}
-              className="hover-lift group rounded-lg border border-border bg-surface p-6 transition-[background-color] duration-300 hover:border-brand-purple/35 hover:bg-surface-hover hover:shadow-glow-sm"
-            >
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md border border-border bg-background-elevated text-brand-purple transition-[border-color,box-shadow] duration-300 group-hover:border-brand-purple/40 group-hover:shadow-glow-sm">
-                <useCase.Motif className="h-5 w-5" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">{useCase.title}</h3>
-              <p className="mt-1.5 text-sm text-foreground-muted">{useCase.description}</p>
+        <div className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-5 lg:grid-cols-[1.3fr_1fr]">
+          {/* Featured — a taller, document-like surface with its motif
+              rendered large and faint behind the copy, not a same-size
+              icon chip. */}
+          <Reveal
+            as="div"
+            className="hover-lift group relative flex min-h-[280px] flex-col overflow-hidden rounded-2xl border border-border bg-surface p-8 transition-[border-color,box-shadow] duration-300 hover:border-brand-purple/35 hover:shadow-glow-sm"
+          >
+            <featured.Motif className="pointer-events-none absolute -right-6 -top-6 h-40 w-40 text-brand-purple/[0.07] transition-opacity duration-300 group-hover:text-brand-purple/[0.1]" />
+            <span className="relative w-fit rounded-full border border-brand-purple/25 bg-brand-purple/[0.08] px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-brand-purple">
+              Featured
+            </span>
+
+            {/* A real illustrative excerpt, not empty space above the
+                copy — the same before/after language HUMANORA already
+                demonstrates elsewhere, applied to this specific
+                use case. */}
+            <div className="relative mt-6 flex flex-1 flex-col justify-center gap-3 rounded-xl border border-border bg-background-elevated/60 p-5">
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Before</p>
+              <p className="text-sm text-foreground-subtle line-through decoration-foreground-subtle/40">
+                It is evident that the aforementioned findings substantiate the hypothesis.
+              </p>
+              <p className="text-xs font-medium uppercase tracking-wide text-foreground-subtle">After</p>
+              <p className="text-sm text-foreground">The findings support the hypothesis.</p>
             </div>
-          ))}
+
+            <h3 className="relative mt-6 text-xl font-semibold text-foreground">{featured.title}</h3>
+            <p className="relative mt-2 max-w-sm text-sm text-foreground-muted">{featured.description}</p>
+          </Reveal>
+
+          {/* Supporting rail — compact rows, not a second grid of cards. */}
+          <div className="flex flex-col divide-y divide-border rounded-2xl border border-border bg-surface">
+            {supporting.map((useCase, i) => (
+              <Reveal
+                key={useCase.title}
+                as="div"
+                delay={i * 60}
+                className="hover-lift group flex items-start gap-3.5 p-5 transition-colors duration-300 first:rounded-t-2xl last:rounded-b-2xl hover:bg-surface-hover"
+              >
+                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background-elevated text-brand-purple transition-[border-color,box-shadow] duration-300 group-hover:border-brand-purple/40 group-hover:shadow-glow-sm">
+                  <useCase.Motif className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{useCase.title}</p>
+                  <p className="mt-0.5 text-xs text-foreground-subtle">{useCase.description}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </Container>
     </section>

@@ -85,8 +85,8 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="auth-panel-frame w-full max-w-[440px]">
     <div className="login-glass-panel relative w-full overflow-hidden p-8">
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Log in</h1>
-      <p className="mt-2 text-sm text-foreground-muted">Welcome back to HUMANORA.</p>
+      <h1 className="auth-heading text-2xl font-bold tracking-tight text-foreground">Log in</h1>
+      <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Welcome back to HUMANORA.</p>
 
       {googleEnabled && (
         <div className="mt-6 flex flex-col gap-4">
@@ -101,7 +101,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
 
       <form onSubmit={handleSubmit} className={cn("flex flex-col gap-5", googleEnabled ? "mt-4" : "mt-8")}>
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
+          <label htmlFor="email" className="auth-field-label mb-1.5 block">
             Email
           </label>
           <div className="relative">
@@ -120,7 +120,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </div>
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <label htmlFor="password" className="block text-sm font-medium text-foreground">
+            <label htmlFor="password" className="auth-field-label block">
               Password
             </label>
           </div>
@@ -156,14 +156,14 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-foreground-muted">
+      <p className="mt-8 text-center text-sm leading-relaxed text-foreground-muted">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink">
+        <Link href="/signup" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-brand-pink">
           Sign up free
         </Link>
       </p>
 
-      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-foreground-subtle">
+      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs tracking-wide text-foreground-subtle">
         <LockIcon className="h-3 w-3" />
         Secure sign-in — your writing is never shared or sold.
       </div>

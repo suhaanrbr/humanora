@@ -79,7 +79,26 @@ export function AuthShell({ children }: { children: ReactNode }) {
           means only one is ever mounted/fetching at a time, so tuning
           one never affects or re-fetches the other. */}
       <LoginArtworkLayer className="absolute inset-0 hidden md:block xl:hidden" minWidth={768} maxWidth={1279} quality={92} dim={0.14} />
-      <LoginArtworkLayer className="absolute inset-0 hidden xl:block" minWidth={1280} />
+      {/* Desktop (xl+) only: `fixed`, not `absolute` — the root's height
+          is pinned to one viewport (`h-dvh`) so the background never
+          resizes, but if desktop window content (e.g. a tall Signup
+          form) ever needs to scroll past that one viewport, an
+          `absolute inset-0` background only ever covered the FIRST
+          viewport height — scrolling further revealed a plain black
+          void beneath it. `fixed` covers the full viewport for the
+          entire scroll range regardless of content height. Scoped to
+          xl+ only — the Android `position: fixed` + "Request Desktop
+          Site" viewport bug this same file documents avoiding only
+          affects phones/tablets, never a real desktop window. */}
+      <LoginArtworkLayer className="absolute inset-0 hidden xl:fixed xl:block" minWidth={1280} dim={0.18} />
+      {/* A little extra fog at the very bottom, desktop only — layered
+          on top of LoginArtworkLayer's own (shorter) bottom wash. Text
+          contrast is unaffected; this only darkens the artwork itself. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 bottom-0 hidden h-72 xl:block"
+        style={{ background: "linear-gradient(to top, rgba(2,3,11,0.75), transparent)" }}
+      />
 
       <div className="relative z-10 w-full">
         {/* >= xl (1280px): side-by-side layout — copy column on the left,

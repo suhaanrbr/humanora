@@ -17,6 +17,7 @@ import { BillingActions } from "@/components/dashboard/BillingActions";
 import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
 import { QuickStart } from "@/components/dashboard/QuickStart";
 import { CountUp } from "@/components/dashboard/CountUp";
+import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
 import { formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
@@ -33,9 +34,9 @@ export const metadata = { title: "Dashboard — HUMANORA" };
 // `soon`. Chat with Document still is (no parsing/RAG pipeline exists).
 const QUICK_ACTIONS = [
   { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you.", icon: SparkIcon },
-  { href: "/dashboard/study", title: "Summarize Text", description: "Condense long material fast.", icon: SummarizeIcon },
-  { href: "/dashboard/study", title: "Explain Like I'm 5", description: "Break a hard topic down simply.", icon: ExplainIcon },
-  { href: "/dashboard/study", title: "Study Notes Generator", description: "Turn material into revision notes.", icon: NotesIcon },
+  { studyMode: "summarize", title: "Summarize Text", description: "Condense long material fast.", icon: SummarizeIcon },
+  { studyMode: "explain", title: "Explain Like I'm 5", description: "Break a hard topic down simply.", icon: ExplainIcon },
+  { studyMode: "notes", title: "Study Notes Generator", description: "Turn material into revision notes.", icon: NotesIcon },
   { href: "/dashboard/ai-detector", title: "AI Detector", description: "Check writing for AI patterns.", icon: DetectorIcon },
   { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Ask questions of an upload — in development.", icon: ChatIcon, soon: true },
 ] as const;
@@ -156,9 +157,13 @@ export default async function DashboardPage() {
           What do you want to do?
         </h2>
         <div className="animate-stagger-in grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:gap-4">
-          {QUICK_ACTIONS.map((action) => (
-            <QuickAction key={action.title} {...action} />
-          ))}
+          {QUICK_ACTIONS.map((action) =>
+            "studyMode" in action ? (
+              <StudyModeLink key={action.title} mode={action.studyMode} title={action.title} description={action.description} />
+            ) : (
+              <QuickAction key={action.title} {...action} />
+            )
+          )}
         </div>
       </div>
 

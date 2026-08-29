@@ -26,7 +26,21 @@ export function FinalCta() {
             className="animate-pulse-slower absolute left-1/3 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#5a3fe0]/25 blur-3xl"
           />
 
+          {/* The H returns — the same geometry the page opened on,
+              settled and resolved rather than dimensional/in-motion,
+              closing the visual sentence the arrival scene opened. */}
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 200 200"
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[140%] w-[140%] max-h-[560px] max-w-[560px] -translate-x-1/2 -translate-y-1/2 opacity-[0.07]"
+          >
+            <rect x="30" y="65" width="35" height="105" rx="6" fill="none" stroke="#cdb8ff" strokeWidth="1" />
+            <rect x="135" y="25" width="35" height="145" rx="6" fill="none" stroke="#cdb8ff" strokeWidth="1" />
+            <polygon points="65,95 135,60 135,90 65,125" fill="none" stroke="#cdb8ff" strokeWidth="1" strokeLinejoin="round" />
+          </svg>
+
           <div className="relative">
+            <p className="mb-4 font-mono text-[11px] tracking-[0.2em] text-white/35">13 / CONCLUSION</p>
             <h2 className="text-3xl font-bold tracking-tight text-[#f8f7fc] sm:text-4xl lg:text-5xl">
               <Reveal as="span" className="block">
                 The draft was AI&apos;s.
