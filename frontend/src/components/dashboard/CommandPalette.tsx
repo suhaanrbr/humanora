@@ -22,6 +22,7 @@ const ITEMS: CommandItem[] = [
   { id: "nav-library", label: "Library", hint: "Go to Library", group: "Go to", run: (r) => r.push("/dashboard/history") },
   { id: "nav-projects", label: "Projects", hint: "Go to Projects", group: "Go to", run: (r) => r.push("/dashboard/projects") },
   { id: "nav-billing", label: "Billing", hint: "Go to Billing", group: "Go to", run: (r) => r.push("/dashboard/billing") },
+  { id: "nav-profile", label: "Profile", hint: "Go to Profile", group: "Go to", run: (r) => r.push("/dashboard/profile") },
   { id: "nav-settings", label: "Settings", hint: "Go to Settings", group: "Go to", run: (r) => r.push("/dashboard/settings") },
   {
     id: "action-humanize",

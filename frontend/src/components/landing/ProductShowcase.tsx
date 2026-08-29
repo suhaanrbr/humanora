@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
 import { ButtonLink } from "@/components/ui/ButtonLink";
+import { SectionIndex } from "@/components/landing/SectionIndex";
 import { cn } from "@/lib/cn";
 
 type ShowcaseTab = "humanize" | "voice" | "meaning" | "readability";
@@ -50,6 +51,7 @@ export function ProductShowcase() {
     <section id="showcase" className="section-glow-top bg-ambient-glow-soft py-20 sm:py-28">
       <Container>
         <Reveal as="div" className="mx-auto max-w-2xl text-center">
+          <SectionIndex>07 / CAPABILITIES</SectionIndex>
           <Badge variant="brand">See it think</Badge>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             One workspace. Four ways to make writing sound like you.
@@ -60,7 +62,7 @@ export function ProductShowcase() {
           </p>
         </Reveal>
 
-        <Reveal as="div" delay={100} className="mx-auto mt-12 max-w-3xl">
+        <Reveal as="div" delay={100} className="materialize mx-auto mt-12 max-w-3xl">
           <div className="mb-6 flex flex-wrap justify-center gap-2">
             {TABS.map((t) => (
               <button

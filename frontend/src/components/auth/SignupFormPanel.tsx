@@ -70,8 +70,8 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="auth-panel-frame w-full max-w-[440px]">
     <div className="login-glass-panel relative w-full overflow-hidden p-8">
-      <h1 className="text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
-      <p className="mt-2 text-sm text-foreground-muted">Free — no credit card required.</p>
+      <h1 className="auth-heading text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
+      <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Free — no credit card required.</p>
 
       {/* Signup carries more hesitation than login ("I'm deciding
           whether to start" vs. "get me in") — a little concrete
@@ -95,7 +95,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
 
       <form onSubmit={handleSubmit} className={`flex flex-col gap-5 ${googleEnabled ? "mt-4" : "mt-8"}`}>
         <div>
-          <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
+          <label htmlFor="name" className="auth-field-label mb-1.5 block">
             Name
           </label>
           <div className="relative">
@@ -113,7 +113,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           </div>
         </div>
         <div>
-          <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
+          <label htmlFor="email" className="auth-field-label mb-1.5 block">
             Email
           </label>
           <div className="relative">
@@ -131,7 +131,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           </div>
         </div>
         <div>
-          <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground">
+          <label htmlFor="password" className="auth-field-label mb-1.5 block">
             Password
           </label>
           <PasswordInput
@@ -167,14 +167,14 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-foreground-muted">
+      <p className="mt-8 text-center text-sm leading-relaxed text-foreground-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink">
+        <Link href="/login" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-brand-pink">
           Log in
         </Link>
       </p>
 
-      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs text-foreground-subtle">
+      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs tracking-wide text-foreground-subtle">
         <LockIcon className="h-3 w-3" />
         Secure sign-up — your writing is never shared or sold.
       </div>

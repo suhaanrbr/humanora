@@ -8,6 +8,7 @@ import { getPaymentHistoryForUser } from "@/lib/db/payments";
 import { getUsageSummary } from "@/lib/db/usage";
 import { PLANS } from "@/lib/config/plans";
 import { BillingActions } from "@/components/dashboard/BillingActions";
+import { BackToHome } from "@/components/dashboard/BackToHome";
 
 export const metadata = { title: "Billing — HUMANORA" };
 
@@ -27,6 +28,7 @@ export default async function BillingPage() {
 
   return (
     <Container className="mx-auto max-w-3xl">
+      <BackToHome />
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Billing</h1>
         <p className="mt-1 text-sm text-foreground-muted">Your current plan and payment history.</p>

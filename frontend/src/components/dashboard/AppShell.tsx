@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Logo, LogoMark } from "@/components/brand/Logo";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { CommandPalette, CommandTrigger, SearchIcon } from "@/components/dashboard/CommandPalette";
+import { AppAtmosphere } from "@/components/dashboard/AppAtmosphere";
 import { cn } from "@/lib/cn";
 
 interface NavEntry {
@@ -84,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-screen">
-      <div className="app-atmosphere" aria-hidden="true" />
+      <AppAtmosphere />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
 
       {/* Desktop/tablet: persistent left rail. Glass, not flat opaque —

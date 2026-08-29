@@ -8,13 +8,23 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { signOut } from "@/lib/auth-client";
-import { formatDate } from "@/lib/formatDate";
+import { formatDate, formatDateTime } from "@/lib/formatDate";
+import { deriveTitle } from "@/lib/text";
+import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
 
 interface UsageSummary {
   humanizeCount: number;
   humanizeLimit: number;
   wordsProcessed: number;
   periodEnd: Date;
+}
+
+interface RecentWorkItem {
+  kind: "humanized" | "study";
+  id: string;
+  inputText: string;
+  outputText: string;
+  createdAt: string;
 }
 
 interface AccountSettingsProps {
@@ -30,6 +40,9 @@ interface AccountSettingsProps {
   usage: UsageSummary | null;
   voiceProfileCount: number;
   voiceProfileReady: boolean;
+  voiceSummary: string | null;
+  voiceTraits: { label: string; value: string }[];
+  recentWork: RecentWorkItem[];
 }
 
 const PROVIDER_LABEL: Record<string, string> = {
@@ -50,12 +63,16 @@ export function AccountSettings({
   usage,
   voiceProfileCount,
   voiceProfileReady,
+  voiceSummary,
+  voiceTraits,
+  recentWork,
 }: AccountSettingsProps) {
   const initial = initialName.trim()[0]?.toUpperCase() ?? "U";
+  const mostRecent = recentWork[0] ?? null;
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Overview */}
+      {/* Identity — who I am, my plan, at a glance. */}
       <Card className="p-6">
         <div className="flex items-center gap-4">
           {image ? (
@@ -66,19 +83,92 @@ export function AccountSettings({
               {initial}
             </div>
           )}
-          <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-foreground">{initialName}</p>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="truncate text-base font-semibold text-foreground">{initialName}</p>
+              <Badge variant={planIsFree ? "neutral" : "brand"}>{plan}</Badge>
+            </div>
             <p className="truncate text-sm text-foreground-muted">{email}</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4 text-xs text-foreground-subtle">
-          <span>
-            Member since {formatDate(createdAt)}
-          </span>
+          <span>Member since {formatDate(createdAt)}</span>
           <span>·</span>
           <span>
             Signed in with {providers.map((p) => PROVIDER_LABEL[p] ?? p).join(" & ") || "email & password"}
           </span>
+        </div>
+      </Card>
+
+      {/* Continue — real most recent work, not a fabricated "pick up
+          where you left off" for a brand new account. */}
+      {mostRecent && (
+        <Link
+          href={mostRecent.kind === "study" ? "/dashboard/study" : "/dashboard/history"}
+          className="glass-panel hover-lift group flex flex-col justify-between rounded-2xl p-5"
+        >
+          <p className="text-xs font-medium uppercase tracking-wide text-foreground-subtle">Continue</p>
+          <p className="mt-2 text-sm font-semibold text-foreground group-hover:text-brand-purple">
+            {deriveTitle(mostRecent.inputText)}
+          </p>
+          <p className="mt-1 line-clamp-2 text-xs text-foreground-subtle">{mostRecent.outputText}</p>
+          <p className="mt-4 text-xs text-foreground-subtle">
+            {mostRecent.kind === "humanized" ? "Humanized" : "Studied"} {formatDateTime(mostRecent.createdAt)}
+          </p>
+        </Link>
+      )}
+
+      {/* Quick tasks — every card here executes a real, specific action.
+          Study's three shortcuts route through StudyModeLink so they
+          actually land in the correct tab (see StudyModeLink.tsx),
+          the same fix applied to the Home dashboard's quick actions. */}
+      <div>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">Quick tasks</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <TaskLink href="/dashboard/humanize" title="Humanize a draft" description="Rewrite text to sound like you." />
+          <StudyModeLink mode="summarize" title="Summarize" description="Condense long material fast." />
+          <StudyModeLink mode="explain" title="Explain" description="Break a hard topic down simply." />
+          <StudyModeLink mode="notes" title="Study notes" description="Turn material into revision notes." />
+          <TaskLink href="/dashboard/voice" title="My Voice" description="View or build your voice profile." />
+          <TaskLink href="/dashboard/history" title="Library" description="Everything you've created." />
+        </div>
+      </div>
+
+      {/* My Voice — the product's real differentiator, surfaced with the
+          same Gemini-derived, Zod-validated traits already used to
+          steer humanize() calls — never fabricated categories. */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-foreground">My Voice</p>
+          <Badge variant={voiceProfileReady ? "brand" : "neutral"}>
+            {voiceProfileReady ? "Profile ready" : "Not set up"}
+          </Badge>
+        </div>
+        {voiceSummary ? (
+          <>
+            <p className="mt-2 text-sm text-foreground-muted">{voiceSummary}</p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {voiceTraits.map((t) => (
+                <span
+                  key={t.label}
+                  className="rounded-full border border-brand-purple/25 bg-brand-purple/[0.08] px-2.5 py-1 text-[11px] capitalize text-brand-purple"
+                >
+                  {t.label}: {t.value}
+                </span>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-foreground-muted">
+            {voiceProfileCount === 0
+              ? "Teach HUMANORA how you write from a few real samples."
+              : `${voiceProfileCount} Voice profile${voiceProfileCount === 1 ? "" : "s"}, not yet analyzed.`}
+          </p>
+        )}
+        <div className="mt-4">
+          <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
+            {voiceProfileCount === 0 ? "Get started" : "Open"}
+          </ButtonLink>
         </div>
       </Card>
 
@@ -109,26 +199,6 @@ export function AccountSettings({
         </div>
       </Card>
 
-      {/* My Voice summary */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">My Voice</p>
-          <Badge variant={voiceProfileReady ? "brand" : "neutral"}>
-            {voiceProfileReady ? "Profile ready" : "Not set up"}
-          </Badge>
-        </div>
-        <p className="mt-2 text-sm text-foreground-muted">
-          {voiceProfileCount === 0
-            ? "No Voice profiles yet."
-            : `${voiceProfileCount} Voice profile${voiceProfileCount === 1 ? "" : "s"}.`}
-        </p>
-        <div className="mt-4">
-          <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
-            {voiceProfileCount === 0 ? "Get started" : "Manage"}
-          </ButtonLink>
-        </div>
-      </Card>
-
       <ProfileForm initialName={initialName} />
       <DangerZone />
 
@@ -142,7 +212,19 @@ export function AccountSettings({
   );
 }
 
-function ProfileForm({ initialName }: { initialName: string }) {
+function TaskLink({ href, title, description }: { href: string; title: string; description: string }) {
+  return (
+    <Link
+      href={href}
+      className="focus-ring hover-lift group flex flex-col justify-center rounded-xl border border-border bg-surface p-4.5 transition-[border-color,box-shadow] hover:border-brand-purple/35 hover:shadow-glow-sm"
+    >
+      <p className="text-sm font-semibold text-foreground">{title}</p>
+      <p className="mt-1 text-xs text-foreground-subtle">{description}</p>
+    </Link>
+  );
+}
+
+export function ProfileForm({ initialName }: { initialName: string }) {
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -196,7 +278,7 @@ function ProfileForm({ initialName }: { initialName: string }) {
   );
 }
 
-function DangerZone() {
+export function DangerZone() {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [confirmText, setConfirmText] = useState("");

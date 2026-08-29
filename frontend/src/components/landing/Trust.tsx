@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/Container";
+import { SectionIndex } from "@/components/landing/SectionIndex";
 
 const principles = [
   {
@@ -32,6 +33,7 @@ export function Trust() {
       <Container>
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-16">
           <div>
+            <SectionIndex>12 / TRUST</SectionIndex>
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               What HUMANORA protects
             </h2>

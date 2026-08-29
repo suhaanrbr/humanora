@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
+import { SectionIndex } from "@/components/landing/SectionIndex";
 
 const protectedFragments = [
   { text: "£4.7 million", tag: "protected number", label: "NUMBER" },
@@ -21,57 +22,79 @@ export function PreserveMeaning() {
           <div className="order-2 lg:order-1">
             <Reveal
               as="div"
-              className="rounded-xl border border-border-strong bg-surface p-7 shadow-glow-md sm:p-9"
+              className="relative flex gap-5 rounded-xl border border-border-strong bg-surface p-7 shadow-glow-md sm:p-9"
             >
-              <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
-                Original
-              </p>
-              <p className="text-lg leading-loose text-foreground-muted">
-                The company reported revenue of{" "}
-                <LockedFragment text="£4.7 million" label="NUMBER" delay={150} />, up
-                from the previous year in{" "}
-                <LockedFragment text="2025" label="DATE" delay={350} />
-                <LockedFragment text="[14]" label="CITATION" delay={550} />.
-              </p>
-
-              {/* A short gradient thread — the same connective motif as the
-                  navbar's scroll progress bar — linking the original line
-                  to its rewrite below, so the two read as one continuous
-                  transformation rather than two separate examples. */}
-              <div className="my-6 flex items-center gap-3" aria-hidden="true">
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-purple/50 to-brand-purple/50" />
-                <span className="text-xs text-foreground-subtle">rewritten</span>
-                <span className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-purple/50 to-brand-purple/50" />
+              {/* Anchor rail — a persistent vertical guide with one pin
+                  per protected fragment, spanning the full height of
+                  BOTH the original and rewritten text. Visually this is
+                  the claim itself: these three points hold in place
+                  the whole way down, while everything to their right
+                  changes above and below them. */}
+              <div className="relative hidden w-6 shrink-0 sm:block" aria-hidden="true">
+                <span className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2 bg-gradient-to-b from-brand-purple/10 via-brand-purple/40 to-brand-purple/10" />
+                {protectedFragments.map((item, i) => (
+                  <span
+                    key={item.text}
+                    className="absolute left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full border border-brand-purple/40 bg-background text-brand-purple shadow-glow-sm"
+                    style={{ top: `${14 + i * 34}%` }}
+                  >
+                    <PinIcon className="h-2.5 w-2.5" />
+                  </span>
+                ))}
               </div>
 
-              <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
-                HUMANORA result
-              </p>
-              <Reveal
-                as="p"
-                delay={700}
-                className="text-lg leading-loose text-foreground"
-              >
-                Revenue reached <LockedFragment text="£4.7 million" label="NUMBER" delay={850} /> in{" "}
-                <LockedFragment text="2025" label="DATE" delay={950} />, according to{" "}
-                <LockedFragment text="[14]" label="CITATION" delay={1050} />.
-              </Reveal>
+              <div className="min-w-0 flex-1">
+                <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
+                  Original
+                </p>
+                <p className="text-lg leading-loose text-foreground-muted">
+                  The company reported revenue of{" "}
+                  <LockedFragment text="£4.7 million" label="NUMBER" delay={150} />, up
+                  from the previous year in{" "}
+                  <LockedFragment text="2025" label="DATE" delay={350} />
+                  <LockedFragment text="[14]" label="CITATION" delay={550} />.
+                </p>
 
-              <div className="mt-7 flex flex-col gap-2.5 border-t border-border pt-6">
-                {protectedFragments.map((item, i) => (
-                  <Reveal key={item.text} as="div" delay={150 + i * 200}>
-                    <div className="flex items-center gap-2 text-sm text-foreground-muted">
-                      <ShieldIcon className="h-4 w-4 text-brand-purple" />
-                      <span className="text-foreground">{item.text}</span>
-                      <span className="text-foreground-subtle">— {item.tag}, unchanged in both</span>
-                    </div>
-                  </Reveal>
-                ))}
+                {/* A short gradient thread — the same connective motif as the
+                    navbar's scroll progress bar — linking the original line
+                    to its rewrite below, so the two read as one continuous
+                    transformation rather than two separate examples. */}
+                <div className="my-6 flex items-center gap-3" aria-hidden="true">
+                  <span className="h-px flex-1 bg-gradient-to-r from-transparent via-brand-purple/50 to-brand-purple/50" />
+                  <span className="text-xs text-foreground-subtle">rewritten</span>
+                  <span className="h-px flex-1 bg-gradient-to-l from-transparent via-brand-purple/50 to-brand-purple/50" />
+                </div>
+
+                <p className="mb-6 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
+                  HUMANORA result
+                </p>
+                <Reveal
+                  as="p"
+                  delay={700}
+                  className="text-lg leading-loose text-foreground"
+                >
+                  Revenue reached <LockedFragment text="£4.7 million" label="NUMBER" delay={850} /> in{" "}
+                  <LockedFragment text="2025" label="DATE" delay={950} />, according to{" "}
+                  <LockedFragment text="[14]" label="CITATION" delay={1050} />.
+                </Reveal>
+
+                <div className="mt-7 flex flex-col gap-2.5 border-t border-border pt-6">
+                  {protectedFragments.map((item, i) => (
+                    <Reveal key={item.text} as="div" delay={150 + i * 200}>
+                      <div className="flex items-center gap-2 text-sm text-foreground-muted">
+                        <ShieldIcon className="h-4 w-4 text-brand-purple" />
+                        <span className="text-foreground">{item.text}</span>
+                        <span className="text-foreground-subtle">— {item.tag}, unchanged in both</span>
+                      </div>
+                    </Reveal>
+                  ))}
+                </div>
               </div>
             </Reveal>
           </div>
 
           <div className="order-1 lg:order-2">
+            <SectionIndex>10 / MEANING</SectionIndex>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               Rewrite the language.
               <br />
@@ -114,6 +137,14 @@ function LockedFragment({
       </span>
       {text}
     </Reveal>
+  );
+}
+
+function PinIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="currentColor" />
+    </svg>
   );
 }
 
