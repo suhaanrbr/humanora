@@ -83,8 +83,8 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: RecentWor
     }
   }
 
-  function handleAssigned(entry: RecentWorkItem, projectId: string | null) {
-    setEntries((cur) => cur.map((e) => (keyOf(e) === keyOf(entry) ? { ...e, projectId } : e)));
+  function handleAssigned(entry: RecentWorkItem, projectId: string | null, projectName: string | null) {
+    setEntries((cur) => cur.map((e) => (keyOf(e) === keyOf(entry) ? { ...e, projectId, projectName } : e)));
   }
 
   return (
@@ -176,7 +176,7 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: RecentWor
               onConfirmDelete={() => handleDelete(entry)}
               onCopy={() => handleCopy(entry)}
               copied={copiedKey === keyOf(entry)}
-              onAssigned={(projectId) => handleAssigned(entry, projectId)}
+              onAssigned={(projectId, projectName) => handleAssigned(entry, projectId, projectName)}
             />
           ))}
         </div>
@@ -206,7 +206,7 @@ function LibraryCard({
   onConfirmDelete: () => void;
   onCopy: () => void;
   copied: boolean;
-  onAssigned: (projectId: string | null) => void;
+  onAssigned: (projectId: string | null, projectName: string | null) => void;
 }) {
   const router = useRouter();
 
@@ -275,7 +275,8 @@ function LibraryCard({
             kind={entry.kind}
             itemId={entry.id}
             currentProjectId={entry.projectId}
-            onAssigned={(projectId) => onAssigned(projectId)}
+            currentProjectName={entry.projectName}
+            onAssigned={onAssigned}
           />
           <span className="text-xs text-foreground-subtle">{entry.wordCount} words</span>
         </div>

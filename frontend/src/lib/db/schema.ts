@@ -9,15 +9,14 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "
  *
  * Deliberately NOT built yet (left as extension points, not tables,
  * until there's a real product need):
- *   - template, integration, activity-event, and a real AI-detector-scan
- *     table. `project` (below) shipped in the "Connected Workspace"
- *     phase — a real v1 grouping of existing content, not the fuller
- *     multi-tab "workspace" (chat context, citations, exports) that was
- *     floated in planning; those stay extension points until there's a
- *     concrete feature (Chat with Docs, etc.) that actually needs them.
- *     Templates/Integrations/AI Detector/Brand Voice still show real,
- *     minimal "in development" pages in the nav rather than fabricated
- *     data — see ComingSoon.tsx.
+ *   - template, integration, activity-event. `project` (Connected
+ *     Workspace phase) and `detectorScan` (Master Completion phase,
+ *     below) are real — a v1 grouping of existing content, and a real
+ *     probabilistic AI-pattern analysis with persisted history,
+ *     neither the fuller speculative feature floated in early planning.
+ *     Templates/Integrations/Brand Voice still show real, minimal "in
+ *     development" pages in the nav rather than fabricated data — see
+ *     ComingSoon.tsx.
  */
 
 // ---------------------------------------------------------------------------
@@ -215,6 +214,34 @@ export const studySession = pgTable(
     index("study_session_user_idx").on(table.userId, table.createdAt),
     index("study_session_project_idx").on(table.projectId),
   ]
+);
+
+/**
+ * A saved AI Detector scan. Stores the categorical, uncertainty-aware
+ * result (see lib/ai/detector.ts) — never a bare percentage — so a
+ * user's past scans have real history instead of vanishing on refresh.
+ * Not linked to `project` — a detector scan assesses a piece of text,
+ * it isn't "content" the way a humanization or study session is, so it
+ * doesn't belong in the Library/Projects content model.
+ */
+export const detectorLikelihoodEnum = ["likely_human", "mixed_uncertain", "likely_ai_assisted"] as const;
+export const detectorConfidenceEnum = ["low", "medium", "high"] as const;
+
+export const detectorScan = pgTable(
+  "detector_scan",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    inputText: text("input_text").notNull(),
+    wordCount: integer("word_count").notNull(),
+    likelihood: text("likelihood", { enum: detectorLikelihoodEnum }).notNull(),
+    confidence: text("confidence", { enum: detectorConfidenceEnum }).notNull(),
+    aiSignalsJson: text("ai_signals_json").notNull(),
+    humanSignalsJson: text("human_signals_json").notNull(),
+    explanation: text("explanation").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [index("detector_scan_user_idx").on(table.userId, table.createdAt)]
 );
 
 /**

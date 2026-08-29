@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/ai/rateLimit";
 import { checkEntitlement, reserveFreeTrial, releaseFreeTrial } from "@/lib/db/entitlement";
 import { checkAndReserveQuota, releaseQuotaUnit } from "@/lib/db/usage";
 import { saveHumanization } from "@/lib/db/history";
+import { assignItemToProject } from "@/lib/db/projects";
 import { getEffectiveVoiceProfile } from "@/lib/db/voice";
 import { buildStyleDirectives } from "@/lib/ai/voiceAnalysis";
 import { checkMeaningPreservation } from "@/lib/ai/meaningCheck";
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const { text, mode, strength, voiceProfileId, customInstructions } = (body ?? {}) as Record<string, unknown>;
+  const { text, mode, strength, voiceProfileId, customInstructions, projectId } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof text !== "string" || !text.trim()) {
     return NextResponse.json({ error: "Please provide some text to humanize." }, { status: 400 });
@@ -157,7 +158,7 @@ export async function POST(req: NextRequest) {
       outputTokenLimit: PLANS[plan].outputTokenLimit,
     });
 
-    await saveHumanization({
+    const savedId = await saveHumanization({
       userId,
       mode: safeMode,
       strength: safeStrength,
@@ -165,6 +166,20 @@ export async function POST(req: NextRequest) {
       outputText: result.output,
       wordCount: words,
     });
+
+    // Optional: file the new result under a project in the same
+    // request, when the caller (e.g. a project's "Humanize into this
+    // project" shortcut) asked for it. Ownership-checked inside
+    // assignItemToProject — an invalid/foreign projectId just fails
+    // silently here rather than failing the whole humanize response,
+    // since the transformation itself already succeeded.
+    if (typeof projectId === "string" && projectId) {
+      try {
+        await assignItemToProject(userId, { kind: "humanized", id: savedId }, projectId);
+      } catch (err) {
+        console.error("[humanize] project assignment failed", err);
+      }
+    }
 
     // Deterministic, non-AI safety net — never another model call, just
     // pattern matching to flag numbers/percentages/dates/URLs/quotes
@@ -174,7 +189,7 @@ export async function POST(req: NextRequest) {
     const meaningCheck = checkMeaningPreservation(trimmed, result.output);
     const readability = scoreReadability(result.output);
 
-    return NextResponse.json({ output: result.output, outputs: result.outputs, meaningCheck, readability });
+    return NextResponse.json({ output: result.output, outputs: result.outputs, meaningCheck, readability, id: savedId });
   } catch (err) {
     if (plan === "free") {
       await releaseFreeTrial(userId);

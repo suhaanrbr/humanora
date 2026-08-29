@@ -12,6 +12,7 @@ import { getVoiceOverview } from "@/lib/db/voice";
 import { getUserPlan, getFreeTrialStatus, getSubscriptionSummary } from "@/lib/db/entitlement";
 import { getLifetimeStats } from "@/lib/db/stats";
 import { getRecentWork } from "@/lib/db/recentWork";
+import { listProjectsForUser } from "@/lib/db/projects";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
 import { QuickStart } from "@/components/dashboard/QuickStart";
@@ -27,18 +28,15 @@ export const metadata = { title: "Dashboard — HUMANORA" };
 // Real destinations only — no "Long Form Editor"/"Paraphrase Content"/
 // "Explain Like I'm 5" as their own routes, since those aren't separate
 // tools today (Study is one workspace with internal Summarize/Explain/
-// Notes tabs — see StudyWorkspace.tsx). Each tile still names the
-// specific capability the mockup called out; the tiles that don't yet
-// have a real backing feature (AI Detector, Chat with Document) route to
-// their real "coming soon" pages rather than nowhere — marked `soon`
-// here so the tile can look intentional (a real preview of what's
-// arriving) rather than identical to a live tool and quietly broken.
+// Notes tabs — see StudyWorkspace.tsx). AI Detector is real as of the
+// Master Completion phase (lib/ai/detector.ts) — no longer marked
+// `soon`. Chat with Document still is (no parsing/RAG pipeline exists).
 const QUICK_ACTIONS = [
   { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you.", icon: SparkIcon },
   { href: "/dashboard/study", title: "Summarize Text", description: "Condense long material fast.", icon: SummarizeIcon },
   { href: "/dashboard/study", title: "Explain Like I'm 5", description: "Break a hard topic down simply.", icon: ExplainIcon },
   { href: "/dashboard/study", title: "Study Notes Generator", description: "Turn material into revision notes.", icon: NotesIcon },
-  { href: "/dashboard/ai-detector", title: "AI Detector", description: "AI-likelihood scoring — in development.", icon: DetectorIcon, soon: true },
+  { href: "/dashboard/ai-detector", title: "AI Detector", description: "Check writing for AI patterns.", icon: DetectorIcon },
   { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Ask questions of an upload — in development.", icon: ChatIcon, soon: true },
 ] as const;
 
@@ -53,7 +51,7 @@ export default async function DashboardPage() {
 
   // Each data source degrades independently — a hiccup on one shouldn't
   // take down the whole dashboard.
-  const [usage, recentWork, voice, freeTrial, billing, lifetime, voiceSnapshot] = await Promise.allSettled([
+  const [usage, recentWork, voice, freeTrial, billing, lifetime, voiceSnapshot, projects] = await Promise.allSettled([
     getUsageSummary(userId, plan),
     getRecentWork(userId, 10),
     getVoiceOverview(userId),
@@ -61,6 +59,7 @@ export default async function DashboardPage() {
     getSubscriptionSummary(userId),
     getLifetimeStats(userId),
     getVoiceSnapshot(userId),
+    listProjectsForUser(userId),
   ]);
 
   const mostRecent = recentWork.status === "fulfilled" ? recentWork.value[0] : null;
@@ -204,6 +203,95 @@ export default async function DashboardPage() {
 
         {/* Sidebar */}
         <aside className="flex flex-col gap-6">
+          {/* My Workspace — real Projects only, up to 3 most recently
+              updated. Priority order per the redesign: Continue / Start
+              Something / Recent Work (main column) come first, then
+              Workspace context (this + My Voice) before Plan/Usage,
+              which matters least on a screen whose job is "what do I do
+              next." */}
+          <section>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Workspace</h2>
+              <Link href="/dashboard/projects" className="text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground">
+                View all
+              </Link>
+            </div>
+            {projects.status === "fulfilled" ? (
+              projects.value.length === 0 ? (
+                <Card className="p-5">
+                  <p className="text-sm text-foreground-muted">No projects yet.</p>
+                  <ButtonLink href="/dashboard/projects" variant="secondary" size="sm" className="mt-3">
+                    Create one
+                  </ButtonLink>
+                </Card>
+              ) : (
+                <Card className="glass-panel divide-y divide-white/[0.06] p-0">
+                  {projects.value.slice(0, 3).map((p) => (
+                    <Link
+                      key={p.id}
+                      href={`/dashboard/projects/${p.id}`}
+                      className="focus-ring press-feedback block p-4 transition-colors hover:bg-white/[0.03]"
+                    >
+                      <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
+                      <p className="mt-0.5 text-xs text-foreground-subtle">
+                        {p.itemCount} item{p.itemCount === 1 ? "" : "s"}
+                      </p>
+                    </Link>
+                  ))}
+                </Card>
+              )
+            ) : (
+              <ErrorState message="Couldn't load your projects right now." />
+            )}
+          </section>
+
+          <section>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
+            {voice.status === "fulfilled" ? (
+              <Card className="glass-panel p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-foreground">
+                    {voice.value.hasAnalyzedProfile ? "Profile ready" : "Not set up"}
+                  </p>
+                  <Badge variant={voice.value.hasAnalyzedProfile ? "brand" : "neutral"}>
+                    {voice.value.profileCount} profile{voice.value.profileCount === 1 ? "" : "s"}
+                  </Badge>
+                </div>
+                {/* Real trait data (voiceSnapshot), not a fabricated
+                    "personality" — the exact same Gemini-derived,
+                    Zod-validated fields already used to steer humanize()
+                    calls (see lib/ai/voiceAnalysis.ts), just surfaced
+                    here instead of only ever consumed silently. */}
+                {voiceSnapshot.status === "fulfilled" && voiceSnapshot.value.summary ? (
+                  <>
+                    <p className="mt-2 text-xs text-foreground-subtle">{voiceSnapshot.value.summary}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {voiceSnapshot.value.traits.map((t) => (
+                        <span
+                          key={t.label}
+                          className="rounded-full border border-brand-purple/25 bg-brand-purple/[0.08] px-2.5 py-1 text-[11px] capitalize text-brand-purple"
+                        >
+                          {t.label}: {t.value}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-foreground-subtle">
+                    Teach HUMANORA how you write from a few real samples.
+                  </p>
+                )}
+                <div className="mt-3">
+                  <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
+                    {voice.value.profileCount === 0 ? "Get started" : "Open"}
+                  </ButtonLink>
+                </div>
+              </Card>
+            ) : (
+              <ErrorState message="Couldn't load your Voice profile right now." />
+            )}
+          </section>
+
           <section>
             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">Plan</h2>
             {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && billing.status === "fulfilled" ? (
@@ -258,53 +346,6 @@ export default async function DashboardPage() {
               </Card>
             ) : (
               <ErrorState message="Couldn't load your plan right now." />
-            )}
-          </section>
-
-          <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-foreground-subtle">My Voice</h2>
-            {voice.status === "fulfilled" ? (
-              <Card className="glass-panel p-5">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-foreground">
-                    {voice.value.hasAnalyzedProfile ? "Profile ready" : "Not set up"}
-                  </p>
-                  <Badge variant={voice.value.hasAnalyzedProfile ? "brand" : "neutral"}>
-                    {voice.value.profileCount} profile{voice.value.profileCount === 1 ? "" : "s"}
-                  </Badge>
-                </div>
-                {/* Real trait data (voiceSnapshot), not a fabricated
-                    "personality" — the exact same Gemini-derived,
-                    Zod-validated fields already used to steer humanize()
-                    calls (see lib/ai/voiceAnalysis.ts), just surfaced
-                    here instead of only ever consumed silently. */}
-                {voiceSnapshot.status === "fulfilled" && voiceSnapshot.value.summary ? (
-                  <>
-                    <p className="mt-2 text-xs text-foreground-subtle">{voiceSnapshot.value.summary}</p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {voiceSnapshot.value.traits.map((t) => (
-                        <span
-                          key={t.label}
-                          className="rounded-full border border-brand-purple/25 bg-brand-purple/[0.08] px-2.5 py-1 text-[11px] capitalize text-brand-purple"
-                        >
-                          {t.label}: {t.value}
-                        </span>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p className="mt-2 text-xs text-foreground-subtle">
-                    Teach HUMANORA how you write from a few real samples.
-                  </p>
-                )}
-                <div className="mt-3">
-                  <ButtonLink href="/dashboard/voice" variant="secondary" size="sm">
-                    {voice.value.profileCount === 0 ? "Get started" : "Open"}
-                  </ButtonLink>
-                </div>
-              </Card>
-            ) : (
-              <ErrorState message="Couldn't load your Voice profile right now." />
             )}
           </section>
 

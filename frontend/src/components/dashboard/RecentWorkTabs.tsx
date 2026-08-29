@@ -72,6 +72,7 @@ export function RecentWorkTabs({ items }: { items: RecentWorkItem[] }) {
               createdAt={item.createdAt}
               kind={item.kind}
               projectId={item.projectId}
+              projectName={item.projectName}
               showProjectPicker
             />
           ))}

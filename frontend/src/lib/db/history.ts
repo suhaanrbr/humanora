@@ -17,9 +17,10 @@ export interface SaveHumanizationInput {
   wordCount: number;
 }
 
-export async function saveHumanization(input: SaveHumanizationInput) {
+export async function saveHumanization(input: SaveHumanizationInput): Promise<string> {
   const db = getDb();
-  await db.insert(humanization).values({ id: randomUUID(), ...input });
+  const id = randomUUID();
+  await db.insert(humanization).values({ id, ...input });
 
   // Trim oldest rows beyond the cap for this user. Simple and correct;
   // if this ever shows up in profiling, move to a scheduled job instead.
@@ -31,10 +32,12 @@ export async function saveHumanization(input: SaveHumanizationInput) {
 
   if (rows.length > MAX_HISTORY_PER_USER) {
     const idsToDelete = rows.slice(MAX_HISTORY_PER_USER).map((r) => r.id);
-    for (const id of idsToDelete) {
-      await db.delete(humanization).where(eq(humanization.id, id));
+    for (const staleId of idsToDelete) {
+      await db.delete(humanization).where(eq(humanization.id, staleId));
     }
   }
+
+  return id;
 }
 
 /**

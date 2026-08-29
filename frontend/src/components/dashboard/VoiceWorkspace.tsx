@@ -527,7 +527,7 @@ function ProfilePanel({
         </div>
       )}
 
-      <Card className="p-6 sm:p-7">
+      <Card className={cn("p-6 sm:p-7", profile && "glass-panel")}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-medium text-foreground">Voice profile</p>
@@ -545,6 +545,9 @@ function ProfilePanel({
 
         {profile && (
           <div className="mt-6 border-t border-border pt-6">
+            <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-brand-purple">
+              This is what steers Humanize when this profile is selected
+            </p>
             <p className="mb-5 max-w-2xl text-sm text-foreground-muted">{profile.summary}</p>
             <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 xl:grid-cols-4">
               {VOICE_TRAITS.map((trait) => (

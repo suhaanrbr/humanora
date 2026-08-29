@@ -55,6 +55,25 @@ export async function createProject(userId: string, name: string, description?: 
   return id;
 }
 
+export async function updateProject(
+  userId: string,
+  projectId: string,
+  fields: { name?: string; description?: string | null }
+) {
+  const db = getDb();
+  const update: { name?: string; description?: string | null; updatedAt: Date } = { updatedAt: new Date() };
+  if (fields.name !== undefined) {
+    const trimmed = fields.name.trim();
+    if (!trimmed) throw new Error("Project name can't be empty.");
+    update.name = trimmed.slice(0, MAX_NAME_LENGTH);
+  }
+  if (fields.description !== undefined) {
+    update.description = fields.description?.trim().slice(0, MAX_DESCRIPTION_LENGTH) || null;
+  }
+  // Ownership-scoped — same pattern as deleteProject below.
+  await db.update(project).set(update).where(and(eq(project.id, projectId), eq(project.userId, userId)));
+}
+
 export async function deleteProject(userId: string, projectId: string) {
   const db = getDb();
   // Ownership-scoped delete — a request for another user's project id

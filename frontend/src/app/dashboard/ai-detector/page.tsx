@@ -1,22 +1,23 @@
-import { ComingSoon } from "@/components/dashboard/ComingSoon";
+import { redirect } from "next/navigation";
+import { getVerifiedSession } from "@/lib/auth-session";
+import { getUserPlan } from "@/lib/db/entitlement";
+import { getDetectorScansForUser } from "@/lib/db/detector";
+import { DetectorWorkspace } from "@/components/dashboard/DetectorWorkspace";
 
 export const metadata = { title: "AI Detector — HUMANORA" };
 
-export default function AiDetectorPage() {
-  return (
-    <ComingSoon
-      title="AI Detector"
-      description="Check a piece of writing for an AI-likelihood estimate before you publish it."
-      icon={DetectorIcon}
-    />
-  );
-}
+export default async function AiDetectorPage() {
+  const result = await getVerifiedSession();
+  if (result.status !== "authenticated") redirect("/login");
 
-function DetectorIcon({ className }: { className?: string }) {
+  const userId = result.session.user.id;
+  const plan = await getUserPlan(userId);
+  const scans = plan === "free" ? [] : await getDetectorScansForUser(userId, 20);
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
-      <path d="m20.5 20.5-4.3-4.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
+    <DetectorWorkspace
+      plan={plan}
+      initialScans={scans.map((s) => ({ ...s, createdAt: s.createdAt.toISOString() }))}
+    />
   );
 }
