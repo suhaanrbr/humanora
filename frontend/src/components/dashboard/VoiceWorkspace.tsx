@@ -108,7 +108,17 @@ export function VoiceWorkspace({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="relative flex flex-col gap-6">
+      {/* A restrained echo of MyVoiceScene's own pink/violet cinematic
+          light, local to this page only — `-z-10` inside this `relative`
+          wrapper keeps it strictly behind this page's own content
+          without touching AppShell's global stacking. Purely decorative,
+          no layout impact (absolute + pointer-events-none). */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
+        style={{ background: "radial-gradient(55% 70% at 30% 0%, rgba(217,70,239,0.08) 0%, transparent 70%)" }}
+      />
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">My Voice</h1>
         <p className="mt-2 max-w-2xl text-sm text-foreground-muted">

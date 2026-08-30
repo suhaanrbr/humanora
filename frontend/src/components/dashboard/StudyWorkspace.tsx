@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { CheckoutButton } from "@/components/payments/CheckoutButton";
-import { PLANS, PAID_PLAN_IDS, type PlanId } from "@/lib/config/plans";
+import { PricingCard } from "@/components/pricing/PricingCard";
+import { PAID_PLAN_IDS, type PlanId } from "@/lib/config/plans";
+import { pricingPlans } from "@/lib/config/pricing";
 import { cn } from "@/lib/cn";
 
 type StudyMode = "summarize" | "explain" | "notes";
@@ -157,7 +158,14 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
   }
 
   return (
-    <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
+    <Container size="medium" className="relative mx-auto pb-36 md:pb-24 lg:pb-10">
+      {/* A restrained echo of StudyScene's own cyan cinematic light,
+          local to this page only. Purely decorative, no layout impact. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
+        style={{ background: "radial-gradient(55% 70% at 70% 0%, rgba(34,211,238,0.07) 0%, transparent 70%)" }}
+      />
       {targetProject && (
         <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
@@ -331,43 +339,151 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
  * screen: lead with what it is and why it matters, THEN the plan
  * requirement.
  */
+const MODE_ICONS: Record<StudyMode, (props: { className?: string }) => React.ReactElement> = {
+  summarize: SummarizeModeIcon,
+  explain: ExplainModeIcon,
+  notes: NotesModeIcon,
+};
+
 export function StudyUpsell() {
+  const gradientId = useId();
+  const paidPlans = pricingPlans.filter((p) => (PAID_PLAN_IDS as readonly string[]).includes(p.id));
+
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-8 text-center">
-      <div>
-        <Badge variant="brand">Study</Badge>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Turn material into something you can actually study from
-        </h1>
-        <p className="mx-auto mt-3 max-w-lg text-sm text-foreground-muted">
-          Paste lecture notes, a reading, or a topic — HUMANORA summarizes it, explains it at the
-          depth you need, or turns it into structured revision notes. Grounded in what you actually
-          gave it, never invented.
-        </p>
+    <div className="relative mx-auto -mt-4 max-w-6xl">
+      {/* Cinematic backdrop, local to this page — same H-thread language
+          as the landing page's StudyScene, not a scroll-pinned scene
+          (this is a real product page, not marketing). */}
+      <div aria-hidden="true" className="pointer-events-none absolute -inset-x-10 -top-16 -z-10 h-[560px] overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(55% 70% at 65% 10%, rgba(34,211,238,0.1) 0%, transparent 70%)" }}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {MODES.map((m) => (
-          <div key={m.value} className="rounded-lg border border-border bg-surface p-4 text-left">
-            <p className="text-sm font-semibold text-foreground">{m.label}</p>
-            <p className="mt-1 text-xs text-foreground-subtle">{m.placeholder}</p>
+      <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div>
+          <Badge variant="brand">Study</Badge>
+          <h1 className="mt-4 text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+            Turn material into something you can actually{" "}
+            <span className="text-brand-gradient">study from</span>
+          </h1>
+          <p className="mt-4 max-w-lg text-base text-foreground-muted">
+            Paste lecture notes, a reading, or a topic — HUMANORA summarizes it, explains it at the
+            depth you need, or turns it into structured revision notes. Grounded in what you actually
+            gave it, never invented.
+          </p>
+        </div>
+
+        {/* The H — same gradient geometry as the landing page's mark,
+            with a couple of floating document echoes around it,
+            resolution-independent SVG, no raster asset. */}
+        <div className="relative hidden h-[320px] items-center justify-center lg:flex">
+          <div
+            aria-hidden="true"
+            className="absolute h-56 w-56 rounded-full border border-white/10"
+            style={{ transform: "rotate(-8deg)" }}
+          />
+          <div className="pearl-glass absolute left-2 top-4 w-32 -rotate-6 rounded-lg p-3 opacity-80" aria-hidden="true">
+            <span className="block h-1.5 w-full rounded-full bg-white/15" />
+            <span className="mt-1.5 block h-1.5 w-2/3 rounded-full bg-white/10" />
           </div>
-        ))}
+          <div className="pearl-glass absolute right-0 bottom-6 w-32 rotate-6 rounded-lg p-3 opacity-80" aria-hidden="true">
+            <span className="block h-1.5 w-full rounded-full bg-white/15" />
+            <span className="mt-1.5 block h-1.5 w-2/3 rounded-full bg-white/10" />
+          </div>
+          <svg viewBox="0 0 200 200" className="h-40 w-40 drop-shadow-[0_0_50px_rgba(34,211,238,0.35)]">
+            <defs>
+              <linearGradient id={`${gradientId}-edge`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--color-brand-cyan)" />
+                <stop offset="55%" stopColor="var(--color-brand-indigo)" />
+                <stop offset="100%" stopColor="var(--color-brand-purple)" />
+              </linearGradient>
+            </defs>
+            <rect x="30" y="65" width="35" height="105" rx="6" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" />
+            <rect x="135" y="25" width="35" height="145" rx="6" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" />
+            <polygon points="65,95 135,60 135,90 65,125" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" strokeLinejoin="round" />
+          </svg>
+        </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-surface p-6 sm:p-8">
-        <p className="text-sm font-medium text-foreground">Available on every paid plan</p>
-        <p className="mt-1 text-xs text-foreground-subtle">
-          Uses the same monthly word allowance as Humanize — no separate quota to track.
-        </p>
-        <div className="mt-4 flex flex-wrap justify-center gap-2.5">
-          {PAID_PLAN_IDS.map((id) => (
-            <CheckoutButton key={id} planId={id} variant={id === "pro" ? "primary" : "secondary"} size="sm">
-              {PLANS[id].name} · ₹{PLANS[id].monthlyPriceInr}
-            </CheckoutButton>
+      <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {MODES.map((m) => {
+          const Icon = MODE_ICONS[m.value];
+          return (
+            <div key={m.value} className="pearl-glass hover-lift relative flex flex-col rounded-2xl p-5">
+              <span className="icon-chip flex h-10 w-10 items-center justify-center">
+                <Icon className="h-[18px] w-[18px]" />
+              </span>
+              <p className="mt-4 text-base font-semibold text-foreground">{m.label}</p>
+              <p className="mt-1.5 flex-1 text-sm text-foreground-subtle">{m.placeholder}</p>
+              <span
+                aria-hidden="true"
+                className="mt-4 flex h-8 w-8 items-center justify-center rounded-full bg-brand-gradient text-white"
+              >
+                <ArrowUpRightIcon className="h-3.5 w-3.5" />
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="pearl-glass relative mt-6 flex flex-col gap-6 rounded-2xl p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-start gap-3">
+          <span className="icon-chip flex h-10 w-10 shrink-0 items-center justify-center">
+            <CrownIcon className="h-[18px] w-[18px]" />
+          </span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Available on every paid plan</p>
+            <p className="mt-1 max-w-sm text-xs text-foreground-subtle">
+              Uses the same monthly word allowance as Humanize — no separate quota to track.
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:w-[560px]">
+          {paidPlans.map((plan) => (
+            <PricingCard key={plan.id} plan={plan} />
           ))}
         </div>
       </div>
     </div>
+  );
+}
+
+function SummarizeModeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 6.5h16M4 12h16M4 17.5h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ExplainModeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 3v3M12 18v3M4.2 6.2l2.1 2.1M17.7 15.7l2.1 2.1M3 12h3M18 12h3M4.2 17.8l2.1-2.1M17.7 8.3l2.1-2.1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+function NotesModeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4.5" y="3.5" width="15" height="17" rx="1.6" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M8 8.5h8M8 12.5h8M8 16.5h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function ArrowUpRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M7 17 17 7M9 7h8v8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function CrownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="m3 8 4 3 5-6 5 6 4-3-1.5 10h-15L3 8Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+    </svg>
   );
 }
