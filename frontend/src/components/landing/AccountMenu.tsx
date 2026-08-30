@@ -23,7 +23,10 @@ const links = [
  * existed. `useSession` is Better Auth's reactive client hook — it
  * reflects the real cookie-backed session, never a locally-faked flag.
  */
-export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } = {}) {
+export function AccountMenu({
+  showAppLinks = true,
+  dropUp = false,
+}: { showAppLinks?: boolean; dropUp?: boolean } = {}) {
   const { data: session, isPending } = useSession();
   const [open, setOpen] = useState(false);
   const { signingOut, handleSignOut } = useSignOut();
@@ -62,8 +65,28 @@ export function AccountMenu({ showAppLinks = true }: { showAppLinks?: boolean } 
         {initial}
       </button>
 
+      {/* Opens upward + rightward when anchored to the dashboard rail's
+          own account button, instead of the header's downward +
+          leftward defaults. Two real, compounding bugs, both only
+          visible by actually clicking this in a browser (the markup
+          always rendered fine):
+           1. `top-full` pushed the dropdown below the viewport — the
+              rail is `fixed inset-y-0` with this button at its very
+              bottom, so there's no scroll to reveal it.
+           2. `right-0` assumes a wide container to the button's LEFT
+              (true in a header, where this sits far right) — in the
+              rail, the button sits near the sidebar's own left edge,
+              so a right-anchored 224px-wide dropdown rendered with a
+              NEGATIVE x-coordinate, off the left of the viewport
+              entirely. `left-0` here extends it rightward into the
+              sidebar/content area instead, where there's actual room. */}
       {open && (
-        <div className="pearl-glass absolute right-0 top-full mt-2 w-56 rounded-lg p-2 shadow-glow-sm">
+        <div
+          className={cn(
+            "pearl-glass absolute w-56 rounded-lg p-2 shadow-glow-sm",
+            dropUp ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
+          )}
+        >
           <div className="border-b border-border px-3 py-2">
             <p className="truncate text-sm font-medium text-foreground">{session.user.name}</p>
             <p className="truncate text-xs text-foreground-subtle">{session.user.email}</p>

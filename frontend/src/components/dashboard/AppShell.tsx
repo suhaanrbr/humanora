@@ -7,6 +7,7 @@ import { Logo, LogoMark } from "@/components/brand/Logo";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { CommandPalette, CommandTrigger, SearchIcon } from "@/components/dashboard/CommandPalette";
 import { AppAtmosphere } from "@/components/dashboard/AppAtmosphere";
+import { useSignOut } from "@/lib/useSignOut";
 import { cn } from "@/lib/cn";
 
 interface NavEntry {
@@ -78,6 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // both responsive slots would double the global Cmd+K listener and
   // stack two competing full-screen overlays.
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const { signingOut, handleSignOut } = useSignOut();
 
   function isActive(href: string) {
     return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
@@ -94,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           div with a border," at negligible visual cost. */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-white/[0.06] bg-background/80 backdrop-blur-xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.03)] md:flex lg:w-64"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-white/[0.07] bg-background/40 backdrop-blur-2xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)] md:flex lg:w-64"
       >
         <Link href="/dashboard" className="focus-ring flex h-16 shrink-0 items-center justify-center px-3 lg:justify-start lg:px-5" aria-label="HUMANORA home">
           <span className="lg:hidden">
@@ -124,13 +126,31 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-2.5 py-3 lg:px-3.5">
+        <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-2.5 py-4 lg:px-3.5">
           <NavGroup label="Workspace" entries={WORKSPACE_ENTRIES} isActive={isActive} />
           <NavGroup label="Explore" entries={EXPLORE_ENTRIES} isActive={isActive} />
         </div>
 
-        <div className="flex items-center justify-center border-t border-white/[0.06] p-3 lg:justify-start lg:px-5">
-          <AccountMenu showAppLinks={false} />
+        {/* A direct sign-out control, not a dropdown — the dropdown
+            version anchored its menu (`right-0`/`top-full`, tuned for
+            the header) to a button sitting at the very bottom-left of
+            a `fixed inset-y-0` rail, which pushed the whole thing off
+            both the bottom AND the left edge of the viewport at once
+            (confirmed by actually clicking it, not just reading the
+            markup). Profile/Billing/Settings are already one Cmd+K
+            away via CommandPalette, so this slot only needs the one
+            action that has to be a single, unambiguous, always-
+            reachable click: log out. */}
+        <div className="border-t border-white/[0.06] p-3">
+          <button
+            type="button"
+            onClick={() => handleSignOut()}
+            disabled={signingOut}
+            className="focus-ring press-feedback group flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-foreground-muted backdrop-blur-sm transition-colors hover:border-brand-purple/40 disabled:opacity-50 lg:justify-start lg:px-4"
+          >
+            <LogoutIcon className="h-4 w-4 shrink-0 text-brand-purple transition-transform group-hover:translate-x-0.5" />
+            <span className="hidden lg:inline">{signingOut ? "Logging out…" : "Log out"}</span>
+          </button>
         </div>
       </nav>
 
@@ -199,18 +219,12 @@ function NavGroup({
             aria-current={active ? "page" : undefined}
             title={entry.label}
             className={cn(
-              "focus-ring group relative flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-sm font-medium transition-colors lg:px-3",
+              "focus-ring group relative flex items-center gap-3 rounded-xl border px-2.5 py-2.5 text-sm font-medium transition-colors lg:px-3.5",
               active
-                ? "bg-white/[0.06] text-foreground shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
-                : "text-foreground-muted hover:bg-white/[0.04] hover:text-foreground"
+                ? "border-brand-purple/30 bg-brand-purple/[0.07] text-foreground shadow-[0_0_24px_-10px_rgba(168,85,247,0.55)]"
+                : "border-transparent text-foreground-muted hover:border-white/10 hover:bg-white/[0.03] hover:text-foreground"
             )}
           >
-            {active && (
-              <span
-                aria-hidden="true"
-                className="nav-illuminated bg-brand-gradient absolute -left-2.5 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full shadow-[0_0_12px_2px_rgba(168,85,247,0.55)] lg:-left-3.5"
-              />
-            )}
             <entry.icon className={cn("h-5 w-5 shrink-0", active && "text-brand-purple")} />
             <span className="hidden lg:inline">{entry.label}</span>
           </Link>
@@ -313,6 +327,14 @@ function AnalyticsIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path d="M5 19V10M12 19V5M19 19v-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function LogoutIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M15 16l4-4-4-4M19 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

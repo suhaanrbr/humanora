@@ -223,7 +223,14 @@ export function HumanizeWorkspace({
   const currentMode = writingModes.find((m) => m.name.toLowerCase() === mode);
 
   return (
-    <Container size="medium" className="mx-auto pb-36 md:pb-24 lg:pb-10">
+    <Container size="medium" className="relative mx-auto pb-36 md:pb-24 lg:pb-10">
+      {/* A restrained echo of HumanizeScene's own blue cinematic light,
+          local to this page only. Purely decorative, no layout impact. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
+        style={{ background: "radial-gradient(55% 70% at 70% 0%, rgba(59,130,246,0.08) 0%, transparent 70%)" }}
+      />
       {targetProject && (
         <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
@@ -235,8 +242,8 @@ export function HumanizeWorkspace({
           Sticky so it stays reachable while a long draft scrolls, but
           it's the editor beneath it that owns the page. */}
       <div className="sticky top-14 z-30 -mx-4 mb-6 px-4 pt-4 sm:-mx-6 sm:px-6 md:top-4 lg:mx-0 lg:px-0">
-        <div className="pearl-glass flex flex-wrap items-center gap-2 rounded-full px-2.5 py-2 shadow-glow-sm">
-          <label className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-foreground-muted">
+        <div className="pearl-glass flex flex-wrap items-center gap-1 rounded-2xl px-2 py-1.5">
+          <label className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-foreground-muted">
             <span className="text-foreground-subtle">Mode</span>
             <select
               value={mode}
@@ -253,7 +260,7 @@ export function HumanizeWorkspace({
 
           <span className="h-4 w-px bg-border" aria-hidden="true" />
 
-          <div className="inline-flex items-center gap-1 rounded-full bg-surface p-1 text-xs">
+          <div className="inline-flex items-center gap-1 rounded-lg border border-white/[0.06] bg-black/20 p-1 text-xs">
             {strengths.map((s) => (
               <button
                 key={s.value}
@@ -261,10 +268,10 @@ export function HumanizeWorkspace({
                 onClick={() => setStrength(s.value)}
                 aria-pressed={strength === s.value}
                 className={cn(
-                  "focus-ring press-feedback cursor-pointer rounded-full px-2.5 py-1 font-medium transition-colors",
+                  "focus-ring press-feedback cursor-pointer rounded-md border px-2.5 py-1 font-medium transition-colors",
                   strength === s.value
-                    ? "bg-brand-gradient text-white"
-                    : "text-foreground-muted hover:text-foreground"
+                    ? "border-brand-purple/35 bg-brand-purple/[0.1] text-foreground"
+                    : "border-transparent text-foreground-muted hover:text-foreground"
                 )}
               >
                 {s.label}
@@ -450,7 +457,7 @@ export function HumanizeWorkspace({
               {text.length}/{MAX_CHARS}
             </span>
           </div>
-          <div className="focus-within:ring-brand-purple/40 rounded-xl transition-shadow focus-within:ring-2">
+          <div className="focus-within:ring-brand-purple/20 rounded-xl transition-shadow focus-within:ring-1">
             <textarea
               ref={textareaRef}
               value={text}
@@ -590,7 +597,12 @@ export function HumanizeWorkspace({
               onClick={runHumanize}
               loading={state === "processing"}
               disabled={!text.trim()}
-              className="ml-auto w-full sm:w-auto lg:ml-0"
+              // Restrained, not the brightest object on screen — a
+              // controlled violet edge rather than the shared
+              // `.bg-brand-gradient` fill this variant normally carries
+              // (that stays the default everywhere else in the app;
+              // this override is scoped to this one CTA).
+              className="!bg-white/[0.05] !shadow-none ml-auto w-full border border-brand-purple/30 text-foreground backdrop-blur-sm transition-shadow hover:!shadow-[0_0_28px_-10px_rgba(168,85,247,0.5)] sm:w-auto lg:ml-0"
             >
               {state === "processing" ? "Humanizing..." : "Humanize"}
             </Button>

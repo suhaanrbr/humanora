@@ -11,6 +11,7 @@ import { ProfileForm, DangerZone } from "@/components/dashboard/AccountSettings"
 import { formatDate, formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { cn } from "@/lib/cn";
+import { CornerFrame } from "@/components/landing/cinematic/CornerFrame";
 
 interface RecentWorkItem {
   kind: "humanized" | "study";
@@ -108,12 +109,29 @@ export function ProfileWorkspace(props: {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-      <BackToHome />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <BackToHome />
+        {/* Transparent, not a filled button — this leaves the product
+            back to the public marketing site, a lower-frequency action
+            than "Home" (the dashboard), so it shouldn't compete
+            visually with real workspace actions. */}
+        <Link
+          href="/"
+          className="focus-ring press-feedback group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 text-sm text-foreground-muted backdrop-blur-sm transition-colors hover:border-brand-purple/35 hover:text-foreground"
+        >
+          <HLogoIcon className="h-3.5 w-3.5 shrink-0 text-brand-purple" />
+          Back to humanora.com
+          <span aria-hidden="true" className="text-foreground-subtle transition-transform group-hover:translate-x-0.5">
+            →
+          </span>
+        </Link>
+      </div>
 
       {/* Asymmetric identity header — not a centered card. Identity on
           the left, a compact voice-fingerprint teaser bleeding in from
           the right (real traits, not decoration) on wide screens. */}
       <div className="glass-panel relative overflow-hidden rounded-3xl p-6 sm:p-9">
+        <CornerFrame color="rgba(139,92,246,0.4)" />
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
@@ -281,6 +299,16 @@ function OverviewTab(
         </button>
       </div>
     </div>
+  );
+}
+
+function HLogoIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 200" fill="currentColor" className={className} aria-hidden="true">
+      <rect x="30" y="65" width="35" height="105" rx="6" />
+      <rect x="135" y="25" width="35" height="145" rx="6" />
+      <polygon points="65,95 135,60 135,90 65,125" />
+    </svg>
   );
 }
 

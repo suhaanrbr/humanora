@@ -525,19 +525,54 @@
   }
 }
 /* H-mark watermark — architectural geometry anchored to the bottom-
-   right corner, mostly out of frame. Stroke-only, extremely faint
-   (opacity ~0.05) so it reads as structure in the environment, never
-   competes with real content. */
+   right corner, mostly out of frame. Stroke-only, faint enough to
+   never compete with real content, but with a gradient edge (matching
+   the landing page's DimensionalH) and a near-imperceptible drift
+   rotation instead of sitting perfectly static — the same "living
+   environment" quality the landing page's persistent H-thread has,
+   at a fraction of the motion (a 4-minute rotation is not something
+   anyone consciously watches, just something that makes the space
+   feel occupied rather than a flat printed backdrop). */
 .app-atmosphere-h {
   position: absolute;
   right: -6vw;
   bottom: -8vw;
   width: min(48vw, 46vh);
   height: min(48vw, 46vh);
-  opacity: 0.05;
+  opacity: 0.08;
   fill: none;
-  stroke: var(--color-brand-purple);
   stroke-width: 1.2;
+  transform-origin: 50% 50%;
+}
+/* A second, smaller, fainter echo in the opposite corner — depth
+   through repetition at different scale/opacity, the same device the
+   landing page's scenes use (near/mid/far planes), not a duplicate
+   decoration. */
+.app-atmosphere-h-echo {
+  position: absolute;
+  left: -10vw;
+  top: -10vw;
+  width: min(26vw, 26vh);
+  height: min(26vw, 26vh);
+  opacity: 0.04;
+  fill: none;
+  stroke-width: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .app-atmosphere-h {
+    animation: drift-rotate 240s linear infinite;
+  }
+  .app-atmosphere-h-echo {
+    animation: drift-rotate 240s linear infinite reverse;
+  }
+}
+@keyframes drift-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 /* Faint vignette — far edges recede slightly darker so the viewport's
    center (where real content sits) always reads as the brightest,
@@ -564,13 +599,19 @@
    this is specifically for the handful of places translucency reads as
    depth instead of muddiness. */
 .glass-panel {
+  /* More genuinely transparent than before (was 72-88% surface) — the
+     dashboard's own background (AppAtmosphere's H-gradient/light
+     sources) should read clearly through every panel, not just tint
+     it, matching the landing page's cinematic material language.
+     Backdrop-blur (raised slightly alongside) is what keeps text
+     legible against whatever's showing through, not opacity. */
   background: linear-gradient(
     160deg,
-    color-mix(in srgb, var(--color-surface) 88%, transparent) 0%,
-    color-mix(in srgb, var(--color-surface) 72%, transparent) 100%
+    color-mix(in srgb, var(--color-surface) 58%, transparent) 0%,
+    color-mix(in srgb, var(--color-surface) 42%, transparent) 100%
   );
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-border-subtle);
 }
 

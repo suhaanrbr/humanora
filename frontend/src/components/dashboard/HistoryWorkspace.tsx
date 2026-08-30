@@ -88,7 +88,15 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: RecentWor
   }
 
   return (
-    <div>
+    <div className="relative">
+      {/* A restrained echo of LibraryScene's own indigo cinematic
+          light, local to this page only. Purely decorative, no layout
+          impact. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
+        style={{ background: "radial-gradient(55% 70% at 40% 0%, rgba(59,130,246,0.07) 0%, transparent 70%)" }}
+      />
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Library</h1>
