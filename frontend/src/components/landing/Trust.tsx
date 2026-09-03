@@ -37,7 +37,7 @@ export function Trust() {
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               What HUMANORA protects
             </h2>
-            <p className="mt-3 max-w-sm text-sm text-foreground-muted">
+            <p className="mt-3 max-w-sm text-base text-foreground-muted">
               Rewriting your language is the easy part. Here&apos;s what we hold ourselves to while
               doing it.
             </p>
@@ -55,7 +55,7 @@ export function Trust() {
                   </span>
                   <h3 className="text-sm font-semibold text-foreground">{principle.title}</h3>
                 </div>
-                <p className="mt-1.5 pl-6 text-sm leading-relaxed text-foreground-muted">
+                <p className="mt-1.5 pl-6 text-base leading-relaxed text-foreground-muted">
                   {principle.description}
                 </p>
               </div>

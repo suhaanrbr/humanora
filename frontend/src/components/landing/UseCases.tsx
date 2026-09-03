@@ -86,7 +86,7 @@ export function UseCases() {
             </div>
 
             <h3 className="relative mt-6 text-xl font-semibold text-foreground">{featured.title}</h3>
-            <p className="relative mt-2 max-w-sm text-sm text-foreground-muted">{featured.description}</p>
+            <p className="relative mt-2 max-w-sm text-base text-foreground-muted">{featured.description}</p>
           </Reveal>
 
           {/* Supporting rail — compact rows, not a second grid of cards. */}
@@ -102,8 +102,8 @@ export function UseCases() {
                   <useCase.Motif className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{useCase.title}</p>
-                  <p className="mt-0.5 text-xs text-foreground-subtle">{useCase.description}</p>
+                  <p className="text-base font-semibold text-foreground">{useCase.title}</p>
+                  <p className="mt-0.5 text-sm text-foreground-subtle">{useCase.description}</p>
                 </div>
               </Reveal>
             ))}

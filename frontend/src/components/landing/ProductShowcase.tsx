@@ -170,7 +170,7 @@ export function ProductShowcase() {
                 </svg>
                 <div>
                   <p className="text-2xl font-bold text-foreground">Easy · 82/100</p>
-                  <p className="mt-1 text-sm text-foreground-muted">
+                  <p className="mt-1 text-base text-foreground-muted">
                     A real Flesch Reading Ease score, computed from the actual rewrite — not an
                     estimate.
                   </p>
