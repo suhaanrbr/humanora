@@ -29,7 +29,18 @@ export function getDb() {
   }
 
   const sql = postgres(url, {
-    max: 1,
+    // DATABASE_URL points at Neon's pooled (PgBouncer) endpoint — its
+    // hostname carries "-pooler" — so a handful of app-level connections
+    // per warm Vercel instance is safe; PgBouncer multiplexes them onto
+    // Neon's actual Postgres backends rather than holding one each.
+    // Pages like /dashboard and /profile fire ~8-9 independent queries
+    // concurrently (Promise.all/allSettled) to paint all their panels
+    // in parallel; max: 1 forced those onto a single connection and
+    // serialized what should've been parallel work, which is what made
+    // /dashboard take ~15s. Keep this comfortably under Neon's free-tier
+    // pooled connection ceiling, since several instances can be warm at
+    // once.
+    max: 10,
     // Serverless-safe connection lifecycle: a module-level client like
     // this one is reused across invocations on a warm Vercel function
     // instance, but the underlying TCP socket can go stale while the

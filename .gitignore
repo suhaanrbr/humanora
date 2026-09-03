@@ -51,3 +51,6 @@ logs/
 dist/
 build/
 coverage/
+
+.vercel
+.env*
