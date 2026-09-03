@@ -12,10 +12,12 @@ export interface PricingCardProps {
 }
 
 /**
- * A single pricing tile. Pro (`plan.highlighted`) gets an elevated
- * treatment so it visually leads without making its siblings look
- * unimportant: a warm-ivory card in Dark Mode, a bright pearl card with
- * a violet border and soft glow in Light Mode (see --color-surface-warm).
+ * A single pricing tile. Every tile is genuinely translucent (`Card`'s
+ * own `.glass-panel` default) — Pro (`plan.highlighted`) leads not
+ * through an opaque fill but through a warmer amber-tinted glass, a
+ * brighter border, and a stronger glow, with text on the same light
+ * tokens every other tile uses (readable against the dark environment
+ * showing through, not the old dark-text-on-opaque-cream treatment).
  */
 export function PricingCard({ plan }: PricingCardProps) {
   const isFree = plan.id === "free";
@@ -25,7 +27,7 @@ export function PricingCard({ plan }: PricingCardProps) {
       className={cn(
         "hover-lift relative flex h-full flex-col p-7 transition-shadow",
         plan.highlighted
-          ? "border-brand-purple/35 bg-surface-warm text-surface-warm-foreground shadow-glow-md"
+          ? "border-brand-purple/40 bg-brand-purple/[0.06] shadow-glow-md"
           : "pearl-glass hover:shadow-glow-sm"
       )}
     >
@@ -45,46 +47,25 @@ export function PricingCard({ plan }: PricingCardProps) {
         className={cn(
           "mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md border",
           plan.highlighted
-            ? "border-surface-warm-foreground/10 bg-surface-warm-foreground/5 text-accent-amber"
+            ? "border-accent-amber/25 bg-accent-amber/[0.08] text-accent-amber"
             : "border-border bg-background-elevated text-brand-purple"
         )}
       >
         <PlanIcon icon={plan.icon} className="h-5 w-5" />
       </div>
 
-      <p className={cn("text-sm font-medium", plan.highlighted ? "text-surface-warm-foreground/70" : "text-foreground-muted")}>
-        {plan.name}
-      </p>
+      <p className="text-sm font-medium text-foreground-muted">{plan.name}</p>
 
       <div className="mt-2 flex items-baseline gap-1">
-        <span
-          className={cn(
-            "text-4xl font-bold tracking-tight",
-            plan.highlighted ? "text-surface-warm-foreground" : "text-foreground"
-          )}
-        >
-          ₹{plan.monthlyPrice}
-        </span>
-        {!isFree && (
-          <span className={cn("text-sm", plan.highlighted ? "text-surface-warm-foreground/60" : "text-foreground-subtle")}>
-            /month
-          </span>
-        )}
+        <span className="text-4xl font-bold tracking-tight text-foreground">₹{plan.monthlyPrice}</span>
+        {!isFree && <span className="text-sm text-foreground-subtle">/month</span>}
       </div>
 
-      <p className={cn("mt-4 text-sm", plan.highlighted ? "text-surface-warm-foreground/75" : "text-foreground-muted")}>
-        {plan.audience}
-      </p>
+      <p className="mt-4 text-sm text-foreground-muted">{plan.audience}</p>
 
       <ul className="mt-6 flex flex-1 flex-col gap-2.5">
         {plan.features.map((feature) => (
-          <li
-            key={feature.label}
-            className={cn(
-              "flex items-start gap-2 text-sm",
-              plan.highlighted ? "text-surface-warm-foreground/85" : "text-foreground-muted"
-            )}
-          >
+          <li key={feature.label} className="flex items-start gap-2 text-sm text-foreground-muted">
             <CheckIcon
               className={cn(
                 "mt-0.5 h-4 w-4 shrink-0",

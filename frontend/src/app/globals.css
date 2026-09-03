@@ -1586,11 +1586,18 @@ h4,
    override keyed to `:root[data-theme="light"]`, not a variable read —
    redefining --color-surface above can't reach it. Counter it
    explicitly, same specificity, later in source order so it wins. */
+/* Previously forced fully opaque here (a deliberate "keep this one
+   moment visually stable" call) — now genuinely translucent like every
+   other glass surface on the page, per an explicit later request for a
+   uniform transparent-panel treatment across the whole site. Keeps
+   `.cinematic-embed`'s own dark-regardless-of-theme base color (see its
+   own rule above) so this still stays legible for Light-theme visitors,
+   just no longer opaque on top of it. */
 .cinematic-embed.cinematic-embed .pearl-glass {
   background-image: none;
-  background-color: var(--color-surface);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background-color: color-mix(in srgb, var(--color-surface) 40%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 /* DimensionalH's H mark — sized off vh alone previously, so on a wide

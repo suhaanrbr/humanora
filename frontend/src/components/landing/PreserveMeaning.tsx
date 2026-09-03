@@ -105,7 +105,7 @@ export function PreserveMeaning() {
               quotations, terminology, and citations while rewriting the
               language around them.
             </p>
-            <p className="mt-4 max-w-lg text-sm text-foreground-subtle">
+            <p className="mt-4 max-w-lg text-base text-foreground-subtle">
               This is a system HUMANORA is built to check for, not a
               guarantee of perfect preservation in every case — you should
               always review important rewrites yourself.

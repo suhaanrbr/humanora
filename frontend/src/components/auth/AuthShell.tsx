@@ -90,7 +90,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           xl+ only — the Android `position: fixed` + "Request Desktop
           Site" viewport bug this same file documents avoiding only
           affects phones/tablets, never a real desktop window. */}
-      <LoginArtworkLayer className="absolute inset-0 hidden xl:fixed xl:block" minWidth={1280} dim={0.18} />
+      <LoginArtworkLayer className="absolute inset-0 hidden xl:fixed xl:block" minWidth={1280} dim={0.3} />
       {/* A little extra fog at the very bottom, desktop only — layered
           on top of LoginArtworkLayer's own (shorter) bottom wash. Text
           contrast is unaffected; this only darkens the artwork itself. */}
