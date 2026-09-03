@@ -12,7 +12,7 @@ import { usePinnedScene } from "@/lib/scrollScene";
  * through this section's extra height scrubs one GSAP timeline: the H
  * turns to face the viewer, sharpens, and settles — then recedes as
  * the real headline/CTA (already present in the DOM, not injected by
- * JS) take the foreground, handing off into HumanizeScene below.
+ * JS) take the foreground, handing off into Pillars below.
  *
  * Resolution-independent by construction — the H is inline SVG, so it
  * stays razor-sharp at any pixel density up to 4K+ with zero extra
@@ -57,7 +57,7 @@ export function DimensionalH() {
   });
 
   return (
-    <div id="hero" ref={trackRef} className="cinematic-track" style={{ ["--pin-vh" as string]: "210vh" }}>
+    <div id="hero" ref={trackRef} className="cinematic-track" style={{ ["--pin-vh" as string]: "130vh" }}>
       <div ref={stageRef} className="cinematic-stage">
         {/* Ambient environment — near-black with a soft, off-center key
             light. Pure CSS gradients, no image asset, so it's crisp at
@@ -72,10 +72,10 @@ export function DimensionalH() {
         />
 
         {/* A soft, out-of-focus glimpse of the real product, revealed
-            only in the timeline's final beat — the same panel that then
-            appears in full clarity as HumanizeScene, immediately below
-            in normal document flow. Cheap continuity: this exact
-            fade-out overlaps HumanizeScene's own entrance. */}
+            only in the timeline's final beat — a preview of the kind of
+            document view ProductShowcase renders in full clarity
+            further down the page. Cheap continuity: a hint of the real
+            UI, not an empty glass rectangle. */}
         <div
           ref={glimpseRef}
           aria-hidden="true"
@@ -131,7 +131,7 @@ export function DimensionalH() {
               Humanize Text Now
               <ArrowRightIcon className="h-4 w-4" />
             </ButtonLink>
-            <ButtonLink href="#how-it-works" variant="secondary" size="lg">
+            <ButtonLink href="#showcase" variant="secondary" size="lg">
               <PlayIcon className="h-4 w-4" />
               See It In Action
             </ButtonLink>
