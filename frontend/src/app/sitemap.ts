@@ -9,6 +9,8 @@ const PUBLIC_PATHS = [
   "",
   "/about",
   "/contact",
+  "/tools",
+  "/tools/citation-generator",
   "/trust",
   "/changelog",
   "/for/students",

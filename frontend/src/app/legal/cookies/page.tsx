@@ -22,7 +22,8 @@ export default function CookiePolicyPage() {
             login, used to keep you signed in) and, while you&apos;re actively
             using the workspace, a temporary draft of unsaved text in your
             browser&apos;s <code className="font-mono text-xs">sessionStorage</code>,
-            cleared automatically when you close the tab.
+            cleared automatically when you close the tab. The Citation
+            Generator keeps the bibliography you are building there too.
           </li>
           <li>
             <strong className="text-foreground">Display preferences</strong> in

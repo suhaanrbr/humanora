@@ -12,6 +12,24 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
   {
+    date: "2026-10-16",
+    title: "Six new tools",
+    body: "A Grammar Checker with one-click fixes, a Paraphraser with seven styles, a Summarizer, a Quiz Generator you can take and score, a Fact Checker that searches the web and lists its sources, and a Citation Generator for APA, MLA, Chicago and Harvard. Find them all under Tools.",
+    tag: "New",
+  },
+  {
+    date: "2026-10-16",
+    title: "Free Citation Generator, no account needed",
+    body: "Build references and in-text citations for journal articles, books and web pages, paste a DOI to fill in the details, and copy a sorted bibliography straight into your document.",
+    tag: "New",
+  },
+  {
+    date: "2026-10-16",
+    title: "Try every writing mode on the homepage",
+    body: "The example at the top of the homepage now switches between all six modes, so you can see how each one edits the same draft.",
+    tag: "Improved",
+  },
+  {
     date: "2026-10-15",
     title: "Easier to use with a keyboard and screen reader",
     body: "A skip-to-content link, labelled form fields, a heading on every page, and stronger contrast on small labels and buttons, in both light and dark mode.",

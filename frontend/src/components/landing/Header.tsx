@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 // works from /about, /blog, and the legal pages, not just the homepage.
 const NAV_LINKS = [
   { label: "How it works", href: "/#how-it-works" },
-  { label: "Writing modes", href: "/#writing-modes" },
+  { label: "Tools", href: "/tools" },
   { label: "My Voice", href: "/#my-voice" },
   { label: "Pricing", href: "/#pricing" },
   { label: "About", href: "/about" },

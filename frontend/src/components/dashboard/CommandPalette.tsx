@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { TOOLS } from "@/lib/config/tools";
 
 const STUDY_MODE_KEY = "humanora-study-mode";
 
@@ -10,7 +11,7 @@ interface CommandItem {
   id: string;
   label: string;
   hint: string;
-  group: "Go to" | "Quick actions" | "Projects";
+  group: "Go to" | "Tools" | "Quick actions" | "Projects";
   run: (router: ReturnType<typeof useRouter>) => void;
 }
 
@@ -24,6 +25,10 @@ const ITEMS: CommandItem[] = [
   { id: "nav-billing", label: "Billing", hint: "Go to Billing", group: "Go to", run: (r) => r.push("/dashboard/billing") },
   { id: "nav-profile", label: "Profile", hint: "Go to Profile", group: "Go to", run: (r) => r.push("/dashboard/profile") },
   { id: "nav-settings", label: "Settings", hint: "Go to Settings", group: "Go to", run: (r) => r.push("/dashboard/settings") },
+  { id: "nav-tools", label: "All tools", hint: "Go to Tools", group: "Tools", run: (r) => r.push("/dashboard/tools") },
+  ...TOOLS.map(
+    (t): CommandItem => ({ id: `tool-${t.slug}`, label: t.name, hint: "Open tool", group: "Tools", run: (r) => r.push(t.appHref) })
+  ),
   {
     id: "action-humanize",
     label: "Humanize a draft",
@@ -262,7 +267,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
           {filtered.length === 0 && (
             <p className="px-3 py-6 text-center text-sm text-foreground-subtle">No matches for &ldquo;{query}&rdquo;.</p>
           )}
-          {(["Go to", "Quick actions", "Projects"] as const).map((group) => {
+          {(["Go to", "Tools", "Quick actions", "Projects"] as const).map((group) => {
             const groupItems = filtered.filter((i) => i.group === group);
             if (groupItems.length === 0) return null;
             return (

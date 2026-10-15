@@ -35,6 +35,10 @@ const WORKSPACE_ENTRIES: NavEntry[] = [
   { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
 ];
 const TOOL_ENTRIES: NavEntry[] = [
+  { href: "/dashboard/tools", label: "All tools", icon: ToolsIcon },
+  { href: "/dashboard/tools/grammar-checker", label: "Grammar", icon: GrammarIcon },
+  { href: "/dashboard/tools/paraphraser", label: "Paraphraser", icon: ParaphraseIcon },
+  { href: "/dashboard/tools/citation-generator", label: "Citations", icon: CitationIcon },
   { href: "/dashboard/ai-detector", label: "AI Detector", icon: DetectorIcon },
   { href: "/dashboard/analytics", label: "Analytics", icon: AnalyticsIcon },
 ];
@@ -69,7 +73,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { signingOut, handleSignOut } = useSignOut();
 
   function isActive(href: string) {
-    return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+    // Home and the Tools hub are parents of other entries, so they only
+    // light up on an exact match.
+    return href === "/dashboard" || href === "/dashboard/tools" ? pathname === href : pathname.startsWith(href);
   }
 
   return (
@@ -294,6 +300,39 @@ function LogoutIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M15 16l4-4-4-4M19 12H9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ToolsIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
+function GrammarIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 18 8.5 6h1L14 18M5.6 14h6.8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="m14.5 14.5 2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ParaphraseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M4 8h12m0 0-3-3m3 3-3 3M20 16H8m0 0 3-3m-3 3 3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function CitationIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M6 7h4v4c0 2.5-1.3 4.3-4 5.5M14 7h4v4c0 2.5-1.3 4.3-4 5.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

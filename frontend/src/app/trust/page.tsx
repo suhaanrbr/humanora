@@ -23,7 +23,9 @@ const SECTIONS = [
   {
     title: "What leaves Humanora",
     points: [
-      "To produce a rewrite, summary, detector result or voice profile, the relevant text is sent to our AI provider, Google’s Gemini API, which processes it under its own terms.",
+      "To produce a rewrite, a tool result, a detector result or a voice profile, the relevant text is sent to our AI provider, Google’s Gemini API, which processes it under its own terms.",
+      "The Fact Checker additionally lets Gemini run Google searches on the claims in your text, so it can cite sources.",
+      "The Citation Generator sends only a DOI you choose to look up to Crossref, the public registry of academic publications. Everything else it does happens in your browser.",
       "Humanora does not sell your text, show you ads, or use your writing to train any model.",
       "Avoid submitting highly sensitive personal, financial or confidential information. That's good practice with any online AI tool.",
     ],
@@ -40,7 +42,7 @@ const SECTIONS = [
     title: "Your browser",
     points: [
       "One session cookie keeps you signed in.",
-      "Small preferences, such as light or dark mode, are kept in your own browser.",
+      "Small preferences, such as light or dark mode, are kept in your own browser, and the Citation Generator’s bibliography lives in your browser tab until you close it.",
       "No advertising cookies, no tracking pixels, no third-party analytics.",
     ],
   },
