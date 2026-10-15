@@ -1,11 +1,11 @@
 import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
- * HUMANORA database schema (Drizzle ORM, Postgres/Neon).
+ * Humanora database schema (Drizzle ORM, Postgres/Neon).
  *
  * `user`, `session`, `account`, `verification` are Better Auth's required
  * tables (shape dictated by its Drizzle adapter — do not rename columns).
- * Everything below that is HUMANORA's own data model.
+ * Everything below that is Humanora's own data model.
  *
  * Deliberately NOT built yet (left as extension points, not tables,
  * until there's a real product need):
@@ -103,7 +103,7 @@ export const verification = pgTable(
 );
 
 // ---------------------------------------------------------------------------
-// HUMANORA application tables
+// Humanora application tables
 // ---------------------------------------------------------------------------
 
 export const planEnum = ["free", "essential", "pro", "ultra"] as const;
@@ -363,7 +363,7 @@ export const paymentOrderStatusEnum = ["created", "paid", "failed"] as const;
 export type PaymentOrderStatus = (typeof paymentOrderStatusEnum)[number];
 
 /**
- * One row per Razorpay order HUMANORA creates. The Razorpay order id
+ * One row per Razorpay order Humanora creates. The Razorpay order id
  * IS the primary key — it's globally unique (Razorpay's own id space),
  * so there's no separate internal id to keep in sync, and every payment
  * verification/webhook lookup is a direct, unambiguous key lookup.

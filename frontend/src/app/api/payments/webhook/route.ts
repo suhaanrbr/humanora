@@ -10,7 +10,7 @@ import type { PaidPlanId } from "@/lib/config/plans";
  * Razorpay webhook — the AUTHORITATIVE payment-confirmation path.
  * /api/payments/verify gives fast UX feedback, but a browser can close,
  * lose network, or simply never call it after a successful payment;
- * this endpoint is what guarantees HUMANORA eventually reaches the
+ * this endpoint is what guarantees Humanora eventually reaches the
  * correct state regardless. Configured from the Razorpay dashboard
  * (Settings -> Webhooks) once RAZORPAY_WEBHOOK_SECRET exists — see the
  * setup instructions delivered alongside this phase.
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       await handlePaymentFailed(paymentEntity);
     }
     // Other event types are received but intentionally not acted on —
-    // HUMANORA doesn't use Razorpay Subscriptions, refunds, or disputes
+    // Humanora doesn't use Razorpay Subscriptions, refunds, or disputes
     // in this architecture yet.
   } catch (err) {
     console.error("[payments/webhook] processing error", event, err);

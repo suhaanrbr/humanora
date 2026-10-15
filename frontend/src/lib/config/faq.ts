@@ -19,7 +19,7 @@ export const pricingFaq: FAQItem[] = [
   },
   {
     question: "What counts as a humanization?",
-    answer: "One humanization is one rewrite request submitted to HUMANORA, regardless of how many output variations you generate from it.",
+    answer: "One humanization is one rewrite request submitted to Humanora, regardless of how many output variations you generate from it.",
   },
   {
     question: "Are unused requests carried over?",
@@ -27,37 +27,10 @@ export const pricingFaq: FAQItem[] = [
   },
   {
     question: "What is My Voice?",
-    answer: "My Voice lets you provide writing samples so HUMANORA learns your writing style. Building a profile is available on any account; applying it to rewrites is available on Essential (preview) and Pro/Ultra (full).",
+    answer: "My Voice lets you provide writing samples so Humanora learns your writing style. Building a profile is available on any account; applying it to rewrites is available on Essential (preview) and Pro/Ultra (full).",
   },
   {
     question: "Is there a free plan?",
     answer: "Yes — every account gets one complimentary humanization, up to 200 characters, with no credit card required. It's a one-time trial, not a monthly allowance.",
-  },
-];
-
-export const apiFaq: FAQItem[] = [
-  {
-    question: "How is API usage measured?",
-    answer: "Usage is planned to be measured per humanization request and total words processed, similar to the consumer product.",
-  },
-  {
-    question: "How are API keys managed?",
-    answer: "A key management dashboard is planned for developer accounts once the API moves beyond developer preview.",
-  },
-  {
-    question: "What languages are supported?",
-    answer: "English is the initial focus. Additional language support is architected for, not yet available.",
-  },
-  {
-    question: "Are rate limits applied?",
-    answer: "Yes — planned rate limits will scale with your API plan to keep the service reliable for everyone.",
-  },
-  {
-    question: "Can I upgrade my API plan?",
-    answer: "Yes, upgrading between Developer, Growth, and Enterprise will be supported once billing is live.",
-  },
-  {
-    question: "Is API access available yet?",
-    answer: "Not yet — the HUMANORA API is currently in developer preview. This page describes the planned offering.",
   },
 ];

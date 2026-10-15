@@ -1,177 +1,84 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   HUMANORA Design Tokens
-   Two themes — HUMANORA Dark (default) and HUMANORA Light — built on the
-   same semantic variable names so components never ask "am I dark mode?";
-   they just consume --color-background, --color-surface, etc. Switching
-   themes is a matter of which block below is active, driven by
-   `data-theme` on <html> (see lib/theme.tsx + the inline init script in
-   layout.tsx). Single source of truth for color, radius and shadow tokens.
+   Humanora design tokens — "Ink & Paper"
+   One theme, deliberately. Warm near-black ink for the page, off-white
+   paper for type, and a single editor's-red accent used the way a copy
+   editor uses a red pencil: sparingly, to mark what matters. No neon,
+   no gradients standing in for hierarchy, no glows. Hierarchy comes
+   from type, rules, and space.
    ========================================================================== */
 
-:root,
-:root[data-theme="dark"] {
-  /* Surfaces — deep near-black navy, darker than before, so the cyan/
-     violet/magenta spectrum below reads as neon light against true
-     darkness rather than sitting on a mid-navy grey. */
-  --color-background: #060812;
-  --color-background-elevated: #0c0f1e;
-  --color-surface: #11142a;
-  --color-surface-subtle: #0c0f1e;
-  --color-surface-hover: #171b38;
-  --color-surface-active: #1f2447;
-  --color-border: rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.2);
-  --color-line: rgba(255, 255, 255, 0.12);
-  --color-grid-dot: rgba(255, 255, 255, 0.06);
+:root {
+  /* Surfaces */
+  --color-background: #12110f;
+  --color-background-elevated: #181714;
+  --color-surface: #1c1b18;
+  --color-surface-subtle: #161512;
+  --color-surface-hover: #24221e;
+  --color-surface-active: #2c2a25;
+  --color-border: rgba(236, 229, 216, 0.11);
+  --color-border-strong: rgba(236, 229, 216, 0.2);
+  --color-line: rgba(236, 229, 216, 0.1);
+  --color-grid-dot: rgba(236, 229, 216, 0.05);
 
-  /* Text */
-  --color-foreground: #f8f8fc;
-  --color-foreground-muted: #c6c6e0;
-  --color-foreground-subtle: #9d9dc0;
-  /* The HUMANORA wordmark's own color — reads as essentially white at
-     a glance, with just enough cool violet mixed in to feel like it
-     belongs to the same palette as the logo mark. Deliberately far
-     more restrained than the mark itself (which stays a full
-     gradient) — the wordmark is typography, not a second logo. */
-  --color-wordmark: color-mix(in srgb, var(--color-brand-violet) 8%, var(--color-foreground));
+  /* Type */
+  --color-foreground: #ece5d8;
+  --color-foreground-muted: #bcb3a3;
+  --color-foreground-subtle: #8e8676;
+  --color-wordmark: var(--color-foreground);
 
-  /* Brand — cyan → blue → violet → magenta spectrum, replacing the
-     narrower indigo/purple pairing with a wider, more electric range. */
-  --color-brand-indigo: #3b82f6;
-  --color-brand-purple: #a855f7;
-  --color-brand-violet: #8b5cf6;
-  --color-brand-pink: #d946ef;
-  --color-brand-cyan: #22d3ee;
+  /* Accent. The brand-* names are kept so every existing component
+     resolves, but they now describe one family, not a spectrum:
+     - purple/violet: the accent as it appears in type and rules
+     - indigo:        the deeper fill that white text sits on
+     - pink:          a lighter tint for hover states
+     - cyan:          brass, the single secondary (Study, info marks) */
+  --color-brand-indigo: #b9462f;
+  --color-brand-purple: #e06a4e;
+  --color-brand-violet: #e06a4e;
+  --color-brand-pink: #ea8f76;
+  --color-brand-cyan: #c9a46a;
 
   /* Status */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #22d3ee;
+  --color-success: #82b48c;
+  --color-warning: #d9a34a;
+  --color-danger: #e5534b;
+  --color-info: #9fb9c9;
 
-  /* Accent — used sparingly for pricing/plan hierarchy, not the whole site */
-  --color-accent-amber: #eab676;
-  --color-surface-warm: #f6f1e7;
-  --color-surface-warm-foreground: #1c1a16;
+  --color-accent-amber: #c9a46a;
+  --color-surface-warm: #ece5d8;
+  --color-surface-warm-foreground: #12110f;
 
-  /* Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.875rem;
-  --radius-lg: 1.25rem;
-  --radius-xl: 1.75rem;
-  /* Semantic aliases — named by WHAT the radius is for, so a component
-     author reaches for "this is a card" rather than picking sm/md/lg/xl
-     by feel each time. Same four numbers as above; nothing new to
-     learn, just a second, more legible name for each. */
+  /* Radius — tight. Printed matter has corners. */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
   --radius-control-sm: var(--radius-sm);
   --radius-control: var(--radius-md);
   --radius-card: var(--radius-lg);
   --radius-panel: var(--radius-xl);
   --radius-pill: 9999px;
 
-  /* Shadows / glow */
-  --shadow-glow-sm: 0 0 24px -8px rgba(139, 92, 246, 0.45);
-  --shadow-glow-md: 0 0 48px -12px rgba(139, 92, 246, 0.55);
-  --shadow-glow-lg: 0 0 72px -14px rgba(139, 92, 246, 0.6);
-  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
-    0 8px 24px -12px rgba(0, 0, 0, 0.7);
-  /* Elevation shadows — dark surfaces need depth from contrast/shadow,
-     not size; these stay compact (small blur radius, tight spread)
-     rather than the large soft shadows that read fine on white but
-     look like fog on near-black. */
-  --shadow-elevation-raised: 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
-    0 4px 14px -6px rgba(0, 0, 0, 0.55);
-  --shadow-elevation-floating: 0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
-    0 12px 32px -10px rgba(0, 0, 0, 0.65);
-  --shadow-elevation-modal: 0 1px 0 0 rgba(255, 255, 255, 0.07) inset,
-    0 24px 60px -16px rgba(0, 0, 0, 0.75);
+  /* Shadows. The old "glow" names survive as plain, neutral depth so
+     existing call sites keep working without any colored halo. */
+  --shadow-glow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-glow-md: 0 14px 34px -18px rgba(0, 0, 0, 0.75);
+  --shadow-glow-lg: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+  --shadow-card: 0 1px 0 0 rgba(236, 229, 216, 0.03) inset;
+  --shadow-elevation-raised: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-elevation-floating: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+  --shadow-elevation-modal: 0 28px 70px -20px rgba(0, 0, 0, 0.8);
 
-  /* Semantic borders — named by ROLE, not by opacity value, so nothing
-     in the app reaches for a one-off rgba() when it means "this is
-     selected" or "this is focused". --color-border/-border-strong
-     above are the two that already existed and are kept as the
-     general-purpose default/strong pair. */
-  --color-border-subtle: rgba(255, 255, 255, 0.07);
-  --color-border-interactive: rgba(168, 85, 247, 0.35);
-  --color-border-selected: rgba(168, 85, 247, 0.6);
+  --color-border-subtle: rgba(236, 229, 216, 0.07);
+  --color-border-interactive: rgba(224, 106, 78, 0.35);
+  --color-border-selected: rgba(224, 106, 78, 0.6);
   --color-border-focus: var(--color-brand-purple);
-  --color-border-ai: rgba(59, 130, 246, 0.4);
-  --color-border-danger: rgba(239, 68, 68, 0.4);
+  --color-border-ai: rgba(201, 164, 106, 0.4);
+  --color-border-danger: rgba(229, 83, 75, 0.4);
 
   color-scheme: dark;
-}
-
-/* ---- HUMANORA Light: "Aurora Intelligence" ----
-   Codename Aurora Glass. A luminous, almost-white environment that reads
-   as lit from underneath by faint indigo/violet/blue light, not a flat
-   white-background-plus-purple-button SaaS default. Readability comes
-   first: every text token here is tuned to clear WCAG AA against both
-   --color-background and --color-surface before anything decorative.
-   The Pro pricing highlight uses a bright pearl card with a violet
-   border + soft glow rather than Dark Mode's ink-flip — a large colored
-   card fill would fight this theme's restrained, mostly-neutral field. */
-:root[data-theme="light"] {
-  --color-background: #fafaff;
-  --color-background-elevated: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-subtle: #f1effe;
-  --color-surface-hover: #f2f0fd;
-  --color-surface-active: #e8e4fb;
-  --color-border: rgba(18, 17, 26, 0.1);
-  --color-border-strong: rgba(18, 17, 26, 0.18);
-  --color-line: rgba(18, 17, 26, 0.11);
-  --color-grid-dot: rgba(18, 17, 26, 0.055);
-
-  /* Text — near-black graphite, never pale lavender for real copy. */
-  --color-foreground: #12111a;
-  --color-foreground-muted: #4c4a5c;
-  --color-foreground-subtle: #67647a;
-  --color-wordmark: color-mix(in srgb, var(--color-brand-violet) 8%, var(--color-foreground));
-
-  /* Brand — Indigo → Electric Violet → Orchid, HUMANORA's light-theme
-     spectrum. Most of the interface stays neutral so this reads as
-     meaningful wherever it appears, rather than tinting everything. */
-  --color-brand-indigo: #5b5ff5;
-  --color-brand-purple: #8b2fe0;
-  --color-brand-violet: #7c3aed;
-  --color-brand-pink: #c2379a;
-  --color-brand-cyan: #0891b2;
-
-  --color-success: #157a3d;
-  --color-warning: #a85a06;
-  --color-danger: #d1352c;
-  --color-info: #0b74b8;
-
-  --color-accent-amber: #a06423;
-  /* Pro's spotlight card in Light Mode stays a bright pearl surface with
-     a violet border + soft glow (see PricingCard) rather than Dark
-     Mode's ink-flip — a "huge colored card background" would fight the
-     luminous Aurora Intelligence direction this theme is built around. */
-  --color-surface-warm: #ffffff;
-  --color-surface-warm-foreground: #171525;
-
-  --shadow-glow-sm: 0 0 22px -10px rgba(109, 74, 255, 0.3);
-  --shadow-glow-md: 0 0 40px -12px rgba(109, 74, 255, 0.32);
-  --shadow-glow-lg: 0 0 56px -12px rgba(109, 74, 255, 0.34);
-  --shadow-card: 0 1px 2px rgba(23, 21, 42, 0.05),
-    0 10px 26px -16px rgba(23, 21, 42, 0.22);
-  --shadow-elevation-raised: 0 1px 2px rgba(23, 21, 42, 0.04),
-    0 6px 16px -8px rgba(23, 21, 42, 0.14);
-  --shadow-elevation-floating: 0 2px 4px rgba(23, 21, 42, 0.05),
-    0 16px 36px -12px rgba(23, 21, 42, 0.2);
-  --shadow-elevation-modal: 0 2px 6px rgba(23, 21, 42, 0.06),
-    0 28px 64px -18px rgba(23, 21, 42, 0.26);
-
-  --color-border-subtle: rgba(18, 17, 26, 0.06);
-  --color-border-interactive: rgba(139, 47, 224, 0.3);
-  --color-border-selected: rgba(139, 47, 224, 0.55);
-  --color-border-focus: var(--color-brand-purple);
-  --color-border-ai: rgba(91, 95, 245, 0.35);
-  --color-border-danger: rgba(209, 53, 44, 0.35);
-
-  color-scheme: light;
 }
 
 @theme inline {
@@ -210,6 +117,8 @@
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
+  --radius-2xl: 0.75rem;
+  --radius-3xl: 0.875rem;
   --radius-control-sm: var(--radius-control-sm);
   --radius-control: var(--radius-control);
   --radius-card: var(--radius-card);
@@ -231,47 +140,31 @@
   --color-border-ai: var(--color-border-ai);
   --color-border-danger: var(--color-border-danger);
 
-  /* One master face (Plus Jakarta Sans, loaded once in layout.tsx as
-     --font-display) — --font-sans re-points to the same injected
-     variable rather than a second font load. Hierarchy comes from
-     weight/size (see the type scale below), not a second typeface. */
-  --font-sans: var(--font-display);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-geist-mono);
+  /* Serif throughout — see layout.tsx. `--font-sans` is the name
+     Tailwind's default body utilities read, so it points at the serif
+     text face rather than at any sans-serif fallback. */
+  --font-sans: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-courier-prime), "Courier New", Courier, monospace;
 }
 
 /* ==========================================================================
-   HUMANORA Foundation — Stage 1 design-system additions.
-   Spacing, motion, and the application type scale, sitting alongside
-   (not replacing) the color/radius/shadow tokens above. Theme-
-   independent — these describe RHYTHM and TIMING, not appearance, so
-   one definition covers both Dark and Light Mode.
+   Rhythm and motion
    ========================================================================== */
 :root {
-  /* Spacing — named for the CONTEXT it's used in, not a generic t-shirt
-     scale. Values sit on Tailwind's own 4px grid (so `gap-[var(--space-
-     card-gap)]` and a plain `gap-4` are never fighting different grids);
-     this exists so five different components building "a card" don't
-     each independently decide what a card's internal gap should be.
-     Reach for a plain Tailwind spacing utility for anything that isn't
-     one of these named contexts — this is not a replacement scale. */
-  --space-gutter-mobile: 1rem; /* 16px — matches existing px-4 usage */
-  --space-gutter-tablet: 1.5rem; /* 24px — matches existing sm:px-6 */
-  --space-gutter-desktop: 2rem; /* 32px — matches existing lg:px-8 */
-  --space-section-gap: 4rem; /* 64px — vertical gap between major page sections */
-  --space-card-padding: 1.25rem; /* 20px — a card/panel's internal padding */
-  --space-card-gap: 0.75rem; /* 12px — gap between sibling cards in a list */
-  --space-control-gap: 0.5rem; /* 8px — gap between adjacent controls (buttons, pills) */
-  --space-stack-sm: 0.5rem; /* 8px */
-  --space-stack-md: 1rem; /* 16px */
-  --space-stack-lg: 1.5rem; /* 24px */
-  --space-inline-gap: 0.625rem; /* 10px — gap within an inline group (icon + label) */
+  --space-gutter-mobile: 1rem;
+  --space-gutter-tablet: 1.5rem;
+  --space-gutter-desktop: 2rem;
+  --space-section-gap: 4rem;
+  --space-card-padding: 1.25rem;
+  --space-card-gap: 0.75rem;
+  --space-control-gap: 0.5rem;
+  --space-stack-sm: 0.5rem;
+  --space-stack-md: 1rem;
+  --space-stack-lg: 1.5rem;
+  --space-inline-gap: 0.625rem;
 
-  /* Motion — a small, named scale rather than picking a duration by
-     feel per component. "Instant" is for state that must never feel
-     laggy (checkbox toggles, pressed states); "deliberate" is for
-     something the user should visually track (a panel docking, a
-     result revealing) — most interactions want "fast" or "normal". */
   --motion-duration-instant: 80ms;
   --motion-duration-fast: 150ms;
   --motion-duration-normal: 240ms;
@@ -281,86 +174,181 @@
   --motion-ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
 }
 
-/* Application type scale — deliberately more restrained than the
-   marketing site's fluid `.text-hero` treatment (clamp() up to ~5rem).
-   The product is read for hours at a time; nothing here needs to
-   shout. All sizes use Plus Jakarta Sans (inherited from body/heading
-   defaults) — hierarchy comes from size+weight, matching the "one
-   master face" font decision. Marketing headings (h1-h4 global rule,
-   `.text-hero`) are untouched by this block — these are opt-in
-   utility classes for the APPLICATION only. */
+/* ==========================================================================
+   Base
+   ========================================================================== */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-optical-sizing: auto;
+  font-feature-settings: "kern", "liga", "onum";
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Lining figures where numbers have to line up or be scanned. */
+table,
+input,
+textarea,
+select,
+.tabular-nums {
+  font-feature-settings: "kern", "lnum", "tnum";
+}
+
+/* Display type. Set unlayered on purpose so a stray `font-bold` on a
+   heading can't drag Newsreader up to a weight it looks clumsy at —
+   editorial headlines live at book-to-medium weight. */
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-feature-settings: "kern", "liga", "lnum";
+  letter-spacing: -0.012em;
+}
+h1,
+h2 {
+  font-weight: 450;
+}
+h3 {
+  font-weight: 500;
+}
+h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+
+::selection {
+  background: var(--color-brand-indigo);
+  color: #fff;
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Type scale
+   ========================================================================== */
+.text-hero {
+  font-size: clamp(2.75rem, 1.6rem + 4.6vw, 5.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.022em;
+}
 .text-display {
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-weight: 450;
+  line-height: 1.12;
 }
 .text-app-h1 {
   font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
-  font-weight: 700;
-  letter-spacing: -0.015em;
   line-height: 1.2;
 }
 .text-app-h2 {
   font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   line-height: 1.3;
 }
 .text-app-h3 {
   font-size: 1.0625rem;
-  font-weight: 600;
   line-height: 1.4;
 }
 .text-app-body {
   font-size: 1rem;
-  font-weight: 400;
   line-height: 1.6;
 }
 .text-app-ui {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   line-height: 1.5;
 }
+/* Small capitals-style label: the serif counterpart to the usual
+   tracked-out uppercase sans eyebrow. */
 .text-app-label {
   font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   line-height: 1.4;
 }
 .text-app-caption {
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--color-foreground-subtle);
 }
 .text-app-helper {
-  font-size: 0.8125rem;
-  font-weight: 400;
+  font-size: 0.875rem;
   line-height: 1.5;
   color: var(--color-foreground-muted);
 }
 .text-app-button {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  letter-spacing: -0.005em;
   line-height: 1;
 }
 .text-app-stat {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 450;
   line-height: 1.1;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Editorial building blocks used by the marketing pages. */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-brand-purple);
+}
+.rule-top {
+  border-top: 1px solid var(--color-border);
+}
+.prose-measure {
+  max-width: 34em;
+}
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 3.6em;
+  line-height: 0.82;
+  padding: 0.06em 0.1em 0 0;
+  color: var(--color-brand-purple);
+}
+/* The copy editor's marks used in the specimen blocks. */
+.mark-strike {
+  text-decoration: line-through;
+  text-decoration-color: var(--color-brand-purple);
+  text-decoration-thickness: 1.5px;
+  color: var(--color-foreground-subtle);
+}
+.mark-insert {
+  color: var(--color-foreground);
+  background-image: linear-gradient(transparent 62%, rgba(224, 106, 78, 0.22) 62%);
+}
+.mark-keep {
+  border-bottom: 1px dotted var(--color-brand-cyan);
 }
 
 /* ==========================================================================
-   Elevation — surfaces layer by CONTRAST + BORDER + SHADOW together,
-   not shadow alone (a lone drop-shadow barely reads against near-black
-   — see --shadow-elevation-* above, which are already deliberately
-   compact for this reason). Five levels: pick the one matching how far
-   "off the page" something should feel, not a shadow size.
+   Surfaces
    ========================================================================== */
 .surface-base {
   background-color: var(--color-background);
@@ -368,7 +356,6 @@
 .surface-raised {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-elevation-raised);
 }
 .surface-floating {
   background-color: var(--color-surface);
@@ -380,523 +367,146 @@
   border: 1px solid var(--color-border-strong);
   box-shadow: var(--shadow-elevation-modal);
 }
-/* AI-highlighted: the treatment for "HUMANORA generated/is generating
-   this" — an indigo-leaning border instead of the brand-purple used
-   for selection, so the two states never look identical. Pairs with
-   `.ai-active` below for the in-progress version. */
 .surface-ai {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border-ai);
-  box-shadow: var(--shadow-elevation-raised);
 }
 
-/* ==========================================================================
-   HUMANORA Atmospheric Primitives — reusable, restrained. Each of these
-   is meant to be reached for by name rather than re-invented per page;
-   see the 70/20/10 rule (globals.css header comment on `.app-*` usage
-   sites) — these supply the 20% (atmosphere), never the 70% (the
-   actual working surface underneath stays plain).
-   ========================================================================== */
-
-/* Selected-navigation illumination — a soft glow bleeding from a
-   selected nav item's accent bar, rather than just a background-color
-   change. Apply to the accent bar element itself (small, fixed-size),
-   not the whole nav row. */
-.nav-illuminated {
-  box-shadow: 0 0 12px 1px var(--color-border-selected);
+/* Historical names for the app's standard panel. Both are now the same
+   honest, opaque surface: legible text never depends on what happens
+   to be scrolling behind it. */
+.glass-panel,
+.pearl-glass {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
-/* Premium gradient border — a border that IS the brand gradient,
-   implemented via a padding-box/border-box double-background so the
-   inside stays a normal flat surface color (unlike a gradient
-   *background* with a mask, which is more expensive and harder to
-   combine with content). Use sparingly — one gradient-bordered element
-   per view at most, or it stops reading as premium and starts reading
-   as decoration. */
-.border-gradient {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--color-surface), var(--color-surface)) padding-box,
-    linear-gradient(120deg, var(--color-brand-indigo), var(--color-brand-purple), var(--color-brand-pink)) border-box;
-}
-
-/* AI-processing state — a slow, quiet pulse on an element's border,
-   for "HUMANORA is working on this right now" (paired with the
-   existing shimmer/skeleton treatment for the content itself, not a
-   replacement for it). Never used for a merely-hovered or merely-
-   selected state — this specifically means "generation in flight". */
-@media (prefers-reduced-motion: no-preference) {
-  .ai-active {
-    animation: ai-pulse-border var(--motion-duration-deliberate) var(--motion-ease-standard) infinite alternate;
-  }
-}
-.ai-active {
-  border-color: var(--color-border-ai);
-}
-@keyframes ai-pulse-border {
-  from {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.25);
-  }
-  to {
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0);
-  }
-}
-
-/* Soft panel illumination — a faint glow bleeding from behind a panel,
-   for the ONE panel per view that should feel like the focal point
-   (an active workspace card, a result panel) — not applied broadly. */
-.panel-glow {
-  position: relative;
-}
-.panel-glow::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  background: radial-gradient(60% 100% at 50% 0%, var(--mesh-1) 0%, transparent 70%);
-  filter: blur(20px);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-/* A soft glowing separator — for the rare divider that should read as
-   "a seam of light" rather than a flat border line (e.g. between a
-   hero moment and the content below it), not a replacement for
-   ordinary `border-t border-border` dividers elsewhere. */
-.divider-glow {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-border-interactive), transparent);
-  border: none;
-}
-
-/* Application cosmic/network backdrop — a calmer, sparser relative of
-   the marketing site's `.bg-ambient-glow` (which is section-scoped and
-   tuned for a scrolling landing page). This is meant as a single fixed
-   layer behind the whole logged-in shell (Stage 2 wires it in), not
-   per-section — moving between app pages should feel like moving
-   through one lit environment, not loading a new gradient each time.
-   Deliberately NOT applied anywhere yet in Stage 1; defined here so
-   Stage 2 has one real, tested primitive to reach for instead of
-   inventing a background per page. */
-.app-atmosphere {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background-color: var(--color-background);
-  background-image: radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: radial-gradient(120% 90% at 50% 0%, black 0%, transparent 85%);
-}
-/* Two off-angle, elongated light sources rather than perfect circles —
-   reads as light spilling in from off-screen, not "glowing spheres." */
-.app-atmosphere::before,
-.app-atmosphere::after {
-  content: "";
-  position: absolute;
-  filter: blur(90px);
-}
-.app-atmosphere::before {
-  top: -14vw;
-  left: -14vw;
-  width: 50vw;
-  height: 32vw;
-  border-radius: 50%;
-  transform: rotate(-18deg);
-  background: var(--mesh-1);
-}
-.app-atmosphere::after {
-  bottom: -18vw;
-  right: -16vw;
-  width: 44vw;
-  height: 30vw;
-  border-radius: 50%;
-  transform: rotate(22deg);
-  background: var(--mesh-2);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .app-atmosphere::before {
-    animation: pulse-slow 9s ease-in-out infinite;
-  }
-  .app-atmosphere::after {
-    animation: pulse-slow 11s ease-in-out infinite 1.5s;
-  }
-}
-/* H-mark watermark — architectural geometry anchored to the bottom-
-   right corner, mostly out of frame. Stroke-only, faint enough to
-   never compete with real content, but with a gradient edge (matching
-   the landing page's DimensionalH) and a near-imperceptible drift
-   rotation instead of sitting perfectly static — the same "living
-   environment" quality the landing page's persistent H-thread has,
-   at a fraction of the motion (a 4-minute rotation is not something
-   anyone consciously watches, just something that makes the space
-   feel occupied rather than a flat printed backdrop). */
-.app-atmosphere-h {
-  position: absolute;
-  right: -6vw;
-  bottom: -8vw;
-  width: min(48vw, 46vh);
-  height: min(48vw, 46vh);
-  opacity: 0.08;
-  fill: none;
-  stroke-width: 1.2;
-  transform-origin: 50% 50%;
-}
-/* A second, smaller, fainter echo in the opposite corner — depth
-   through repetition at different scale/opacity, the same device the
-   landing page's scenes use (near/mid/far planes), not a duplicate
-   decoration. */
-.app-atmosphere-h-echo {
-  position: absolute;
-  left: -10vw;
-  top: -10vw;
-  width: min(26vw, 26vh);
-  height: min(26vw, 26vh);
-  opacity: 0.04;
-  fill: none;
-  stroke-width: 1;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .app-atmosphere-h {
-    animation: drift-rotate 240s linear infinite;
-  }
-  .app-atmosphere-h-echo {
-    animation: drift-rotate 240s linear infinite reverse;
-  }
-}
-@keyframes drift-rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-/* Faint vignette — far edges recede slightly darker so the viewport's
-   center (where real content sits) always reads as the brightest,
-   most important layer. An inset box-shadow on the layer itself, not
-   a third pseudo-element (::before/::after are already the two light
-   sources above). */
-.app-atmosphere {
-  box-shadow: inset 0 0 18vw 2vw rgba(0, 0, 0, 0.35);
-}
-
-/* ==========================================================================
-   Dashboard Phase 2 — premium surface primitives
-   Small, composable additions on top of the existing token set (glow/
-   shadow/gradient tokens above are untouched) — a handful of reusable
-   classes for the dashboard's hero/stat/glass treatment, so the "premium
-   futuristic AI product" direction lives in a few shared primitives
-   rather than being reinvented per component.
-   ========================================================================== */
-
-/* A frosted, faintly-lit glass panel — for surfaces that should read as
-   floating above .app-atmosphere rather than sitting flush with it (the
-   stat strip, the nav rail). Not a replacement for Card's opaque
-   bg-surface (most content still wants a fully legible solid card) —
-   this is specifically for the handful of places translucency reads as
-   depth instead of muddiness. */
-.glass-panel {
-  /* More genuinely transparent than before (was 72-88% surface) — the
-     dashboard's own background (AppAtmosphere's H-gradient/light
-     sources) should read clearly through every panel, not just tint
-     it, matching the landing page's cinematic material language.
-     Backdrop-blur (raised slightly alongside) is what keeps text
-     legible against whatever's showing through, not opacity. */
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-surface) 58%, transparent) 0%,
-    color-mix(in srgb, var(--color-surface) 42%, transparent) 100%
-  );
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--color-border-subtle);
-}
-
-/* The dashboard hero's cinematic backdrop: the settings-background image
-   sits underneath (in markup), this supplies the multi-stop color wash
-   + vignette on top of it — replacing a flat single linear gradient
-   with something closer to volumetric light falling from one corner. */
-.hero-cinematic-overlay {
-  background:
-    radial-gradient(120% 100% at 8% 0%, color-mix(in srgb, var(--color-brand-violet) 30%, transparent) 0%, transparent 55%),
-    radial-gradient(90% 80% at 100% 100%, color-mix(in srgb, var(--color-brand-cyan) 16%, transparent) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(3, 4, 10, 0.35) 0%, rgba(3, 4, 10, 0.55) 55%, rgba(3, 4, 10, 0.88) 100%);
-}
-
-/* Gradient icon chip used for quick-action tiles and stat tiles — a
-   small consistent "this is a capability" mark instead of bare text,
-   which is most of what read as "admin panel" before. */
 .icon-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-control);
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-brand-violet) 22%, var(--color-surface-hover)) 0%,
-    color-mix(in srgb, var(--color-brand-indigo) 14%, var(--color-surface-hover)) 100%
-  );
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background-elevated);
   color: var(--color-brand-purple);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 .icon-chip-muted {
-  background: var(--color-surface-hover);
+  background-color: transparent;
   color: var(--color-foreground-subtle);
   border: 1px dashed var(--color-border);
 }
 
-/* Application container/gutter — responsive foundation for Stage 2's
-   shell to consume; not applied to any page in Stage 1. Gutters widen
-   at each breakpoint using the --space-gutter-* tokens above rather
-   than a new arbitrary set of padding values. */
-.app-container {
-  width: 100%;
-  max-width: 88rem;
-  margin-inline: auto;
-  padding-inline: var(--space-gutter-mobile);
+.bg-line {
+  background-color: var(--color-line);
 }
-@media (min-width: 640px) {
-  .app-container {
-    padding-inline: var(--space-gutter-tablet);
-  }
-}
-@media (min-width: 1024px) {
-  .app-container {
-    padding-inline: var(--space-gutter-desktop);
-  }
+.border-fade-top {
+  border-top: 1px solid var(--color-border);
 }
 
-:root[data-theme="dark"] {
-  /* Deep navy-black base, matching the reference's near-black stage — the
-     cyan/violet/magenta mesh below is what supplies all the color. */
-  --gradient-body-top: #0a0d1f;
-  --gradient-body-mid: #05060f;
-  --gradient-body-bottom: #0a0818;
-
-  --mesh-1: rgba(59, 130, 246, 0.3);
-  --mesh-2: rgba(168, 85, 247, 0.28);
-  --mesh-3: rgba(217, 70, 239, 0.22);
-  --mesh-4: rgba(34, 211, 238, 0.22);
+/* The accent as a fill (progress bars, active pills, avatars). A flat
+   color — the class name is historical. */
+.bg-brand-gradient {
+  background-color: var(--color-brand-indigo);
 }
-:root[data-theme="light"] {
-  --gradient-body-top: #fafaff;
-  --gradient-body-mid: #fafaff;
-  --gradient-body-bottom: #f6f5ff;
-
-  /* Kept faint on purpose — Aurora Intelligence reads as an almost-white
-     surface lit from underneath, not a colored wash over the page.
-     Individual sections (Hero, My Voice, Preserve Meaning) add their own
-     confined, masked aurora blooms on top of this near-neutral base —
-     see .bg-ambient-glow below. */
-  --mesh-1: rgba(91, 95, 245, 0.055);
-  --mesh-2: rgba(124, 58, 237, 0.045);
-  --mesh-3: rgba(168, 85, 247, 0.035);
-  --mesh-4: rgba(120, 170, 255, 0.045);
+/* The accent in type. Flat color, no clipped gradient. */
+.text-brand-gradient {
+  color: var(--color-brand-purple);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* A brief, universal color transition — applied only for ~200ms while
-   ThemeProvider is switching themes (see lib/theme.tsx), not permanently.
-   This is what gives the theme swap its "immediate but not jarring" feel
-   without adding a transition to every element all the time. */
-@media (prefers-reduced-motion: no-preference) {
-  html.theme-transitioning,
-  html.theme-transitioning *,
-  html.theme-transitioning *::before,
-  html.theme-transitioning *::after {
-    transition: background-color 180ms ease, border-color 180ms ease,
-      color 180ms ease, fill 180ms ease, stroke 180ms ease !important;
-    transition-delay: 0s !important;
-  }
-}
-
-body {
-  background-color: var(--color-background);
-  /* Layers, back to front: base gradient → several confined color
-     fields → a near-invisible film-grain texture. The grain is what
-     turns a flat gradient into something that reads as "there's actual
-     depth here" on closer look, at an opacity too low to ever register
-     as a texture on its own. Fixed attachment keeps it feeling like one
-     continuous environment rather than a strip repeated per section. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E"),
-    radial-gradient(
-      50% 45% at 8% 0%,
-      var(--mesh-1) 0%,
-      transparent 60%
-    ),
-    radial-gradient(45% 40% at 95% 8%, var(--mesh-2) 0%, transparent 60%),
-    radial-gradient(55% 50% at 15% 60%, var(--mesh-3) 0%, transparent 65%),
-    radial-gradient(50% 45% at 85% 75%, var(--mesh-4) 0%, transparent 60%),
-    radial-gradient(70% 60% at 50% 105%, var(--mesh-2) 0%, transparent 65%),
-    linear-gradient(
-      180deg,
-      var(--gradient-body-top) 0%,
-      var(--gradient-body-mid) 55%,
-      var(--gradient-body-bottom) 100%
-    );
-  background-attachment: fixed;
-  color: var(--color-foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
-  /* Defensive guard: decorative absolutely-positioned elements (hero glow,
-     orbit ring) must never introduce a horizontal scrollbar. */
-  overflow-x: hidden;
-}
-
-/* Headings get HUMANORA's display face (Sora) — a geometric, confident
-   voice distinct from the Inter body copy, applied globally so no
-   component needs to remember to opt in. */
-h1,
-h2,
-h3,
-h4,
-.font-display {
-  font-family: var(--font-display), var(--font-sans), ui-sans-serif,
-    system-ui, sans-serif;
-  letter-spacing: -0.02em;
-}
-
-@media (max-width: 640px) {
-  body {
-    /* Fixed backgrounds can jank on mobile scroll (repaint per frame on
-       some devices) — scroll normally there, still fully vibrant. */
-    background-attachment: scroll;
-  }
-}
-
-/* Ambient background glow used behind hero/showcase sections. Uses the
-   same theme-tuned mesh tokens as the body so hero-strength glow and the
-   rest-of-page glow always feel like one palette. (Dark Mode geometry —
-   unchanged from the approved design.) */
-.bg-ambient-glow {
-  background-image: radial-gradient(65% 60% at 12% 0%, var(--mesh-1) 0%, transparent 62%),
-    radial-gradient(60% 55% at 88% 15%, var(--mesh-2) 0%, transparent 62%),
-    radial-gradient(45% 40% at 70% 75%, var(--mesh-3) 0%, transparent 60%),
-    radial-gradient(40% 35% at 25% 90%, var(--mesh-4) 0%, transparent 62%);
-}
-
-/* Softer, single-glow variant for sections lower on the page — light
-   emerging from the dark rather than a second hero-strength wash. */
-.bg-ambient-glow-soft {
-  background-image: radial-gradient(45% 40% at 50% 0%, var(--mesh-1) 0%, transparent 65%);
-}
-
-/* Aurora Intelligence — Light Mode's own restrained geometry for the same two
-   utility classes above. Several small, corner-confined light sources
-   (upper-right lavender, lower-left blush, lower-right icy blue) rather
-   than one large wash bleeding across the whole section — the center
-   stays close to clean pearl so headline/body text never sits on top of
-   compounding color. This never touches Dark Mode's rules above. */
-:root[data-theme="light"] .bg-ambient-glow {
-  /* color-mix bakes the transparency into the gradient's own paint layer
-     — deliberately NOT an `opacity` on the section, which would also
-     fade the readable content sitting on top of it. */
-  background-image: radial-gradient(
-      32% 38% at 88% 6%,
-      color-mix(in srgb, var(--color-brand-violet) 13%, transparent) 0%,
-      transparent 72%
-    ),
-    radial-gradient(
-      28% 32% at 6% 96%,
-      color-mix(in srgb, var(--color-brand-pink) 9%, transparent) 0%,
-      transparent 74%
-    ),
-    radial-gradient(
-      30% 34% at 92% 88%,
-      color-mix(in srgb, var(--color-info) 11%, transparent) 0%,
-      transparent 74%
-    );
-}
-
-:root[data-theme="light"] .bg-ambient-glow-soft {
-  background-image: radial-gradient(
-    38% 30% at 50% 0%,
-    color-mix(in srgb, var(--color-brand-violet) 8%, transparent) 0%,
-    transparent 75%
-  );
-}
-
-/* Faint dot-grid texture. Extremely low opacity — a hint of structure
-   behind content, not a visible pattern.
-   IMPORTANT: this renders on a ::before, not the section itself. A
-   mask-image applied directly to a section would mask/fade its actual
-   content (headline, buttons, everything) toward transparent at the
-   edges, not just the decorative background — exactly the kind of
-   accidental content-opacity bug that makes a hero read as "washed
-   out". Keeping it on a separate, non-content pseudo-element confines
-   the fade to the dots alone. */
+/* Retired atmospheric effects. Kept as harmless names so any call site
+   left in the app resolves to nothing rather than to a missing class. */
+.section-glow-top,
 .bg-grid-texture {
   position: relative;
 }
-.bg-grid-texture::before {
-  content: "";
-  position: absolute;
+.app-atmosphere {
+  position: fixed;
   inset: 0;
+  z-index: 0;
   pointer-events: none;
-  background-image: radial-gradient(var(--color-grid-dot) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(60% 60% at 50% 30%, black 0%, transparent 100%);
+  background-color: var(--color-background);
 }
 
 /* ==========================================================================
-   3D perspective floor — a genuine CSS 3D plane (real perspective/rotateX,
-   not a flat illusion) receding beneath the hero, like a lit floor in a
-   studio rather than a wallpaper pattern. Sits behind all content via
-   z-index/DOM order and fades to transparent via mask so it never
-   competes with text. A very slow drift is the only motion, gated by
-   prefers-reduced-motion.
+   Authentication
    ========================================================================== */
-.bg-3d-floor {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 65%;
-  overflow: hidden;
-  pointer-events: none;
-  perspective: 700px;
-  perspective-origin: 50% 0%;
-  mask-image: linear-gradient(180deg, transparent 0%, black 55%, black 100%);
+.auth-panel-frame {
+  position: relative;
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background-elevated);
+  box-shadow: var(--shadow-elevation-floating);
 }
-.bg-3d-floor::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: rotateX(62deg);
-  transform-origin: 50% 0%;
-  background-image: linear-gradient(var(--color-border-strong) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-border-strong) 1px, transparent 1px);
-  background-size: 64px 64px;
-  opacity: 0.5;
-  mask-image: radial-gradient(65% 75% at 50% 0%, black 0%, transparent 78%);
+.login-glass-panel {
+  position: relative;
+  border-radius: var(--radius-panel);
+  background-color: transparent;
 }
-@media (prefers-reduced-motion: no-preference) {
-  .bg-3d-floor::before {
-    animation: floor-drift 14s linear infinite;
+.login-badge {
+  border: 1px solid var(--color-border);
+}
+.auth-heading {
+  letter-spacing: -0.015em;
+}
+.auth-field-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-foreground-muted);
+}
+.login-field {
+  background-color: var(--color-background) !important;
+  border-color: var(--color-border-strong) !important;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+.login-field:hover {
+  border-color: rgba(236, 229, 216, 0.3) !important;
+}
+.login-field:focus {
+  border-color: var(--color-brand-purple) !important;
+  box-shadow: 0 0 0 3px rgba(224, 106, 78, 0.16) !important;
+}
+.login-field::placeholder {
+  color: var(--color-foreground-subtle);
+}
+.login-cta {
+  /* Inherits Button's primary treatment; nothing to override. */
+}
+
+/* ==========================================================================
+   Motion — restrained, and always gated on prefers-reduced-motion.
+   ========================================================================== */
+.skeleton-line {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-line) 0%,
+    var(--color-line) 40%,
+    var(--color-border-strong) 50%,
+    var(--color-line) 60%,
+    var(--color-line) 100%
+  );
+  background-size: 250% 100%;
+}
+@keyframes sweep-shimmer {
+  0% {
+    background-position: -150% 0;
   }
-}
-@keyframes floor-drift {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 0 64px, 64px 0;
+  100% {
+    background-position: 250% 0;
   }
 }
 
-/* Base/final state: fully clipped away, so reduced-motion users (who never
-   get the .animate-sweep-reveal rule below) see the humanized result
-   underneath immediately, not the original stuck on top. */
+.animate-sweep-in {
+  clip-path: inset(0 0% 0 0);
+}
+@keyframes sweep-in {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+  100% {
+    clip-path: inset(0 0% 0 0);
+  }
+}
 .animate-sweep-reveal {
   clip-path: inset(0 100% 0 0);
 }
@@ -909,863 +519,127 @@ h4,
   }
 }
 
-/* Base/final state: fully visible, so reduced-motion users (who never
-   get .animate-sweep-in below) see the result immediately rather than
-   stuck hidden at the animation's 0% frame. */
-.animate-sweep-in {
-  clip-path: inset(0 0% 0 0);
-}
-@keyframes sweep-in {
-  0% {
-    clip-path: inset(0 100% 0 0);
-  }
-  100% {
-    clip-path: inset(0 0% 0 0);
-  }
-}
-
-@keyframes sweep-shimmer {
-  0% {
-    background-position: -150% 0;
-  }
-  100% {
-    background-position: 250% 0;
-  }
-}
-/* Base (non-animated) skeleton look, so reduced-motion users see a
-   calm static bar instead of a stuck-mid-sweep gradient. */
-.skeleton-line {
-  border-radius: 9999px;
-  background: linear-gradient(
-    90deg,
-    var(--color-line) 0%,
-    var(--color-line) 40%,
-    var(--color-border-strong) 50%,
-    var(--color-line) 60%,
-    var(--color-line) 100%
-  );
-  background-size: 250% 100%;
-}
-
-/* ==========================================================================
-   Pearl Glass — HUMANORA's Light Mode elevated-surface material.
-   White/translucent, a whisper of lavender, a thin visible border, a
-   soft multi-layer shadow, and a 1px internal highlight along the top
-   edge (like light catching the rim of glass). Used selectively — hero
-   cards, pricing cards, the My Voice panel, dropdowns, tooltips — not
-   applied to every surface on the page. In Dark Mode this resolves to
-   the existing card surface unchanged (no glass effect needed there).
-   ========================================================================== */
-.pearl-glass {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-}
-/* Scoped, not global — `.pearl-glass` is also the real product's card
-   surface (AccountMenu's dropdown, PricingCard, the Humanize/Study/
-   Voice workspaces, Profile), where translucent-over-whatever-scrolls-
-   behind would hurt legibility and trust (a pricing card should never
-   look uncertain). Genuine glass transparency is scoped to the landing
-   page's own cinematic text boxes only, via this one extra class
-   layered on top of `.pearl-glass` there. */
-.cinematic-track .pearl-glass {
-  background-color: color-mix(in srgb, var(--color-surface) 45%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-/* Faint violet-tinted surface — used only for the "after"/result side of
-   a before/after comparison (hero visual, live demo), so the transformed
-   state reads as distinct without resorting to a saturated fill. */
-.surface-violet-tint {
-  background-color: color-mix(in srgb, var(--color-brand-violet) 6%, var(--color-surface));
-}
-:root[data-theme="light"] .surface-violet-tint {
-  background-color: color-mix(in srgb, var(--color-brand-violet) 5%, var(--color-surface));
-}
-
-:root[data-theme="light"] .pearl-glass {
-  background-image: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(252, 250, 255, 0.92) 100%
-  );
-  background-color: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9), var(--shadow-card);
-}
-/* Higher specificity than either rule alone, so combining the two
-   classes reliably shows the tinted glass rather than plain glass. */
-:root[data-theme="light"] .pearl-glass.surface-violet-tint {
-  background-color: color-mix(in srgb, var(--color-brand-violet) 7%, rgba(255, 255, 255, 0.86));
-}
-
-/* Light Mode section-rhythm tints — alternating subtle surfaces so Pearl
-   Aurora doesn't read as one endless white canvas. No-op in Dark Mode
-   (that palette already has its own established rhythm via
-   .bg-ambient-glow-soft / .section-glow-top, left untouched). */
-:root[data-theme="light"] .section-tint-lavender {
-  background-color: color-mix(in srgb, var(--color-brand-violet) 3%, var(--color-background));
-}
-:root[data-theme="light"] .section-tint-violet {
-  background-color: color-mix(in srgb, var(--color-brand-violet) 5%, var(--color-background));
-}
-:root[data-theme="light"] .section-tint-cool {
-  background-color: color-mix(in srgb, var(--color-info) 4%, var(--color-background));
-}
-
-/* Hairline gradient edge — used to fade a section's top/bottom border
-   into the background instead of a hard-stop border line. */
-.border-fade-top {
-  position: relative;
-}
-.border-fade-top::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-border-strong) 50%,
-    transparent
-  );
-}
-
-/* Theme-aware placeholder "line of text" used in mockup UIs (mini editors,
-   before/after cards). Replaces literal bg-white/10, which disappears
-   against a light background. */
-.bg-line {
-  background-color: var(--color-line);
-}
-
-/* Brand gradient text (wordmark accent, headline highlight) */
-.text-brand-gradient {
-  background-image: linear-gradient(
-    90deg,
-    var(--color-brand-indigo),
-    var(--color-brand-purple)
-  );
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
-/* Extremely subtle glow on the gradient portion of the hero headline —
-   Light Mode only, where a hairline lift helps the violet gradient sit
-   forward against a pale pearl background. Dark Mode's gradient already
-   pops against the near-black surface without help. */
-:root[data-theme="light"] .text-brand-gradient-glow {
-  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--color-brand-violet) 22%, transparent));
-}
-
-/* Brand gradient fill (logo mark, solid CTAs) */
-.bg-brand-gradient {
-  background-image: linear-gradient(
-    135deg,
-    var(--color-brand-indigo) 0%,
-    var(--color-brand-violet) 55%,
-    var(--color-brand-purple) 100%
-  );
-}
-
-/* The login card's glass material — scoped to the login page only, not
-   a change to the shared .pearl-glass primitive (whose dark-theme
-   treatment is a flat opaque surface, not actual glass; light-theme's
-   blur treatment doesn't apply here since HUMANORA runs dark-only).
-   Genuine translucency + blur so the cosmic scene behind it reads
-   through faintly, plus two soft directional highlights (violet
-   upper-left, blue lower-right) standing in for "environmental light
-   reflecting on glass" rather than a gradient wash across the whole
-   card. */
-/* A soft, slightly organic silhouette echoing the approved reference's
-   blob shape — WITHOUT using percentage radii, which curve the entire
-   edge (not just the corner) and clipped real content (the "Log in"
-   heading, the footer line) behind the curve at this panel's actual
-   440px width. Fixed pixel radii only round each corner locally,
-   leaving the rest of every edge straight, so the real form content
-   (full-width inputs/button, an actual heading, actual footer text)
-   never collides with the silhouette regardless of how much text a
-   given account's error message or plan name runs to. One shared
-   value so the outer rim frame and the inner glass fill stay
-   concentric. */
-:root {
-  --auth-panel-radius: 44px 64px 48px 72px;
-}
-
-/* The rim frame — a thin gradient "border" using the classic
-   gradient-border trick (a gradient-filled background-clip:border-box
-   behind a solid inner fill, exposed only through the 1.5px gap
-   between the two). Several radial-gradients at different points
-   around the perimeter, not one linear sweep — so the illumination
-   genuinely VARIES (bright cyan top-left, violet at the right where
-   the planets sit, soft magenta lower-left, and a stretch of the
-   bottom-right edge left to fade into the dark) rather than reading
-   as a single uniform neon outline. A soft outer glow stands in for
-   "light catching optical glass" rather than a hard border. */
-.auth-panel-frame {
-  position: relative;
-  border-radius: var(--auth-panel-radius);
-  padding: 1.5px;
-  background:
-    radial-gradient(120px 90px at 12% 0%, rgba(147, 197, 253, 0.95) 0%, transparent 70%),
-    radial-gradient(140px 160px at 100% 35%, rgba(139, 92, 246, 0.85) 0%, transparent 65%),
-    radial-gradient(130px 110px at 8% 92%, rgba(217, 70, 239, 0.6) 0%, transparent 70%),
-    radial-gradient(160px 140px at 90% 100%, rgba(59, 130, 246, 0.5) 0%, transparent 65%),
-    linear-gradient(180deg, rgba(120, 140, 200, 0.22) 0%, rgba(80, 60, 130, 0.16) 100%);
-  box-shadow:
-    0 30px 80px -24px rgba(0, 0, 0, 0.55),
-    0 0 50px -10px rgba(139, 92, 246, 0.3);
-}
-
-.login-glass-panel {
-  position: relative;
-  border-radius: var(--auth-panel-radius);
-  /* Fully invisible now — no fill, no blur, no reflections. Only the
-     real controls (heading/labels via their own text color, the
-     Email/Password fields via `.login-field`, the button via
-     `.login-cta`) are visible; the card's own surface is gone, so the
-     artwork behind it shows exactly as crisp as everywhere else on
-     the page. */
-  background-color: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-
-/* Small premium badge on the login page ("AI-powered writing") — dark
-   transparent glass, thin brand-tinted border, no fill. */
-.login-badge {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(139, 92, 246, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-/* Auth page text refinements — Log in / Sign up headings, field
-   labels, and the "AI-powered writing" strap all get a slightly more
-   considered treatment than plain default text: tighter tracking and
-   a soft brand-tinted glow on the heading (it's sitting on a glass
-   panel over a lit scene, so a flat heading reads slightly dead by
-   comparison), a touch of letter-spacing and weight on labels so they
-   read as considered UI rather than a plain HTML label default. */
-.auth-heading {
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 28px rgba(139, 92, 246, 0.25);
-}
-.auth-field-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: rgba(226, 226, 245, 0.82);
-}
-
-/* Login form inputs — scoped overrides on top of the shared Input
-   primitive's classes (via `cn`, applied last so they win), matching
-   the approved reference exactly. Not a change to Input.tsx itself —
-   every other consumer of Input keeps its own default look. */
-.login-field {
-  background-color: rgba(255, 255, 255, 0.04) !important;
-  border-color: rgba(139, 92, 246, 0.18) !important;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
-}
-.login-field:hover {
-  border-color: rgba(139, 92, 246, 0.32) !important;
-}
-.login-field:focus {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(99, 140, 248, 0.55) !important;
-  box-shadow: 0 0 0 4px rgba(99, 140, 248, 0.14) !important;
-}
-.login-field::placeholder {
-  color: #64748b;
-}
-
-/* The login CTA's own gradient — a clean two-stop blue->purple sweep
-   (the reference's exact spec) rather than the shared .bg-brand-gradient
-   three-stop indigo/violet/purple used for every other primary button
-   in the app. Layered on top of Button's own primary variant (which
-   already provides the inner-highlight/hover-sweep treatment), so this
-   only overrides the fill color. A soft bloom stands in for "slightly
-   luminous inside the glass" — restrained, not a hard neon glow. */
-.login-cta {
-  background-image: linear-gradient(90deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%) !important;
-  box-shadow:
-    0 8px 24px -8px rgba(99, 102, 241, 0.5),
-    0 0 32px -10px rgba(139, 92, 246, 0.45) !important;
-}
-.login-cta:hover {
-  box-shadow:
-    0 10px 28px -8px rgba(99, 102, 241, 0.6),
-    0 0 40px -8px rgba(139, 92, 246, 0.55) !important;
-}
-
-/* Consistent, accessible focus ring across custom primitives */
-.focus-ring {
-  outline: none;
-}
-.focus-ring:focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
-}
-
-::selection {
-  background: var(--color-brand-purple);
-  color: white;
-}
-
-/* ==========================================================================
-   Restrained motion — used only under motion-safe: (see Tailwind classes).
-   Anyone with prefers-reduced-motion enabled sees these elements static.
-   ========================================================================== */
-
-@keyframes spin-slow {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes spin-slow-reverse {
-  to {
-    transform: rotate(-360deg);
-  }
-}
-
-@keyframes pulse-slow {
+@keyframes ellipsis {
   0%,
   100% {
-    opacity: 0.6;
-    transform: scale(1);
+    opacity: 0.3;
   }
   50% {
-    opacity: 0.9;
-    transform: scale(1.08);
+    opacity: 1;
   }
 }
-
-/* The login page's light path (LoginCosmicScene) — an extremely slow
-   dash-offset creep, using the SVG's own normalized pathLength so the
-   dash pattern scales correctly regardless of the path's actual pixel
-   length. Reads as a faint, barely-there flow of energy, not a
-   marching-ants effect. */
-@keyframes path-flow {
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
   to {
-    stroke-dashoffset: -1;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .animate-path-flow {
-    animation: path-flow 14s linear infinite;
-  }
-}
-
-/* The login scene's nebula/mist layer — an almost imperceptible drift,
-   amplitude kept under 1% of the viewport so it reads as "the
-   atmosphere is alive" rather than anything actively moving. */
-@keyframes cloud-drift {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-0.6%, 0.4%);
-  }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .login-cloud-drift {
-    animation: cloud-drift 50s ease-in-out infinite;
-  }
-}
-
-/* Used when the header's nav shell swaps content between destinations
-   (Product -> Solutions -> ...) while staying open — a quick settle,
-   not an entrance, since the shell itself is already visible. */
 @keyframes nav-panel-fade-in {
   from {
     opacity: 0;
-    transform: translateY(-3px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .animate-nav-panel-fade-in {
-    animation: nav-panel-fade-in 160ms ease-out;
-  }
-}
-
-@keyframes ellipsis {
-  0% {
-    opacity: 0.3;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.3;
-  }
-}
-
-@keyframes float-gentle {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-/* A genuine 3D tilt (rotateX/Y with perspective) rather than a flat
-   left-right slide — used on the hero's HUMANORA core so it reads as a
-   floating dimensional object, not a sticker. */
-@keyframes tilt-3d {
-  0%,
-  100% {
-    transform: rotateY(0deg) rotateX(0deg);
-  }
-  25% {
-    transform: rotateY(8deg) rotateX(-3deg);
-  }
-  75% {
-    transform: rotateY(-8deg) rotateX(3deg);
-  }
-}
-
-@keyframes drift-particle {
-  0% {
-    transform: translate(0, 0);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    transform: var(--drift-to, translate(0, -120px));
-    opacity: 0;
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes bar-grow {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .animate-spin-slow {
-    animation: spin-slow 40s linear infinite;
-  }
-  .animate-spin-slow-reverse {
-    animation: spin-slow-reverse 32s linear infinite;
-  }
-  .animate-pulse-slow {
-    animation: pulse-slow 6s ease-in-out infinite;
-  }
-  .animate-pulse-slower {
-    animation: pulse-slow 8s ease-in-out infinite 1s;
-  }
-  .animate-ellipsis {
-    animation: ellipsis 1.6s ease-in-out infinite;
-  }
-  .animate-float-gentle {
-    animation: float-gentle 5s ease-in-out infinite;
-  }
-  .animate-float-gentle-delayed {
-    animation: float-gentle 5s ease-in-out infinite 1.2s;
-  }
-  .animate-float-gentle-delayed-2 {
-    animation: float-gentle 5.6s ease-in-out infinite 2.1s;
-  }
-  .animate-float-gentle-delayed-3 {
-    animation: float-gentle 4.6s ease-in-out infinite 0.6s;
-  }
-  /* Workspace processing state: an indeterminate light sweep looping
-     across skeleton lines while a real humanize() request is in flight.
-     Duration is unknown (a live API call), so this loops rather than
-     completing — never implies a fake progress percentage or fake
-     multi-stage pipeline, just "still working". */
-  .animate-sweep-shimmer {
-    animation: sweep-shimmer 1.8s ease-in-out infinite;
-  }
-  /* Workspace result reveal: the inverse of .animate-sweep-reveal above —
-     this element IS the real content (not an overlay hiding something
-     underneath), so it must animate from hidden to fully visible and
-     land there, not the other way around. */
-  .animate-sweep-in {
-    animation: sweep-in 1.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  }
-  /* Signature interaction (ProductShowcase, Humanize tab): a soft edge of
-     light sweeps left-to-right across the original/stiff text, clipping
-     it away to reveal the humanized rewrite already sitting underneath —
-     "AI draft becoming human" as one continuous motion rather than an
-     abrupt swap. Runs once per mount/replay, not a loop. */
-  .animate-sweep-reveal {
-    animation: sweep-reveal 1.4s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-  }
-  .animate-tilt-3d {
-    animation: tilt-3d 9s ease-in-out infinite;
-    transform-style: preserve-3d;
-  }
-  .animate-drift-particle {
-    animation: drift-particle 3.2s ease-in infinite;
-  }
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out both;
-  }
-  .animate-bar-grow {
-    animation: bar-grow 1s ease-out both;
-    transform-origin: left;
-  }
-}
-
-/* Section-to-section continuity glow. A faint radial wash positioned at
-   the top of a section so it reads as light bleeding in from the section
-   above, rather than a hard visual stop between blocks. */
-.section-glow-top {
-  position: relative;
-}
-.section-glow-top::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: min(900px, 90%);
-  height: 240px;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(
-    50% 50% at 50% 50%,
-    rgba(139, 92, 246, 0.1) 0%,
-    transparent 70%
-  );
-  pointer-events: none;
-}
-
-/* Fluid hero headline sizing — scales smoothly between breakpoints
-   instead of jumping between fixed text-4xl/5xl/6xl steps. */
-.text-hero {
-  font-size: clamp(2.25rem, 1.55rem + 3.2vw, 3.75rem);
-  line-height: 1.08;
-}
-
-/* Restrained entrance motion — a brief, staggered fade+rise for a list
-   of cards appearing together (Recent Work, Quick Actions), NOT a
-   constant/looping animation. Each direct child gets a slightly later
-   delay via nth-child, capped at 7 groups so a long list doesn't keep
-   staggering for a full second. Respects reduced-motion like every
-   other animation in this file. */
-@media (prefers-reduced-motion: no-preference) {
-  .animate-stagger-in > * {
-    animation: stagger-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-  .animate-stagger-in > *:nth-child(1) { animation-delay: 0ms; }
-  .animate-stagger-in > *:nth-child(2) { animation-delay: 40ms; }
-  .animate-stagger-in > *:nth-child(3) { animation-delay: 80ms; }
-  .animate-stagger-in > *:nth-child(4) { animation-delay: 120ms; }
-  .animate-stagger-in > *:nth-child(5) { animation-delay: 160ms; }
-  .animate-stagger-in > *:nth-child(6) { animation-delay: 200ms; }
-  .animate-stagger-in > *:nth-child(n+7) { animation-delay: 240ms; }
-}
-@keyframes stagger-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* A single element's entrance (stat tiles, hero content) — same curve
-   as stagger-in but for one thing, not a list. */
-@media (prefers-reduced-motion: no-preference) {
-  .animate-rise-in {
-    animation: stagger-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-}
-
-/* Reusable hover-lift for interactive surfaces (cards, panels). */
-.hover-lift {
-  transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .hover-lift:hover {
-    transform: translateY(-3px);
-  }
-}
-.hover-lift:hover {
-  border-color: var(--color-border-strong);
-}
-
-/* ==========================================================================
-   Scroll reveal system (see components/ui/Reveal.tsx).
-   Elements start hidden/offset and are un-hidden by adding `.is-visible`
-   once an IntersectionObserver reports them in view. Reduced-motion users
-   never receive the hidden state to begin with (handled in JS), so this
-   CSS only ever animates for users who allow motion.
-   ========================================================================== */
-.reveal {
-  opacity: 0;
-  transform: translateY(16px);
-  filter: blur(4px);
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out;
-  will-change: opacity, transform;
-}
-.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  filter: blur(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    filter: none;
-    transition: none;
-  }
-}
-
-/* Cinematic embed — forces HUMANORA Dark's token values on a subtree
-   regardless of the site's active theme, WITHOUT touching global theme
-   state (no `data-theme` write, no ThemeProvider change) and without
-   forking ProductShowcase's own logic/markup. ProductShowcase sits
-   between forced-dark cinematic scenes on the landing page; a Light-
-   theme visitor would otherwise see it flip to a bright panel mid-
-   sequence, breaking the one visual continuity this whole page is
-   built around. Custom properties cascade to any descendant that
-   reads them via var(), so wrapping the same component in this class
-   is enough — no duplicate "dark ProductShowcase" component needed.
-   Only used on the landing page; the authenticated app's real theme
-   toggle is completely untouched by this. */
-.cinematic-embed {
-  --color-background: #060812;
-  --color-background-elevated: #0c0f1e;
-  --color-surface: #11142a;
-  --color-surface-subtle: #0c0f1e;
-  --color-surface-hover: #171b38;
-  --color-surface-active: #1f2447;
-  --color-border: rgba(255, 255, 255, 0.12);
-  --color-border-strong: rgba(255, 255, 255, 0.2);
-  --color-line: rgba(255, 255, 255, 0.12);
-  --color-foreground: #f8f8fc;
-  --color-foreground-muted: #c6c6e0;
-  --color-foreground-subtle: #9d9dc0;
-  --color-brand-indigo: #3b82f6;
-  --color-brand-purple: #a855f7;
-  --color-brand-violet: #8b5cf6;
-  --color-brand-pink: #d946ef;
-  --color-brand-cyan: #22d3ee;
-  background-color: var(--color-background);
-}
-/* .pearl-glass's Light-theme treatment (below) is a hardcoded literal
-   override keyed to `:root[data-theme="light"]`, not a variable read —
-   redefining --color-surface above can't reach it. Counter it
-   explicitly, same specificity, later in source order so it wins. */
-/* Previously forced fully opaque here (a deliberate "keep this one
-   moment visually stable" call) — now genuinely translucent like every
-   other glass surface on the page, per an explicit later request for a
-   uniform transparent-panel treatment across the whole site. Keeps
-   `.cinematic-embed`'s own dark-regardless-of-theme base color (see its
-   own rule above) so this still stays legible for Light-theme visitors,
-   just no longer opaque on top of it. */
-.cinematic-embed.cinematic-embed .pearl-glass {
-  background-image: none;
-  background-color: color-mix(in srgb, var(--color-surface) 40%, transparent);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-/* DimensionalH's H mark — sized off vh alone previously, so on a wide
-   but not-especially-tall display (2560x1440, 3840x2160) it stayed
-   visually small relative to how much wider the canvas got, reading
-   as dead space rather than an object filling the environment. min()
-   of a vh and a vw figure means it grows with whichever dimension is
-   more constrained, so it actually gets bigger on wide displays
-   instead of staying pinned to viewport height alone. */
-.dimensional-h-mark {
-  width: min(42vh, 30vw);
-  height: min(42vh, 30vw);
-}
-@media (max-width: 859px) {
-  .dimensional-h-mark {
-    width: 8rem;
-    height: 8rem;
-  }
-}
-
-/* Cinematic scroll scenes (DimensionalH, HumanizeScene, WorkspaceExpansion-
-   Scene, MyVoiceScene, StudyScene, LibraryScene, ConnectedWorkspaceScene)
-   — shared pin-track sizing. Height lives in CSS (keyed off the same
-   media conditions the JS uses to decide whether to engage GSAP's pin),
-   not inline styles computed in an effect, so there is never a frame
-   where a track renders "tall" before JS shrinks it back down on a
-   viewport that isn't going to pin at all. */
-.cinematic-track {
-  position: relative;
-  z-index: 1;
-  height: var(--pin-vh, 200vh);
-}
-.cinematic-stage {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  height: 100vh;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  /* Deliberately transparent — each scene used to paint its own opaque
-     black wall here, which is the real reason scrolling between them
-     felt like moving between sealed rooms rather than through one
-     environment: even a perfect object hand-off can't read as
-     continuous if every scene fully occludes whatever's behind it.
-     `LandingCinematicEnvironment` (mounted once, behind every scene)
-     now owns the shared dark base + the one persistent H that threads
-     through the whole sequence; each stage's own radial-gradient tint
-     layers on top of that instead of replacing it. */
-  background-color: transparent;
-}
-/* The near-black base itself lives on `.cinematic-world` (the fixed
-   wrapper `LandingCinematicEnvironment` renders, plus a plain CSS
-   background-color so it's present immediately, before any JS/GSAP
-   runs, and unconditionally on no-JS) — see below — not on the track
-   or stage, so there is exactly one base paint for the whole
-   sequence, never seven competing ones. */
-.cinematic-world {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  background-color: #04050c;
-  pointer-events: none;
-}
-/* Reduced-motion: LandingCinematicEnvironment hides itself via JS
-   (see its own effect) rather than never mounting the shared layer at
-   all, so each `.cinematic-track` needs its OWN opaque dark base back
-   — otherwise these scenes' hardcoded light/white text would sit
-   directly on the page's real (possibly Light-theme, pale) background
-   with nothing behind it, unreadable. Scoped to this media query only
-   — motion-enabled visitors still get the transparent track + shared
-   environment behind it, not a second competing background. */
-@media (prefers-reduced-motion: reduce) {
-  .cinematic-track {
-    background-color: #04050c;
-  }
-}
-@media (max-width: 859px), (max-height: 479px) {
-  .cinematic-track {
-    height: auto;
-  }
-  .cinematic-stage {
-    height: auto;
-    /* NOT min-height: 100vh — that was forcing every mobile scene to
-       pad out to a full viewport regardless of how short its actual
-       stacked content was, which is exactly where the worst "giant
-       dead space" on mobile came from (confirmed scrolling the real
-       page: several hundred px of pure black between one scene's last
-       element and the next scene's first). Content determines height;
-       padding below just gives normal breathing room between scenes. */
-    min-height: 0;
-    /* Several scenes' secondary content (a caption/label div) is a
-       direct sibling of the scene's main content wrapper, not nested
-       inside it — each one drops out of absolute positioning and into
-       normal flow at this breakpoint via its own `max-[859px]:static`,
-       but `.cinematic-stage`'s default flex-direction is row, so two
-       "static" siblings were laying out side-by-side instead of
-       stacking — the caption ending up floated oddly to the right of
-       the real content instead of below it. Column stacks any number
-       of now-static top-level children correctly regardless of which
-       scene they belong to. */
-    flex-direction: column;
-    justify-content: center;
-    gap: 1.25rem;
-    padding-block: 2.5rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cinematic-track {
-    height: auto;
-  }
-  .cinematic-stage {
-    height: auto;
-    min-height: auto;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-block: 4rem;
-  }
-}
-
-/* Materialize — a heavier variant of .reveal for the one product panel
-   right after the cinematic H arrival (ProductShowcase): a slight
-   forward tilt settling flat, reinforcing "this object is arriving
-   from the environment" rather than a generic fade-up. Combine with
-   .reveal on the same element — .reveal drives opacity/blur, this
-   drives the 3D settle. */
-.materialize {
-  transform: perspective(1200px) rotateX(9deg) scale(0.94) translateY(18px);
-  transform-origin: 50% 100%;
-  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.materialize.is-visible {
-  transform: perspective(1200px) rotateX(0deg) scale(1) translateY(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .materialize {
-    transform: none;
-    transition: none;
-  }
-}
-
-/* Flowing dashed connector — used for the "language changes, protected
-   info stays" and How-It-Works progress lines. */
 @keyframes flow-dash {
   to {
     stroke-dashoffset: -24;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .animate-flow-dash {
-    animation: flow-dash 1.4s linear infinite;
+@keyframes path-flow {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
-/* Button press feedback */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-sweep-shimmer {
+    animation: sweep-shimmer 1.8s ease-in-out infinite;
+  }
+  .animate-sweep-in {
+    animation: sweep-in 0.9s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .animate-sweep-reveal {
+    animation: sweep-reveal 1.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  }
+  .animate-ellipsis {
+    animation: ellipsis 1.6s ease-in-out infinite;
+  }
+  .animate-rise-in {
+    animation: rise-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-stagger-in > * {
+    animation: rise-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-stagger-in > *:nth-child(2) { animation-delay: 40ms; }
+  .animate-stagger-in > *:nth-child(3) { animation-delay: 80ms; }
+  .animate-stagger-in > *:nth-child(4) { animation-delay: 120ms; }
+  .animate-stagger-in > *:nth-child(5) { animation-delay: 160ms; }
+  .animate-stagger-in > *:nth-child(n+6) { animation-delay: 200ms; }
+  .animate-nav-panel-fade-in {
+    animation: nav-panel-fade-in 140ms ease-out;
+  }
+  .animate-flow-dash {
+    animation: flow-dash 1.4s linear infinite;
+  }
+  .animate-path-flow {
+    animation: path-flow 14s linear infinite;
+  }
+  .animate-pulse-slow,
+  .animate-pulse-slower {
+    animation: pulse-slow 6s ease-in-out infinite;
+  }
+}
+
+/* Interactive surfaces get a border change on hover, not a lift. */
+.hover-lift {
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+.hover-lift:hover {
+  border-color: var(--color-border-strong);
+}
+
+/* Scroll reveal (see components/ui/Reveal.tsx): a short fade, no blur,
+   no travel worth noticing. Reduced-motion users never get the hidden
+   state at all (handled in JS). */
+.reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .press-feedback {
   transition: transform 120ms ease;
 }
 .press-feedback:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
 }
 
-/* A horizontally-scrollable strip (mobile app nav, mobile mode toolbar)
-   still scrolls with touch/trackpad input — this only removes the
-   visible scrollbar chrome, which reads as a leftover desktop control
-   rather than a native mobile gesture affordance. */
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -1774,82 +648,9 @@ h4,
   display: none;
 }
 
-/* A hairline of internal light along the top edge of HUMANORA's primary
-   CTA — what makes it read as "illuminated from within" rather than a
-   flat gradient rectangle. Subtle enough to disappear at a glance. */
-.btn-primary-illuminate {
-  position: relative;
-  isolation: isolate;
-  /* A soft bevel: a bright rim on top, a darker floor underneath — the
-     "raised glass button" read, layered under the caller's own
-     shadow-glow-* utility rather than replacing it. */
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.3),
-    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.18);
-}
-.btn-primary-illuminate::before {
-  content: "";
-  position: absolute;
-  inset: 1px 1px auto 1px;
-  height: 40%;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent);
-  pointer-events: none;
-  z-index: 1;
-}
-/* A diagonal light sweep that glides across on hover — restrained, one
-   pass, never looping. Purely decorative (::after, no text inside it),
-   so it can never interfere with label contrast. */
-.btn-primary-illuminate::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    transparent 20%,
-    rgba(255, 255, 255, 0.22) 35%,
-    transparent 50%
-  );
-  background-size: 250% 100%;
-  background-position: 120% 0;
-  pointer-events: none;
-  z-index: 1;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .btn-primary-illuminate::after {
-    transition: background-position 700ms ease;
-  }
-  .btn-primary-illuminate:hover::after {
-    background-position: -20% 0;
-  }
-}
-.btn-primary-illuminate > * {
-  position: relative;
-  z-index: 2;
-}
-
-/* Lighter companion treatment for secondary/outline buttons — just the
-   top-edge glass highlight, no sweep (that stays reserved for the
-   primary CTA so it keeps a distinct, more important feel). */
+/* Button helpers — the illuminated/glass treatments are retired; the
+   classes remain only so existing markup keeps a positioning context. */
+.btn-primary-illuminate,
 .btn-glass-edge {
   position: relative;
-  isolation: isolate;
-}
-.btn-glass-edge::before {
-  content: "";
-  position: absolute;
-  inset: 1px 1px auto 1px;
-  height: 45%;
-  border-radius: inherit;
-  /* Light reflecting off glass reads as bright regardless of theme —
-     unlike the surface underneath, this highlight is never tinted by
-     --color-foreground. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: 0;
-}
-.btn-glass-edge > * {
-  position: relative;
-  z-index: 1;
 }

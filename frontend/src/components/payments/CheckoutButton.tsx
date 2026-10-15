@@ -53,7 +53,7 @@ function loadCheckoutScript(): Promise<void> {
 }
 
 /**
- * Starts a real Razorpay Checkout for one of HUMANORA's paid plans.
+ * Starts a real Razorpay Checkout for one of Humanora's paid plans.
  * Only ever sends `planId` to the server — the price shown here is for
  * display; the amount actually charged is whatever the server looks up
  * from lib/config/plans.ts when it creates the order (see
@@ -106,7 +106,7 @@ export function CheckoutButton({
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
-        name: "HUMANORA",
+        name: "Humanora",
         description: `${order.planName} plan`,
         order_id: order.orderId,
         theme: { color: "#7c3aed" },

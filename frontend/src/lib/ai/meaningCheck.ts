@@ -1,6 +1,6 @@
 /**
  * Deterministic meaning-preservation check — NOT another AI call. Runs
- * plain pattern matching against the original input and HUMANORA's own
+ * plain pattern matching against the original input and Humanora's own
  * output to flag the facts a rewrite must never silently change:
  * numbers, percentages, dates, URLs, and quoted text. This is a safety
  * net on top of the prompt's own "preserve meaning" instruction

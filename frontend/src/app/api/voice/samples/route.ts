@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   if (!result.ok) {
     const messages: Record<typeof result.reason, string> = {
       not_found: "Voice profile not found.",
-      too_short: `That sample is too short — add at least ${MIN_SAMPLE_WORDS} words so HUMANORA has enough to learn from.`,
+      too_short: `That sample is too short — add at least ${MIN_SAMPLE_WORDS} words so Humanora has enough to learn from.`,
       too_long: `That sample is too long — keep individual samples under ${MAX_SAMPLE_WORDS} words.`,
       limit_reached: "You've reached the maximum number of writing samples for this profile. Remove one to add another.",
     };

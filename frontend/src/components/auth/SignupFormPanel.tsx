@@ -70,7 +70,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="auth-panel-frame w-full max-w-[440px]">
     <div className="login-glass-panel relative w-full overflow-hidden p-8">
-      <h1 className="auth-heading text-2xl font-bold tracking-tight text-foreground">Create your account</h1>
+      <h1 className="auth-heading text-[2rem] leading-tight text-foreground">Create your account</h1>
       <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Free — no credit card required.</p>
 
       {/* Signup carries more hesitation than login ("I'm deciding
@@ -108,7 +108,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
-              className="login-field h-[52px] rounded-full pl-10"
+              className="login-field h-12 rounded-md pl-10"
             />
           </div>
         </div>
@@ -126,7 +126,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="you@example.com"
-              className="login-field h-[52px] rounded-full pl-10"
+              className="login-field h-12 rounded-md pl-10"
             />
           </div>
         </div>
@@ -142,7 +142,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 8 characters"
-            className="login-field h-[52px] rounded-full"
+            className="login-field h-12 rounded-md"
           />
         </div>
 
@@ -161,7 +161,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           variant="primary"
           size="lg"
           loading={loading}
-          className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
+          className="login-cta mt-2 h-12 w-full rounded-md text-base font-semibold"
         >
           Create account <span aria-hidden="true">→</span>
         </Button>
@@ -169,7 +169,7 @@ export function SignupFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
 
       <p className="mt-8 text-center text-sm leading-relaxed text-foreground-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-brand-pink">
+        <Link href="/login" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-foreground">
           Log in
         </Link>
       </p>

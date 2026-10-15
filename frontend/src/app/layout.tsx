@@ -1,24 +1,32 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Newsreader, Source_Serif_4, Courier_Prime } from "next/font/google";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/config/site";
 import "./globals.css";
 
-// Plus Jakarta Sans is HUMANORA's one master UI typeface — headings and
-// body both draw from this single family (weight, not a second face, is
-// what separates "Display" from "Caption") rather than pairing two
-// different fonts. One font load, one variable, self-hosted via
-// next/font (no external request, no runtime fetch, no license cost).
-// Only the five weights the type scale actually uses — see the type
-// scale in globals.css — not the full variable-font weight range.
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-display",
+// Humanora is set entirely in serif type — a writing product should look
+// like it respects writing. Newsreader (optical-size axis, built for
+// headlines) carries display type; Source Serif 4 carries body and UI
+// text, where its own optical sizing keeps small labels crisp. Code
+// samples use Courier Prime, a slab-serif monospace, so no sans-serif
+// face ships anywhere. All three are self-hosted via next/font.
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
+});
+
+const courierPrime = Courier_Prime({
+  variable: "--font-courier-prime",
+  subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -51,7 +59,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-// HUMANORA is dark-mode only by deliberate product decision — there is
+// Humanora is dark-mode only by deliberate product decision — there is
 // no theme toggle and no Light/System option anywhere in the app.
 // globals.css's `:root` (with no data-theme attribute at all) already
 // resolves to the same dark palette that `:root[data-theme="dark"]`
@@ -63,7 +71,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${sourceSerif.variable} ${courierPrime.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

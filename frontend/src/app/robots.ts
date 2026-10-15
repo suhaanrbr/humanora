@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/api"], // "/api" (exact) is the public developer-preview page, not the API routes under it
+        allow: ["/"],
         // Private, authenticated, or purely functional routes — never
         // useful (or safe) as a search result, and /dashboard is behind
         // real auth regardless. Disallowed here too as defense in

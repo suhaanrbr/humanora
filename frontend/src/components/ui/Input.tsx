@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 export type InputProps = InputHTMLAttributes<HTMLInputElement>;
 
 /**
- * HUMANORA text input. Dark surface, subtle border, brand-colored focus ring.
+ * Humanora text input. Dark surface, subtle border, brand-colored focus ring.
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, ...props }, ref) => {

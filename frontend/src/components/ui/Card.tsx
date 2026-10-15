@@ -4,23 +4,14 @@ import { cn } from "@/lib/cn";
 export type CardProps = HTMLAttributes<HTMLDivElement>;
 
 /**
- * HUMANORA card surface: rounded corners, thin border, soft ambient
- * shadow. The base unit for dashboard panels, pricing tiles, and
- * content blocks — genuinely translucent (reusing `.glass-panel`'s
- * recipe, the same one already used across the cinematic landing
- * scenes and Profile) rather than a solid opaque fill, so the same
- * "glass over a lit environment" material reads consistently
- * everywhere this component is used: landing, auth, dashboard, and
- * every dashboard sub-page. Text stays legible via each element's own
- * color/weight (the semantic `text-foreground`/`text-foreground-muted`
- * tokens already carry enough contrast on their own), not via an
- * opaque backing.
+ * Humanora card surface: an opaque panel, hairline border, small radius.
+ * The base unit for dashboard panels, pricing tiles, and content blocks.
  */
 export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "glass-panel rounded-lg shadow-card",
+        "rounded-lg border border-border bg-surface",
         className
       )}
       {...props}

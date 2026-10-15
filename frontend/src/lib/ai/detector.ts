@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * HUMANORA's AI Detector — a genuinely different kind of output than
+ * Humanora's AI Detector — a genuinely different kind of output than
  * Humanize/Study: those PRODUCE text; this ASSESSES text someone else
  * (or another tool) produced. Deliberately does NOT return a bare
  * percentage ("98% human") — AI-text detection is fundamentally

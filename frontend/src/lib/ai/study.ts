@@ -1,5 +1,5 @@
 /**
- * HUMANORA's Study tools — Summarize, Explain, and Study Notes. Shares
+ * Humanora's Study tools — Summarize, Explain, and Study Notes. Shares
  * the exact same Gemini call shape, quota system, and cost-control
  * approach as lib/ai/humanize.ts (see that file's header comment) —
  * this is a second capability on the SAME AI pipeline, not a separate
@@ -57,7 +57,7 @@ function buildPrompt(req: StudyRequest): string {
 
   if (req.mode === "summarize") {
     lines.push(
-      "You are HUMANORA's study assistant. Summarize the material below for a student who needs to review it quickly.",
+      "You are Humanora's study assistant. Summarize the material below for a student who needs to review it quickly.",
       "",
       GROUNDING_RULE,
       "",
@@ -73,7 +73,7 @@ function buildPrompt(req: StudyRequest): string {
   } else if (req.mode === "explain") {
     const depth = req.depth ?? "standard";
     lines.push(
-      "You are HUMANORA's study assistant. Explain the material below for a student.",
+      "You are Humanora's study assistant. Explain the material below for a student.",
       "",
       GROUNDING_RULE,
       "",
@@ -83,7 +83,7 @@ function buildPrompt(req: StudyRequest): string {
     );
   } else {
     lines.push(
-      "You are HUMANORA's study assistant. Turn the material below into structured revision notes.",
+      "You are Humanora's study assistant. Turn the material below into structured revision notes.",
       "",
       GROUNDING_RULE,
       "",

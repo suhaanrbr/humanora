@@ -1,6 +1,6 @@
 import { ComingSoon } from "@/components/dashboard/ComingSoon";
 
-export const metadata = { title: "Chat with Docs — HUMANORA" };
+export const metadata = { title: "Chat with Docs — Humanora" };
 
 export default function ChatWithDocsPage() {
   return (

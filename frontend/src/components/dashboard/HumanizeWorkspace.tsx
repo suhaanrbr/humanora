@@ -50,7 +50,7 @@ interface VoiceProfileOption {
 }
 
 /**
- * HUMANORA's flagship workspace — the editor is the interface, not a
+ * Humanora's flagship workspace — the editor is the interface, not a
  * textarea sitting inside a dashboard card. A single floating toolbar
  * carries every control the current plan actually supports; the canvas
  * itself has almost no chrome so the writing has room to breathe.
@@ -58,7 +58,7 @@ interface VoiceProfileOption {
  * The processing → result transition deliberately mirrors the landing
  * page's signature interaction (an indeterminate shimmer while the one
  * real API call is in flight, then the same clip-path "sweep" used in
- * ProductShowcase to reveal the finished rewrite) — one HUMANORA motif,
+ * ProductShowcase to reveal the finished rewrite) — one Humanora motif,
  * not two different loading treatments invented separately.
  */
 export function HumanizeWorkspace({
@@ -185,7 +185,7 @@ export function HumanizeWorkspace({
         // ignore
       }
     } catch {
-      setErrorMessage("Couldn't reach HUMANORA. Check your connection and try again.");
+      setErrorMessage("Couldn't reach Humanora. Check your connection and try again.");
       setState("error");
     }
   }
@@ -226,11 +226,6 @@ export function HumanizeWorkspace({
     <Container size="medium" className="relative mx-auto pb-36 md:pb-24 lg:pb-10">
       {/* A restrained echo of HumanizeScene's own blue cinematic light,
           local to this page only. Purely decorative, no layout impact. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
-        style={{ background: "radial-gradient(55% 70% at 70% 0%, rgba(59,130,246,0.08) 0%, transparent 70%)" }}
-      />
       {targetProject && (
         <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
@@ -490,7 +485,7 @@ export function HumanizeWorkspace({
           <div className={cn(compareView !== "result" && "hidden lg:block", "lg:border-l lg:border-border lg:pl-10")}>
             <div className="mb-3 flex items-center justify-between gap-3">
               <p className="text-brand-gradient text-xs font-semibold uppercase tracking-wide">
-                HUMANORA result
+                Humanora result
               </p>
               {state === "done" && (
                 <button
@@ -597,12 +592,7 @@ export function HumanizeWorkspace({
               onClick={runHumanize}
               loading={state === "processing"}
               disabled={!text.trim()}
-              // Restrained, not the brightest object on screen — a
-              // controlled violet edge rather than the shared
-              // `.bg-brand-gradient` fill this variant normally carries
-              // (that stays the default everywhere else in the app;
-              // this override is scoped to this one CTA).
-              className="!bg-white/[0.05] !shadow-none ml-auto w-full border border-brand-purple/30 text-foreground backdrop-blur-sm transition-shadow hover:!shadow-[0_0_28px_-10px_rgba(168,85,247,0.5)] sm:w-auto lg:ml-0"
+              className="ml-auto w-full sm:w-auto lg:ml-0"
             >
               {state === "processing" ? "Humanizing..." : "Humanize"}
             </Button>
@@ -664,13 +654,13 @@ function MeaningCheckPanel({ result }: { result: MeaningCheckResult }) {
 function PaywallPanel({ onBack }: { onBack: () => void }) {
   return (
     <div className="text-center">
-      <Badge variant="brand">Continue with HUMANORA</Badge>
+      <Badge variant="brand">Continue with Humanora</Badge>
       <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
         Choose a plan to keep writing
       </h1>
       <p className="mx-auto mt-3 max-w-lg text-base text-foreground-muted">
-        Your complimentary HUMANORA experience supports up to {FREE_TRIAL_MAX_CHARS} characters.
-        Choose a plan to work with longer writing and continue using HUMANORA.
+        Your complimentary Humanora experience supports up to {FREE_TRIAL_MAX_CHARS} characters.
+        Choose a plan to work with longer writing and continue using Humanora.
       </p>
 
       <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-3">

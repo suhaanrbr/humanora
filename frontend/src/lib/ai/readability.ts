@@ -1,6 +1,6 @@
 /**
  * Deterministic readability scoring — the classic Flesch Reading Ease
- * formula. No AI call, no cost; pure arithmetic over the text HUMANORA
+ * formula. No AI call, no cost; pure arithmetic over the text Humanora
  * already has. Shown alongside a rewrite so a user can see the effect
  * of a Mode/Strength choice numerically, not just by eye.
  */

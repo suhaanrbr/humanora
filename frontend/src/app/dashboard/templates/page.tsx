@@ -1,6 +1,6 @@
 import { ComingSoon } from "@/components/dashboard/ComingSoon";
 
-export const metadata = { title: "Templates — HUMANORA" };
+export const metadata = { title: "Templates — Humanora" };
 
 export default function TemplatesPage() {
   return (

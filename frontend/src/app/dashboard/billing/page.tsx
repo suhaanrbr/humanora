@@ -10,7 +10,7 @@ import { PLANS } from "@/lib/config/plans";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { BackToHome } from "@/components/dashboard/BackToHome";
 
-export const metadata = { title: "Billing — HUMANORA" };
+export const metadata = { title: "Billing — Humanora" };
 
 export default async function BillingPage() {
   const result = await getVerifiedSession();
@@ -52,7 +52,7 @@ export default async function BillingPage() {
         )}
         {!isFreeOrExpired && billing.currentPeriodEnd && (
           <p className="mt-3 text-xs text-foreground-subtle">
-            Access valid through {billing.currentPeriodEnd.toLocaleDateString()}. HUMANORA doesn&apos;t auto-renew —
+            Access valid through {billing.currentPeriodEnd.toLocaleDateString()}. Humanora doesn&apos;t auto-renew —
             choose a plan again when this period ends to continue.
           </p>
         )}

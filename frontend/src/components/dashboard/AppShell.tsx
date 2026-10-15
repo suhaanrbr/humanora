@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Logo, LogoMark } from "@/components/brand/Logo";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { CommandPalette, CommandTrigger, SearchIcon } from "@/components/dashboard/CommandPalette";
-import { AppAtmosphere } from "@/components/dashboard/AppAtmosphere";
 import { useSignOut } from "@/lib/useSignOut";
 import { cn } from "@/lib/cn";
 
@@ -60,7 +59,7 @@ const MOBILE_NAV_ENTRIES = NAV_ENTRIES.filter((e) =>
 );
 
 /**
- * HUMANORA's application shell — a persistent environment the
+ * Humanora's application shell — a persistent environment the
  * workspace pages sit inside, replacing the previous horizontally-
  * scrolling top nav. `.app-atmosphere` (Stage 1) is one continuous
  * fixed backdrop behind every route here, so moving between Write,
@@ -87,18 +86,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-screen">
-      <AppAtmosphere />
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
 
-      {/* Desktop/tablet: persistent left rail. Glass, not flat opaque —
-          a hairline right border plus a very faint inner glow is what
-          separates "floating panel in a lit environment" from "sidebar
-          div with a border," at negligible visual cost. */}
+      {/* Desktop/tablet: persistent left rail, one step lighter than the
+          page and divided from it by a hairline. */}
       <nav
         aria-label="Primary"
-        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-white/[0.07] bg-background/40 backdrop-blur-2xl shadow-[inset_-1px_0_0_0_rgba(255,255,255,0.04)] md:flex lg:w-64"
+        className="fixed inset-y-0 left-0 z-40 hidden w-[76px] flex-col border-r border-border bg-background-elevated md:flex lg:w-64"
       >
-        <Link href="/dashboard" className="focus-ring flex h-16 shrink-0 items-center justify-center px-3 lg:justify-start lg:px-5" aria-label="HUMANORA home">
+        <Link href="/dashboard" className="focus-ring flex h-16 shrink-0 items-center justify-center px-3 lg:justify-start lg:px-5" aria-label="Humanora home">
           <span className="lg:hidden">
             <LogoMark size="sm" />
           </span>
@@ -141,14 +137,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             away via CommandPalette, so this slot only needs the one
             action that has to be a single, unambiguous, always-
             reachable click: log out. */}
-        <div className="border-t border-white/[0.06] p-3">
+        <div className="border-t border-border p-3">
           <button
             type="button"
             onClick={() => handleSignOut()}
             disabled={signingOut}
-            className="focus-ring press-feedback group flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-foreground-muted backdrop-blur-sm transition-colors hover:border-brand-purple/40 disabled:opacity-50 lg:justify-start lg:px-4"
+            className="focus-ring press-feedback group flex w-full items-center justify-center gap-2 rounded-md border border-border px-3 py-2.5 text-sm font-medium text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground disabled:opacity-50 lg:justify-start lg:px-4"
           >
-            <LogoutIcon className="h-4 w-4 shrink-0 text-brand-purple transition-transform group-hover:translate-x-0.5" />
+            <LogoutIcon className="h-4 w-4 shrink-0 text-foreground-subtle transition-transform group-hover:translate-x-0.5" />
             <span className="hidden lg:inline">{signingOut ? "Logging out…" : "Log out"}</span>
           </button>
         </div>
@@ -156,8 +152,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile: slim top bar (brand + command trigger) plus a bottom
           bar for the four primary destinations. */}
-      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-white/[0.06] bg-background/90 px-4 backdrop-blur-xl md:hidden">
-        <Link href="/dashboard" className="focus-ring shrink-0 rounded-md" aria-label="HUMANORA home">
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-background px-4 md:hidden">
+        <Link href="/dashboard" className="focus-ring shrink-0 rounded-md" aria-label="Humanora home">
           <LogoMark size="sm" />
         </Link>
         <div className="min-w-0 flex-1">
@@ -170,7 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label="Primary"
-        className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-white/[0.06] bg-background/95 backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-border bg-background md:hidden"
       >
         {MOBILE_NAV_ENTRIES.map((entry) => {
           const active = isActive(entry.href);
@@ -207,7 +203,7 @@ function NavGroup({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <p className="hidden px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground-subtle/70 lg:block">
+      <p className="text-app-label hidden px-3 pb-1 text-foreground-subtle lg:block">
         {label}
       </p>
       {entries.map((entry) => {
@@ -219,10 +215,10 @@ function NavGroup({
             aria-current={active ? "page" : undefined}
             title={entry.label}
             className={cn(
-              "focus-ring group relative flex items-center gap-3 rounded-xl border px-2.5 py-2.5 text-sm font-medium transition-colors lg:px-3.5",
+              "focus-ring group relative flex items-center gap-3 rounded-md border px-2.5 py-2 text-[0.9375rem] transition-colors lg:px-3",
               active
-                ? "border-brand-purple/30 bg-brand-purple/[0.07] text-foreground shadow-[0_0_24px_-10px_rgba(168,85,247,0.55)]"
-                : "border-transparent text-foreground-muted hover:border-white/10 hover:bg-white/[0.03] hover:text-foreground"
+                ? "border-border bg-surface text-foreground"
+                : "border-transparent text-foreground-muted hover:bg-surface hover:text-foreground"
             )}
           >
             <entry.icon className={cn("h-5 w-5 shrink-0", active && "text-brand-purple")} />

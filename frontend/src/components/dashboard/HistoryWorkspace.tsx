@@ -20,7 +20,7 @@ type SortOrder = "newest" | "oldest";
 type FilterKind = "all" | "humanized" | "study";
 
 /**
- * The Library workspace — HUMANORA's real memory of a user's work.
+ * The Library workspace — Humanora's real memory of a user's work.
  * Unified across both content tables (humanization, study_session; see
  * lib/db/recentWork.ts) as of the Connected Workspace phase — Library
  * used to only show Humanize output even after Study sessions started
@@ -92,11 +92,6 @@ export function HistoryWorkspace({ initialEntries }: { initialEntries: RecentWor
       {/* A restrained echo of LibraryScene's own indigo cinematic
           light, local to this page only. Purely decorative, no layout
           impact. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
-        style={{ background: "radial-gradient(55% 70% at 40% 0%, rgba(59,130,246,0.07) 0%, transparent 70%)" }}
-      />
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Library</h1>

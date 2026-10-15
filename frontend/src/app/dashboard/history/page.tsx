@@ -4,10 +4,10 @@ import { Container } from "@/components/ui/Container";
 import { getRecentWork } from "@/lib/db/recentWork";
 import { HistoryWorkspace } from "@/components/dashboard/HistoryWorkspace";
 
-export const metadata = { title: "Library — HUMANORA" };
+export const metadata = { title: "Library — Humanora" };
 
 /**
- * Library is now HUMANORA's real memory of a user's work — both
+ * Library is now Humanora's real memory of a user's work — both
  * Humanize output AND persisted Study sessions (Study used to be
  * stateless; see schema.ts's study_session table), not just
  * humanizations. 500 (not the old 200) since it's now covering two

@@ -107,7 +107,7 @@ export function CommandTrigger({ onOpen, className }: { onOpen: () => void; clas
 }
 
 /**
- * HUMANORA's command palette overlay — mount exactly ONCE per app
+ * Humanora's command palette overlay — mount exactly ONCE per app
  * (AppShell owns this). Ctrl/Cmd+K toggles it globally regardless of
  * which trigger button is visible at the current viewport. Static
  * entries (navigation, Study-mode shortcuts) are always present; a

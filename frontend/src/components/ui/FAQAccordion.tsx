@@ -22,18 +22,18 @@ export function FAQAccordion({ items, className }: FAQAccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col border-t border-border", className)}>
       {items.map((item, i) => {
         const open = openIndex === i;
         return (
-          <div key={item.question} className="overflow-hidden rounded-lg border border-border bg-surface">
+          <div key={item.question} className="border-b border-border">
             <button
               type="button"
               onClick={() => setOpenIndex(open ? null : i)}
               aria-expanded={open}
-              className="focus-ring flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left"
+              className="focus-ring flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left"
             >
-              <span className="text-sm font-medium text-foreground">{item.question}</span>
+              <span className="font-display text-xl leading-snug text-foreground">{item.question}</span>
               <ChevronIcon className={cn("h-4 w-4 shrink-0 text-foreground-subtle transition-transform duration-300", open && "rotate-180")} />
             </button>
             <div
@@ -43,7 +43,7 @@ export function FAQAccordion({ items, className }: FAQAccordionProps) {
               )}
             >
               <div className="overflow-hidden">
-                <p className="px-5 pb-4 text-sm leading-relaxed text-foreground-muted">{item.answer}</p>
+                <p className="max-w-2xl pb-6 text-base leading-relaxed text-foreground-muted">{item.answer}</p>
               </div>
             </div>
           </div>

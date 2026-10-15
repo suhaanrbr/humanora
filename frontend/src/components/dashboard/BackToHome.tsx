@@ -1,10 +1,10 @@
 import Link from "next/link";
 
 /**
- * Explicit "return to HUMANORA Home" control for deep/secondary pages
+ * Explicit "return to Humanora Home" control for deep/secondary pages
  * (Settings, Billing, Project detail, etc.) — always links to the real
  * dashboard route, never router.back() (which could land a user
- * outside HUMANORA entirely if they arrived via an external link).
+ * outside Humanora entirely if they arrived via an external link).
  * A plain server-renderable Link — no client state needed since it
  * always points at a fixed destination.
  */

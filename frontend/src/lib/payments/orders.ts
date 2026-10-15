@@ -6,7 +6,7 @@ import { getRazorpay, getRazorpayPublicKeyId } from "@/lib/payments/razorpay";
 import { PLANS, BILLING_PERIOD_DAYS, isPaidPlanId, type PaidPlanId } from "@/lib/config/plans";
 
 /**
- * HUMANORA's Razorpay billing architecture: one-time Orders, not
+ * Humanora's Razorpay billing architecture: one-time Orders, not
  * Razorpay Subscriptions.
  *
  * Razorpay Subscriptions require e-mandate/UPI Autopay registration and

@@ -1,10 +1,10 @@
 /**
- * HUMANORA's single authoritative plan configuration. Marketing pages,
+ * Humanora's single authoritative plan configuration. Marketing pages,
  * the workspace paywall, checkout, and server-side entitlement/payment
  * checks all derive from this file — nowhere else should a quota,
  * price, or character limit be hard-coded.
  *
- * Prices are canonical INR (HUMANORA's owner is an individual in India
+ * Prices are canonical INR (Humanora's owner is an individual in India
  * billing through Razorpay — see lib/payments/razorpay.ts). Amounts are
  * whole rupees here; payment code converts to paise (`* 100`) only at
  * the Razorpay API boundary, never anywhere else.
@@ -133,7 +133,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 export const FREE_TRIAL_MAX_CHARS = 200;
 
 /** Every paid plan bills for a 30-day access period — see
- * lib/payments/orders.ts for why HUMANORA uses one-time orders rather
+ * lib/payments/orders.ts for why Humanora uses one-time orders rather
  * than Razorpay recurring Subscriptions for V1. */
 export const BILLING_PERIOD_DAYS = 30;
 

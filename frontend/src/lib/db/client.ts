@@ -24,7 +24,7 @@ export function getDb() {
   const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error(
-      "DATABASE_URL is not set. HUMANORA's account/history features require a Neon Postgres connection string — see docs/PHASE_2_SETUP.md."
+      "DATABASE_URL is not set. Humanora's account/history features require a Neon Postgres connection string — see docs/PHASE_2_SETUP.md."
     );
   }
 

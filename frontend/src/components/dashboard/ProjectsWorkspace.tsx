@@ -55,7 +55,7 @@ export function ProjectsWorkspace({ initialProjects }: { initialProjects: Projec
       setDescription("");
       setCreating(false);
     } catch {
-      setError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setError("Couldn't reach Humanora. Check your connection and try again.");
     } finally {
       setSaving(false);
     }

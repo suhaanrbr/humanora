@@ -1,9 +1,9 @@
 /**
- * HUMANORA marketing pricing display. Prices themselves are NEVER
+ * Humanora marketing pricing display. Prices themselves are NEVER
  * redefined here — `monthlyPrice` below is read directly from
  * lib/config/plans.ts (the one authoritative, server-enforced config)
  * so the marketing page can never drift from what checkout actually
- * charges. Only display copy (audience, feature bullets, icon, badge)
+ * charges. Only display copy (audience, feature bullets, badge)
  * lives here.
  *
  * There is no annual billing plan in the current Razorpay integration
@@ -22,7 +22,6 @@ export interface PricingFeature {
 export interface PricingPlan {
   id: PlanId;
   name: string;
-  icon: "sprout" | "pen" | "star" | "bolt";
   monthlyPrice: number;
   audience: string;
   features: PricingFeature[];
@@ -35,23 +34,21 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: "free",
     name: "Free",
-    icon: "sprout",
     monthlyPrice: PLANS.free.monthlyPriceInr,
-    audience: "For people exploring HUMANORA.",
+    audience: "Try one rewrite before you decide.",
     features: [
       { label: "One complimentary humanization, ever" },
       { label: "Up to 200 characters" },
       { label: "Natural mode" },
       { label: "No credit card required" },
     ],
-    ctaLabel: "Get Started",
+    ctaLabel: "Start free",
   },
   {
     id: "essential",
     name: "Essential",
-    icon: "pen",
     monthlyPrice: PLANS.essential.monthlyPriceInr,
-    audience: "For students and everyday writers.",
+    audience: "For students and everyday writing.",
     features: [
       { label: `${PLANS.essential.monthlyHumanizations} humanizations per month` },
       { label: `Up to ${Math.round(PLANS.essential.maxInputChars / 6).toLocaleString()} words per request` },
@@ -65,9 +62,8 @@ export const pricingPlans: PricingPlan[] = [
   {
     id: "pro",
     name: "Pro",
-    icon: "star",
     monthlyPrice: PLANS.pro.monthlyPriceInr,
-    audience: "For creators, professionals and frequent writers.",
+    audience: "For people who write for a living, or nearly.",
     features: [
       { label: `${PLANS.pro.monthlyHumanizations} humanizations per month` },
       { label: `Up to ${Math.round(PLANS.pro.maxInputChars / 6).toLocaleString()} words per request` },
@@ -79,14 +75,13 @@ export const pricingPlans: PricingPlan[] = [
     ],
     ctaLabel: "Choose Pro",
     highlighted: true,
-    badge: "Most Popular",
+    badge: "Recommended",
   },
   {
     id: "ultra",
     name: "Ultra",
-    icon: "bolt",
     monthlyPrice: PLANS.ultra.monthlyPriceInr,
-    audience: "For power users and high-volume workflows.",
+    audience: "For heavy, daily use across several voices.",
     features: [
       { label: `${PLANS.ultra.monthlyHumanizations} humanizations per month` },
       { label: `Up to ${Math.round(PLANS.ultra.maxInputChars / 6).toLocaleString()} words per request` },

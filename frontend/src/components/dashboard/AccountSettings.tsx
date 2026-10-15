@@ -161,7 +161,7 @@ export function AccountSettings({
         ) : (
           <p className="mt-2 text-sm text-foreground-muted">
             {voiceProfileCount === 0
-              ? "Teach HUMANORA how you write from a few real samples."
+              ? "Teach Humanora how you write from a few real samples."
               : `${voiceProfileCount} Voice profile${voiceProfileCount === 1 ? "" : "s"}, not yet analyzed.`}
           </p>
         )}
@@ -248,7 +248,7 @@ export function ProfileForm({ initialName }: { initialName: string }) {
       }
       setSaved(true);
     } catch {
-      setError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setError("Couldn't reach Humanora. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -301,7 +301,7 @@ export function DangerZone() {
       router.push("/");
       router.refresh();
     } catch {
-      setError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setError("Couldn't reach Humanora. Check your connection and try again.");
       setDeleting(false);
     }
   }

@@ -18,7 +18,7 @@ export type AuthResult = { status: "ok"; userId: string } | { status: "unauthent
 /** Shared 401-vs-503 response for any route's non-"ok" AuthResult. */
 export function authErrorResponse(status: "unauthenticated" | "error") {
   return status === "error"
-    ? NextResponse.json({ error: "HUMANORA is temporarily unavailable. Please try again shortly." }, { status: 503 })
+    ? NextResponse.json({ error: "Humanora is temporarily unavailable. Please try again shortly." }, { status: 503 })
     : NextResponse.json({ error: "Please log in." }, { status: 401 });
 }
 

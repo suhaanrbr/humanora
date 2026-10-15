@@ -62,7 +62,7 @@ export function ForgotPasswordFormPanel() {
               variant="secondary"
               size="lg"
               onClick={() => setSent(false)}
-              className="h-14 w-full rounded-full text-base font-semibold"
+              className="h-12 w-full rounded-md text-base font-semibold"
             >
               Use a different email
             </Button>
@@ -83,7 +83,7 @@ export function ForgotPasswordFormPanel() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="login-field h-[52px] rounded-full pl-10"
+                  className="login-field h-12 rounded-md pl-10"
                 />
               </div>
             </div>
@@ -103,7 +103,7 @@ export function ForgotPasswordFormPanel() {
               variant="primary"
               size="lg"
               loading={loading}
-              className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
+              className="login-cta mt-2 h-12 w-full rounded-md text-base font-semibold"
             >
               Send reset link <span aria-hidden="true">→</span>
             </Button>
@@ -112,7 +112,7 @@ export function ForgotPasswordFormPanel() {
 
         <p className="mt-8 text-center text-sm text-foreground-muted">
           Remembered it?{" "}
-          <Link href="/login" className="font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink">
+          <Link href="/login" className="font-medium text-brand-purple underline underline-offset-2 hover:text-foreground">
             Back to log in
           </Link>
         </p>

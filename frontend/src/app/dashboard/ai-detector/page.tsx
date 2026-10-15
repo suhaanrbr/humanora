@@ -4,7 +4,7 @@ import { getUserPlan } from "@/lib/db/entitlement";
 import { getDetectorScansForUser } from "@/lib/db/detector";
 import { DetectorWorkspace } from "@/components/dashboard/DetectorWorkspace";
 
-export const metadata = { title: "AI Detector — HUMANORA" };
+export const metadata = { title: "AI Detector — Humanora" };
 
 export default async function AiDetectorPage() {
   const result = await getVerifiedSession();

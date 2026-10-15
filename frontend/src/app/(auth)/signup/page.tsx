@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { SignupFormPanel } from "@/components/auth/SignupFormPanel";
 
-export const metadata = { title: "Sign up — HUMANORA" };
+export const metadata = { title: "Sign up — Humanora" };
 
 export default async function SignupPage() {
   const result = await getVerifiedSession();

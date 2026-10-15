@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { LoginFormPanel } from "@/components/auth/LoginFormPanel";
 
-export const metadata = { title: "Log in — HUMANORA" };
+export const metadata = { title: "Log in — Humanora" };
 
 /**
  * An already-authenticated user has no reason to see the login form —

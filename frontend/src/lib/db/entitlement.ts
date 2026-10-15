@@ -4,7 +4,7 @@ import { userEntitlement, subscription } from "@/lib/db/schema";
 import { PLANS, FREE_TRIAL_MAX_CHARS, type PlanId } from "@/lib/config/plans";
 
 /**
- * HUMANORA's free-tier business rule, in one place:
+ * Humanora's free-tier business rule, in one place:
  *
  *   ONE lifetime complimentary humanization per account, capped at
  *   FREE_TRIAL_MAX_CHARS. It never resets (not daily/monthly/on
@@ -33,7 +33,7 @@ export async function getFreeTrialStatus(userId: string): Promise<{ used: boolea
 /**
  * A subscription's `status` is only ever flipped by a webhook/verify
  * call (see lib/payments/orders.ts) — nothing proactively downgrades it
- * when `currentPeriodEnd` passes, since HUMANORA doesn't auto-renew.
+ * when `currentPeriodEnd` passes, since Humanora doesn't auto-renew.
  * So "is this plan actually still usable right now" always needs both
  * checks: status must be active AND the paid period must not have
  * lapsed. Centralized here so no caller can forget the second half.

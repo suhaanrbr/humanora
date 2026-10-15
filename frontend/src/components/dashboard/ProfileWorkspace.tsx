@@ -11,7 +11,6 @@ import { ProfileForm, DangerZone } from "@/components/dashboard/AccountSettings"
 import { formatDate, formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { cn } from "@/lib/cn";
-import { CornerFrame } from "@/components/landing/cinematic/CornerFrame";
 
 interface RecentWorkItem {
   kind: "humanized" | "study";
@@ -69,7 +68,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 /**
- * HUMANORA's Profile — the user's personal identity inside the
+ * Humanora's Profile — the user's personal identity inside the
  * product, not a second Settings page. Every number and label here is
  * real (lifetime stats, mode usage, voice traits, projects, recent
  * work) — nothing fabricated (no streaks/scores/rankings). Settings
@@ -127,16 +126,9 @@ export function ProfileWorkspace(props: {
         </Link>
       </div>
 
-      {/* Asymmetric identity header — not a centered card. Identity on
-          the left, a compact voice-fingerprint teaser bleeding in from
+      {/* Identity on the left, a compact voice-fingerprint teaser on
           the right (real traits, not decoration) on wide screens. */}
-      <div className="glass-panel relative overflow-hidden rounded-3xl p-6 sm:p-9">
-        <CornerFrame color="rgba(139,92,246,0.4)" />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{ background: "radial-gradient(50% 60% at 85% 20%, rgba(217,70,239,0.10) 0%, transparent 70%)" }}
-        />
+      <div className="glass-panel relative overflow-hidden rounded-lg p-6 sm:p-9">
         <div className="relative grid grid-cols-1 items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
           <div className="flex items-center gap-5">
             {props.image ? (
@@ -170,7 +162,7 @@ export function ProfileWorkspace(props: {
               {props.voiceTraits.slice(0, 4).map((t, i) => (
                 <span
                   key={t.label}
-                  className="rounded-full border border-brand-pink/25 bg-brand-pink/[0.08] px-3 py-1.5 text-xs capitalize text-foreground-muted"
+                  className="rounded-sm border border-border px-3 py-1.5 text-xs capitalize text-foreground-muted"
                   style={{ transform: `translateY(${i % 2 === 0 ? "-6px" : "6px"})` }}
                 >
                   {t.value}
@@ -271,7 +263,7 @@ function OverviewTab(
               <Badge variant={props.voiceProfileReady ? "brand" : "neutral"}>{props.voiceProfileReady ? "Ready" : "Not set up"}</Badge>
             </div>
             <p className="mt-2 text-xs text-foreground-subtle line-clamp-2">
-              {props.voiceSummary ?? "Teach HUMANORA how you write from a few real samples."}
+              {props.voiceSummary ?? "Teach Humanora how you write from a few real samples."}
             </p>
           </Card>
         </button>
@@ -352,7 +344,7 @@ function VoiceTab(props: {
         <p className="text-base font-semibold text-foreground">No voice profile yet.</p>
         <p className="mx-auto mt-2 max-w-sm text-sm text-foreground-muted">
           {props.voiceProfileCount === 0
-            ? "Add a few real writing samples and HUMANORA will build a structured profile of how you write."
+            ? "Add a few real writing samples and Humanora will build a structured profile of how you write."
             : `${props.voiceProfileCount} profile${props.voiceProfileCount === 1 ? "" : "s"} started, not yet analyzed.`}
         </p>
         <ButtonLink href="/dashboard/voice" variant="primary" size="sm" className="mt-5">

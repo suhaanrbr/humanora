@@ -32,7 +32,7 @@ const trustedOrigins = [
 ];
 
 /**
- * HUMANORA authentication (server-side): email/password, plus Google
+ * Humanora authentication (server-side): email/password, plus Google
  * OAuth when GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET are configured (see
  * docs/GOOGLE_LOGIN_SETUP.md). Google is added conditionally — with no
  * client id/secret set, `socialProviders` is simply omitted so
@@ -75,10 +75,10 @@ export const auth = betterAuth({
         throw new Error("Password reset email is not configured (missing RESEND_API_KEY).");
       }
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || "HUMANORA <onboarding@resend.dev>",
+        from: process.env.RESEND_FROM_EMAIL || "Humanora <onboarding@resend.dev>",
         to: user.email,
-        subject: "Reset your HUMANORA password",
-        html: `<p>Someone requested a password reset for this HUMANORA account.</p>
+        subject: "Reset your Humanora password",
+        html: `<p>Someone requested a password reset for this Humanora account.</p>
 <p><a href="${url}">Click here to reset your password</a>. This link expires in 1 hour.</p>
 <p>If you didn't request this, you can safely ignore this email.</p>`,
       });

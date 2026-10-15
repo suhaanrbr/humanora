@@ -42,7 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <AppShell>
         <Container className="mx-auto max-w-md text-center">
           <Card className="p-8">
-            <p className="text-sm font-medium text-foreground">HUMANORA is temporarily unavailable</p>
+            <p className="text-sm font-medium text-foreground">Humanora is temporarily unavailable</p>
             <p className="mt-2 text-sm text-foreground-muted">
               We couldn&apos;t confirm your session just now — this is usually momentary. Your login is
               not affected.

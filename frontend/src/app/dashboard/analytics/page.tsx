@@ -7,7 +7,7 @@ import { getUsageSummary } from "@/lib/db/usage";
 import { getLifetimeStats, getDailyActivity, getHumanizeModeDistribution } from "@/lib/db/stats";
 import { ActivityChart } from "@/components/dashboard/ActivityChart";
 
-export const metadata = { title: "Analytics — HUMANORA" };
+export const metadata = { title: "Analytics — Humanora" };
 
 /**
  * Every number here is derived directly from stored rows — lifetime

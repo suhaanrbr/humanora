@@ -4,7 +4,7 @@ import { getUserPlan } from "@/lib/db/entitlement";
 import { getVoiceOverview } from "@/lib/db/voice";
 import { HumanizeWorkspace } from "@/components/dashboard/HumanizeWorkspace";
 
-export const metadata = { title: "Humanize — HUMANORA" };
+export const metadata = { title: "Humanize — Humanora" };
 
 export default async function HumanizePage() {
   // Request-memoized — reuses the layout's session lookup, no extra DB call.

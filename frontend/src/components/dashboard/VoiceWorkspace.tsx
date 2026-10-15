@@ -76,7 +76,7 @@ export function VoiceWorkspace({
       setNewName("");
       setCreating(false);
     } catch {
-      setCreateError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setCreateError("Couldn't reach Humanora. Check your connection and try again.");
     }
   }
 
@@ -114,15 +114,10 @@ export function VoiceWorkspace({
           wrapper keeps it strictly behind this page's own content
           without touching AppShell's global stacking. Purely decorative,
           no layout impact (absolute + pointer-events-none). */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
-        style={{ background: "radial-gradient(55% 70% at 30% 0%, rgba(217,70,239,0.08) 0%, transparent 70%)" }}
-      />
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">My Voice</h1>
         <p className="mt-2 max-w-2xl text-sm text-foreground-muted">
-          Give HUMANORA a few examples of your own writing. It learns patterns in how you write and
+          Give Humanora a few examples of your own writing. It learns patterns in how you write and
           applies them to future rewrites. This describes your writing style only — never used to
           verify identity or authorship.
         </p>
@@ -217,7 +212,7 @@ export function VoiceWorkspace({
           <div>
             <p className="text-sm font-medium text-foreground">Create your first Voice profile</p>
             <p className="mt-1.5 max-w-sm text-sm text-foreground-muted">
-              Add a few writing samples and HUMANORA analyzes patterns like these — vocabulary, tone,
+              Add a few writing samples and Humanora analyzes patterns like these — vocabulary, tone,
               and rhythm — then applies them the next time you humanize a draft.
             </p>
           </div>
@@ -272,7 +267,7 @@ function ExampleProfilePreview({ className }: { className?: string }) {
 
 const VOICE_STEPS = [
   { title: "Add samples", description: "Paste a few pieces of your own writing." },
-  { title: "HUMANORA learns", description: "Vocabulary, sentence rhythm, tone, and more." },
+  { title: "Humanora learns", description: "Vocabulary, sentence rhythm, tone, and more." },
   { title: "Voice profile", description: "A structured, reviewable style — not a black box." },
   { title: "Used in Humanize", description: "Pick it next to Mode when you rewrite a draft." },
 ] as const;
@@ -292,7 +287,7 @@ function MyVoiceUpsell() {
           Not just human. More like you.
         </h1>
         <p className="mx-auto mt-3 max-w-lg text-sm text-foreground-muted">
-          Generic humanizing makes writing sound natural. My Voice goes further — HUMANORA learns
+          Generic humanizing makes writing sound natural. My Voice goes further — Humanora learns
           patterns in how <span className="text-foreground">you</span> actually write and applies
           them to future rewrites.
         </p>
@@ -372,7 +367,7 @@ function ProfilePanel({
       onUpdate({ samples: [{ id: resData.sample.id, content: resData.sample.content, wordCount: resData.sample.wordCount }, ...samples] });
       setDraft("");
     } catch {
-      setAddError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setAddError("Couldn't reach Humanora. Check your connection and try again.");
     } finally {
       setAdding(false);
     }
@@ -404,7 +399,7 @@ function ProfilePanel({
       }
       onUpdate({ profile: resData.profile, overrides: {} });
     } catch {
-      setAnalyzeError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setAnalyzeError("Couldn't reach Humanora. Check your connection and try again.");
     } finally {
       setAnalyzing(false);
     }
@@ -589,7 +584,7 @@ function ProfilePanel({
             {profile.notableQuirks.length > 0 && (
               <div className="mt-6 border-t border-border pt-5">
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-foreground-subtle">
-                  Other patterns HUMANORA noticed
+                  Other patterns Humanora noticed
                 </p>
                 <ul className="flex flex-col gap-1.5 text-sm text-foreground-muted">
                   {profile.notableQuirks.map((quirk) => (
@@ -601,7 +596,7 @@ function ProfilePanel({
 
             <p className="mt-6 text-xs text-foreground-subtle">
               {savedNote && <span className="text-success">Saved. </span>}
-              Tap any trait above to correct it — your choice always overrides what HUMANORA inferred.
+              Tap any trait above to correct it — your choice always overrides what Humanora inferred.
             </p>
 
             <p className="mt-5 border-t border-border pt-5 text-xs text-foreground-subtle">

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { SITE_NAME, SITE_TAGLINE } from "@/lib/config/site";
+import { SITE_TAGLINE } from "@/lib/config/site";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -18,38 +18,23 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#07070d",
-          backgroundImage: "radial-gradient(circle at 30% 20%, rgba(124,58,237,0.35), transparent 55%)",
+          justifyContent: "space-between",
+          padding: "72px 84px",
+          backgroundColor: "#12110f",
+          color: "#ece5d8",
+          fontFamily: "Georgia, serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 20,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              width: 88,
-              height: 88,
-              borderRadius: 20,
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 48,
-              fontWeight: 800,
-              color: "white",
-              backgroundImage: "linear-gradient(135deg, #6366f1, #a855f7)",
-            }}
-          >
-            H
-          </div>
-          <div style={{ fontSize: 72, fontWeight: 800, color: "white", letterSpacing: -1 }}>{SITE_NAME}</div>
+        <div style={{ display: "flex", fontSize: 44, letterSpacing: -1 }}>
+          Humanora<span style={{ color: "#e06a4e" }}>.</span>
         </div>
-        <div style={{ marginTop: 28, fontSize: 34, color: "#c9c9d9" }}>{SITE_TAGLINE}</div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ fontSize: 88, lineHeight: 1.04, letterSpacing: -2, maxWidth: 940 }}>
+            Write with AI. Sound like yourself.
+          </div>
+          <div style={{ marginTop: 28, fontSize: 30, color: "#bcb3a3" }}>{SITE_TAGLINE}</div>
+        </div>
+        <div style={{ display: "flex", height: 2, width: 120, backgroundColor: "#e06a4e" }} />
       </div>
     ),
     { ...size }

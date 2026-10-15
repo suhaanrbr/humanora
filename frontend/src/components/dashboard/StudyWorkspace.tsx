@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -17,7 +17,7 @@ const MODES: { value: StudyMode; label: string; placeholder: string; example: st
   {
     value: "summarize",
     label: "Summarize",
-    placeholder: "Paste your lecture notes, an article, or a reading — HUMANORA will summarize it.",
+    placeholder: "Paste your lecture notes, an article, or a reading — Humanora will summarize it.",
     example:
       "The mitochondria is the organelle responsible for producing ATP through cellular respiration. It has a double membrane structure: the outer membrane is smooth, while the inner membrane is folded into cristae, which increase surface area for the electron transport chain. Mitochondria also contain their own DNA, separate from the cell's nuclear DNA, supporting the endosymbiotic theory that they originated from free-living bacteria.",
   },
@@ -31,7 +31,7 @@ const MODES: { value: StudyMode; label: string; placeholder: string; example: st
   {
     value: "notes",
     label: "Study Notes",
-    placeholder: "Paste your material and HUMANORA will turn it into structured revision notes.",
+    placeholder: "Paste your material and Humanora will turn it into structured revision notes.",
     example:
       "Photosynthesis occurs in two stages: the light-dependent reactions, which take place in the thylakoid membrane and produce ATP and NADPH, and the Calvin cycle, which occurs in the stroma and uses that ATP and NADPH to fix carbon dioxide into glucose. Chlorophyll absorbs light most strongly in the blue and red wavelengths, which is why plants appear green.",
   },
@@ -64,7 +64,7 @@ function wordCount(text: string) {
 }
 
 /**
- * HUMANORA's Study workspace — Summarize / Explain / Study Notes as
+ * Humanora's Study workspace — Summarize / Explain / Study Notes as
  * three modes of one shared "input -> options -> generate -> result"
  * workspace, deliberately built on the same visual and interaction
  * language as HumanizeWorkspace (floating toolbar, borderless editor,
@@ -135,7 +135,7 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
       setOutput(data.output as string);
       setState("done");
     } catch {
-      setErrorMessage("Couldn't reach HUMANORA. Check your connection and try again.");
+      setErrorMessage("Couldn't reach Humanora. Check your connection and try again.");
       setState("error");
     }
   }
@@ -161,11 +161,6 @@ export function StudyWorkspace({ plan }: { plan: PlanId }) {
     <Container size="medium" className="relative mx-auto pb-36 md:pb-24 lg:pb-10">
       {/* A restrained echo of StudyScene's own cyan cinematic light,
           local to this page only. Purely decorative, no layout impact. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-6 -top-10 -z-10 h-[420px] overflow-hidden"
-        style={{ background: "radial-gradient(55% 70% at 70% 0%, rgba(34,211,238,0.07) 0%, transparent 70%)" }}
-      />
       {targetProject && (
         <p className="mb-4 flex items-center gap-1.5 text-xs text-foreground-subtle">
           <span className="h-1.5 w-1.5 rounded-full bg-brand-purple" aria-hidden="true" />
@@ -346,64 +341,22 @@ const MODE_ICONS: Record<StudyMode, (props: { className?: string }) => React.Rea
 };
 
 export function StudyUpsell() {
-  const gradientId = useId();
   const paidPlans = pricingPlans.filter((p) => (PAID_PLAN_IDS as readonly string[]).includes(p.id));
 
   return (
     <div className="relative mx-auto -mt-4 max-w-6xl">
-      {/* Cinematic backdrop, local to this page — same H-thread language
-          as the landing page's StudyScene, not a scroll-pinned scene
-          (this is a real product page, not marketing). */}
-      <div aria-hidden="true" className="pointer-events-none absolute -inset-x-10 -top-16 -z-10 h-[560px] overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{ background: "radial-gradient(55% 70% at 65% 10%, rgba(34,211,238,0.1) 0%, transparent 70%)" }}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
+      <div className="max-w-3xl">
         <div>
           <Badge variant="brand">Study</Badge>
           <h1 className="mt-4 text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             Turn material into something you can actually{" "}
-            <span className="text-brand-gradient">study from</span>
+            <em className="text-brand-purple">study from</em>
           </h1>
           <p className="mt-4 max-w-lg text-base text-foreground-muted">
-            Paste lecture notes, a reading, or a topic — HUMANORA summarizes it, explains it at the
+            Paste lecture notes, a reading, or a topic — Humanora summarizes it, explains it at the
             depth you need, or turns it into structured revision notes. Grounded in what you actually
             gave it, never invented.
           </p>
-        </div>
-
-        {/* The H — same gradient geometry as the landing page's mark,
-            with a couple of floating document echoes around it,
-            resolution-independent SVG, no raster asset. */}
-        <div className="relative hidden h-[320px] items-center justify-center lg:flex">
-          <div
-            aria-hidden="true"
-            className="absolute h-56 w-56 rounded-full border border-white/10"
-            style={{ transform: "rotate(-8deg)" }}
-          />
-          <div className="pearl-glass absolute left-2 top-4 w-32 -rotate-6 rounded-lg p-3 opacity-80" aria-hidden="true">
-            <span className="block h-1.5 w-full rounded-full bg-white/15" />
-            <span className="mt-1.5 block h-1.5 w-2/3 rounded-full bg-white/10" />
-          </div>
-          <div className="pearl-glass absolute right-0 bottom-6 w-32 rotate-6 rounded-lg p-3 opacity-80" aria-hidden="true">
-            <span className="block h-1.5 w-full rounded-full bg-white/15" />
-            <span className="mt-1.5 block h-1.5 w-2/3 rounded-full bg-white/10" />
-          </div>
-          <svg viewBox="0 0 200 200" className="h-40 w-40 drop-shadow-[0_0_50px_rgba(34,211,238,0.35)]">
-            <defs>
-              <linearGradient id={`${gradientId}-edge`} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="var(--color-brand-cyan)" />
-                <stop offset="55%" stopColor="var(--color-brand-indigo)" />
-                <stop offset="100%" stopColor="var(--color-brand-purple)" />
-              </linearGradient>
-            </defs>
-            <rect x="30" y="65" width="35" height="105" rx="6" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" />
-            <rect x="135" y="25" width="35" height="145" rx="6" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" />
-            <polygon points="65,95 135,60 135,90 65,125" fill="none" stroke={`url(#${gradientId}-edge)`} strokeWidth="2" strokeLinejoin="round" />
-          </svg>
         </div>
       </div>
 

@@ -103,7 +103,7 @@ export function ProjectDetail({
       setDescription(draftDescription.trim() || null);
       setEditing(false);
     } catch {
-      setEditError("Couldn't reach HUMANORA. Check your connection and try again.");
+      setEditError("Couldn't reach Humanora. Check your connection and try again.");
     } finally {
       setSavingEdit(false);
     }

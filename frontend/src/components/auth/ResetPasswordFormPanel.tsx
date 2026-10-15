@@ -67,7 +67,7 @@ export function ResetPasswordFormPanel() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="login-field h-[52px] rounded-full"
+                className="login-field h-12 rounded-md"
               />
             </div>
             <div>
@@ -82,7 +82,7 @@ export function ResetPasswordFormPanel() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="••••••••"
-                className="login-field h-[52px] rounded-full"
+                className="login-field h-12 rounded-md"
               />
             </div>
 
@@ -101,7 +101,7 @@ export function ResetPasswordFormPanel() {
               variant="primary"
               size="lg"
               loading={loading}
-              className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
+              className="login-cta mt-2 h-12 w-full rounded-md text-base font-semibold"
             >
               Reset password <span aria-hidden="true">→</span>
             </Button>
@@ -109,7 +109,7 @@ export function ResetPasswordFormPanel() {
         )}
 
         <p className="mt-8 text-center text-sm text-foreground-muted">
-          <Link href="/login" className="font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink">
+          <Link href="/login" className="font-medium text-brand-purple underline underline-offset-2 hover:text-foreground">
             Back to log in
           </Link>
         </p>

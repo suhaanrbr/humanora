@@ -7,7 +7,7 @@ import { voiceStyleProfileSchema } from "@/lib/ai/voiceAnalysis";
 import { VoiceWorkspace, type ProfileData } from "@/components/dashboard/VoiceWorkspace";
 import { PLANS } from "@/lib/config/plans";
 
-export const metadata = { title: "My Voice — HUMANORA" };
+export const metadata = { title: "My Voice — Humanora" };
 
 export default async function VoicePage() {
   const result = await getVerifiedSession();

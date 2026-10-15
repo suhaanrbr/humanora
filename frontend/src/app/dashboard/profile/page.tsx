@@ -11,7 +11,7 @@ import { listProjectsForUser } from "@/lib/db/projects";
 import { PLANS } from "@/lib/config/plans";
 import { ProfileWorkspace } from "@/components/dashboard/ProfileWorkspace";
 
-export const metadata = { title: "Profile — HUMANORA" };
+export const metadata = { title: "Profile — Humanora" };
 
 export default async function ProfilePage({
   searchParams,

@@ -89,7 +89,7 @@ export function DetectorWorkspace({ plan, initialScans }: { plan: PlanId; initia
         ...prev,
       ]);
     } catch {
-      setErrorMessage("Couldn't reach HUMANORA. Check your connection and try again.");
+      setErrorMessage("Couldn't reach Humanora. Check your connection and try again.");
       setState("error");
     }
   }

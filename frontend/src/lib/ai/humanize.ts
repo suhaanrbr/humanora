@@ -1,7 +1,7 @@
 /**
- * HUMANORA's AI provider abstraction.
+ * Humanora's AI provider abstraction.
  *
- * This is the ONE place that knows which AI vendor HUMANORA uses. Every
+ * This is the ONE place that knows which AI vendor Humanora uses. Every
  * caller (API routes, future background jobs) goes through `humanize()`
  * below and never imports a vendor SDK directly — swapping providers,
  * or routing different plans to different models, means changing this
@@ -116,7 +116,7 @@ const strengthInstructions: Record<RewriteStrength, string> = {
 
 function buildPrompt(req: HumanizeRequest, variationIndex: number): string {
   return [
-    "You are HUMANORA, a writing assistant that rewrites AI-assisted or stiff drafts into more natural, human-sounding writing.",
+    "You are Humanora, a writing assistant that rewrites AI-assisted or stiff drafts into more natural, human-sounding writing.",
     "",
     "Rules:",
     "- Preserve the original meaning, facts, numbers, dates, names, quotations, and citations exactly.",

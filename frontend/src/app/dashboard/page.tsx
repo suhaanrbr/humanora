@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { Container } from "@/components/ui/Container";
@@ -24,7 +23,7 @@ import { PLANS } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
 import { getVoiceSnapshot } from "@/lib/db/voice";
 
-export const metadata = { title: "Dashboard — HUMANORA" };
+export const metadata = { title: "Dashboard — Humanora" };
 
 // Real destinations only — no "Long Form Editor"/"Paraphrase Content"/
 // "Explain Like I'm 5" as their own routes, since those aren't separate
@@ -70,40 +69,18 @@ export default async function DashboardPage() {
 
   return (
     <Container size="wide" className="flex flex-col gap-10 xl:gap-12">
-      {/* Cinematic hero — the settings-background art underneath, but
-          hero-cinematic-overlay (globals.css) replaces the flat top-to-
-          bottom fade with volumetric corner light + vignette, and the
-          stat strip is pulled up to physically overlap the banner's
-          bottom edge (glass, floating) rather than sitting as its own
-          separate block below — one composed scene, not "image, then a
-          row of boxes." */}
+      {/* Greeting set as a headline over a hairline rule, with the
+          stat strip directly beneath it. */}
       <div>
-        <div className="relative isolate overflow-hidden rounded-[2rem] shadow-elevation-floating">
-          <Image
-            src="/images/settings-background.png"
-            alt=""
-            fill
-            priority
-            sizes="(min-width: 1280px) 1152px, 100vw"
-            className="object-cover"
-            aria-hidden="true"
-          />
-          <div className="hero-cinematic-overlay absolute inset-0" aria-hidden="true" />
-          <div className="relative flex flex-col gap-6 px-7 py-10 sm:px-10 sm:py-14 lg:py-16">
-            <span className="w-fit rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] text-white/70 backdrop-blur-sm">
-              Workspace
-            </span>
-            <div>
-              <p className="text-sm text-white/70">{greeting},</p>
-              <h1 className="text-hero font-bold tracking-tight text-white">{session.user.name}</h1>
-            </div>
-          </div>
+        <div className="flex flex-col gap-2 border-b border-border pb-8 pt-2">
+          <p className="text-app-label text-foreground-subtle">{greeting}</p>
+          <h1 className="text-hero text-foreground">{session.user.name}</h1>
         </div>
 
         {/* Stat strip — real lifetime totals (lib/db/stats.ts), glass,
             anchored to the hero so it reads as one composed panel. */}
         {lifetime.status === "fulfilled" ? (
-          <div className="glass-panel animate-rise-in relative z-10 mx-3 -mt-8 grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl shadow-elevation-raised sm:mx-6 sm:-mt-10 xl:grid-cols-4 xl:divide-y-0">
+          <div className="animate-rise-in grid grid-cols-2 divide-x divide-y divide-border border-b border-border xl:grid-cols-4 xl:divide-y-0">
             <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized} icon={SparkIcon} emphasize />
             <StatTile label="Documents Created" value={lifetime.value.documentsCreated} icon={DocumentIcon} />
             <StatTile label="Study Sessions" value={lifetime.value.studySessions} icon={StudyStatIcon} />
@@ -230,12 +207,12 @@ export default async function DashboardPage() {
                   </ButtonLink>
                 </Card>
               ) : (
-                <Card className="glass-panel divide-y divide-white/[0.06] p-0">
+                <Card className="glass-panel divide-y divide-border p-0">
                   {projects.value.slice(0, 3).map((p) => (
                     <Link
                       key={p.id}
                       href={`/dashboard/projects/${p.id}`}
-                      className="focus-ring press-feedback block p-4 transition-colors hover:bg-white/[0.03]"
+                      className="focus-ring press-feedback block p-4 transition-colors hover:bg-surface-hover"
                     >
                       <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
                       <p className="mt-0.5 text-xs text-foreground-subtle">
@@ -283,7 +260,7 @@ export default async function DashboardPage() {
                   </>
                 ) : (
                   <p className="mt-2 text-xs text-foreground-subtle">
-                    Teach HUMANORA how you write from a few real samples.
+                    Teach Humanora how you write from a few real samples.
                   </p>
                 )}
                 <div className="mt-3">
@@ -375,14 +352,14 @@ export default async function DashboardPage() {
                         {i < Math.min(recentWork.value.length, 5) - 1 && (
                           <span
                             aria-hidden="true"
-                            className="absolute left-[5px] top-4 h-[calc(100%+0.75rem)] w-px bg-white/[0.08]"
+                            className="absolute left-[5px] top-4 h-[calc(100%+0.75rem)] w-px bg-border"
                           />
                         )}
                         <span
                           aria-hidden="true"
                           className={cn(
                             "mt-1.5 h-[10px] w-[10px] shrink-0 rounded-full",
-                            item.kind === "humanized" ? "bg-brand-gradient shadow-glow-sm" : "bg-brand-cyan"
+                            item.kind === "humanized" ? "bg-brand-purple" : "bg-brand-cyan"
                           )}
                         />
                         <div className="min-w-0">
@@ -479,18 +456,13 @@ function StatTile({
 }) {
   const display = `${value.toLocaleString()}${suffix}`;
   return (
-    <div className="flex items-center gap-3 p-4 sm:p-5">
-      <span className={cn("icon-chip h-10 w-10 shrink-0", emphasize && "shadow-glow-sm")}>
-        <Icon className="h-[18px] w-[18px]" />
-      </span>
+    <div className="flex flex-col gap-2 px-4 py-6 sm:px-6">
+      <p className="flex items-center gap-2 text-sm text-foreground-subtle">
+        <Icon className="h-4 w-4" />
+        {label}
+      </p>
       <div className="min-w-0">
-        <p className="text-xs leading-snug text-foreground-subtle">{label}</p>
-        <p
-          className={cn(
-            "mt-0.5 text-xl font-bold tracking-tight sm:text-2xl",
-            emphasize ? "text-brand-gradient" : "text-foreground"
-          )}
-        >
+        <p className={cn("text-app-stat sm:text-[2.5rem]", emphasize ? "text-brand-purple" : "text-foreground")}>
           <CountUp value={value} display={display} />
         </p>
       </div>
@@ -526,10 +498,10 @@ function QuickAction({
     <Link
       href={href}
       className={cn(
-        "focus-ring hover-lift group relative flex items-start gap-3.5 overflow-hidden rounded-xl border p-4.5 transition-[border-color,box-shadow]",
+        "focus-ring hover-lift group relative flex items-start gap-3.5 overflow-hidden rounded-lg border p-4.5 transition-[border-color,box-shadow]",
         soon
           ? "border-dashed border-border bg-surface/60 hover:border-border-strong"
-          : "border-border bg-surface hover:border-brand-purple/35 hover:shadow-glow-sm"
+          : "border-border bg-surface hover:border-border-strong"
       )}
     >
       <span className={cn("icon-chip h-10 w-10 shrink-0", soon && "icon-chip-muted")}>

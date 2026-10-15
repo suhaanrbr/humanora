@@ -119,7 +119,7 @@ export interface ModeUsage {
   count: number;
 }
 
-/** Real mode-usage distribution across lifetime Humanize output — for Analytics' "how you use HUMANORA" breakdown. */
+/** Real mode-usage distribution across lifetime Humanize output — for Analytics' "how you use Humanora" breakdown. */
 export async function getHumanizeModeDistribution(userId: string): Promise<ModeUsage[]> {
   const db = getDb();
   const rows = await db

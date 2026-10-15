@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     if (decision.reason === "over_free_limit") {
       return NextResponse.json(
         {
-          error: `Your complimentary HUMANORA experience supports up to ${FREE_TRIAL_MAX_CHARS} characters.`,
+          error: `Your complimentary Humanora experience supports up to ${FREE_TRIAL_MAX_CHARS} characters.`,
           code: "UPGRADE_REQUIRED",
           reason: "over_free_limit",
         },
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     if (decision.reason === "free_trial_already_used") {
       return NextResponse.json(
         {
-          error: "You've already used your one complimentary HUMANORA transformation. Choose a plan to continue.",
+          error: "You've already used your one complimentary Humanora transformation. Choose a plan to continue.",
           code: "UPGRADE_REQUIRED",
           reason: "free_trial_used",
         },
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    return NextResponse.json({ error: "Please log in to use HUMANORA." }, { status: 401 });
+    return NextResponse.json({ error: "Please log in to use Humanora." }, { status: 401 });
   }
 
   const plan = decision.plan;
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       // Lost a race with a concurrent request — the trial is now used.
       return NextResponse.json(
         {
-          error: "You've already used your one complimentary HUMANORA transformation. Choose a plan to continue.",
+          error: "You've already used your one complimentary Humanora transformation. Choose a plan to continue.",
           code: "UPGRADE_REQUIRED",
           reason: "free_trial_used",
         },

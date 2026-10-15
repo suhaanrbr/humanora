@@ -15,7 +15,7 @@ import { cn } from "@/lib/cn";
 // retyping isn't necessary. Never used for the password field.
 const AUTH_EMAIL_BRIDGE_KEY = "humanora-auth-email";
 
-/** Only ever redirect within HUMANORA itself — an open `next` param could
+/** Only ever redirect within Humanora itself — an open `next` param could
  * otherwise be used to bounce a just-authenticated user to an external
  * site (classic open-redirect). A single leading slash, never `//...`
  * (protocol-relative) or an absolute URL. */
@@ -85,8 +85,8 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
   return (
     <div className="auth-panel-frame w-full max-w-[440px]">
     <div className="login-glass-panel relative w-full overflow-hidden p-8">
-      <h1 className="auth-heading text-2xl font-bold tracking-tight text-foreground">Log in</h1>
-      <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Welcome back to HUMANORA.</p>
+      <h1 className="auth-heading text-[2rem] leading-tight text-foreground">Log in</h1>
+      <p className="mt-2 text-sm leading-relaxed text-foreground-muted">Welcome back to Humanora.</p>
 
       {googleEnabled && (
         <div className="mt-6 flex flex-col gap-4">
@@ -114,7 +114,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               placeholder="you@example.com"
-              className="login-field h-[52px] rounded-full pl-10"
+              className="login-field h-12 rounded-md pl-10"
             />
           </div>
         </div>
@@ -125,7 +125,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium text-brand-purple underline underline-offset-2 hover:text-brand-pink"
+              className="text-xs font-medium text-brand-purple underline underline-offset-2 hover:text-foreground"
             >
               Forgot password?
             </Link>
@@ -137,7 +137,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="login-field h-[52px] rounded-full"
+            className="login-field h-12 rounded-md"
           />
         </div>
 
@@ -156,7 +156,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
           variant="primary"
           size="lg"
           loading={loading}
-          className="login-cta mt-2 h-14 w-full rounded-full text-base font-semibold"
+          className="login-cta mt-2 h-12 w-full rounded-md text-base font-semibold"
         >
           Log in <span aria-hidden="true">→</span>
         </Button>
@@ -164,7 +164,7 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
 
       <p className="mt-8 text-center text-sm leading-relaxed text-foreground-muted">
         Don&apos;t have an account?{" "}
-        <Link href="/signup" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-brand-pink">
+        <Link href="/signup" className="font-semibold text-brand-purple underline underline-offset-4 transition-colors hover:text-foreground">
           Sign up free
         </Link>
       </p>

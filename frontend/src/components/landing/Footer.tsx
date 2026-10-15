@@ -1,62 +1,32 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Container";
-
-interface FooterLink {
-  label: string;
-  href?: string;
-  soon?: boolean;
-}
+import { CONTACT_EMAIL } from "@/lib/config/site";
 
 interface FooterColumn {
   heading: string;
-  links: FooterLink[];
+  links: { label: string; href: string }[];
 }
 
-// Real routes/anchors get an href; anything without a built destination
-// is marked `soon` and rendered as plain text with a "Soon" tag instead
-// of a link to a page that doesn't exist.
+// Real routes and anchors only. Contact appears once a monitored inbox
+// is configured (see CONTACT_EMAIL), never before.
 const footerColumns: FooterColumn[] = [
   {
     heading: "Product",
     links: [
-      { label: "Humanizer", href: "/#hero" },
-      { label: "Writing Modes", href: "/#writing-modes" },
+      { label: "How it works", href: "/#how-it-works" },
+      { label: "Writing modes", href: "/#writing-modes" },
       { label: "My Voice", href: "/#my-voice" },
+      { label: "Meaning check", href: "/#meaning" },
       { label: "Pricing", href: "/#pricing" },
-    ],
-  },
-  {
-    heading: "Solutions",
-    links: [
-      { label: "Students", href: "/#use-cases" },
-      { label: "Professionals", href: "/#use-cases" },
-      { label: "Creators", href: "/#use-cases" },
-      { label: "Teams", soon: true },
-    ],
-  },
-  {
-    heading: "Developers",
-    links: [
-      { label: "API", href: "/api" },
-      { label: "Documentation", soon: true },
-      { label: "API Pricing", href: "/api#pricing" },
-    ],
-  },
-  {
-    heading: "Resources",
-    links: [
-      { label: "Blog", href: "/blog" },
-      { label: "Guides", soon: true },
-      { label: "FAQ", href: "/#pricing" },
-      { label: "Affiliates", href: "/affiliates" },
     ],
   },
   {
     heading: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Contact", href: "/contact" },
+      ...(CONTACT_EMAIL ? [{ label: "Contact", href: "/contact" }] : []),
+      { label: "Principles", href: "/#principles" },
     ],
   },
   {
@@ -64,50 +34,35 @@ const footerColumns: FooterColumn[] = [
     links: [
       { label: "Privacy", href: "/legal/privacy" },
       { label: "Terms", href: "/legal/terms" },
-      { label: "Cookie Policy", href: "/legal/cookies" },
+      { label: "Cookies", href: "/legal/cookies" },
     ],
   },
 ];
 
-/**
- * Site footer. Placeholder navigation only — no fabricated company
- * registration details or addresses. Links point only to real routes or
- * in-page anchors; anything not built yet is labeled "Soon" rather than
- * linking somewhere misleading.
- */
 export function Footer() {
   return (
-    <footer className="border-fade-top border-t border-border">
+    <footer className="border-t border-border">
       <Container className="py-16">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:grid-cols-7">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <Logo size="sm" />
-            <p className="mt-4 max-w-xs text-sm text-foreground-muted">
-              AI drafts. Human impact.
+        <div className="grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-12">
+          <div className="col-span-2 lg:col-span-6">
+            <Logo size="md" />
+            <p className="font-display mt-5 max-w-sm text-xl italic leading-snug text-foreground-muted">
+              Write with AI. Sound like yourself.
             </p>
           </div>
 
           {footerColumns.map((column) => (
-            <div key={column.heading}>
-              <h3 className="text-sm font-semibold text-foreground">{column.heading}</h3>
+            <div key={column.heading} className="lg:col-span-2">
+              <h3 className="text-app-label font-sans text-foreground-subtle">{column.heading}</h3>
               <ul className="mt-4 flex flex-col gap-2.5">
                 {column.links.map((link) => (
                   <li key={link.label}>
-                    {link.soon || !link.href ? (
-                      <span className="inline-flex items-center gap-1.5 text-sm text-foreground-subtle">
-                        {link.label}
-                        <span className="rounded-full border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-wide">
-                          Soon
-                        </span>
-                      </span>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="focus-ring rounded-md text-sm text-foreground-muted transition-colors hover:text-foreground"
-                      >
-                        {link.label}
-                      </Link>
-                    )}
+                    <Link
+                      href={link.href}
+                      className="focus-ring rounded-sm text-[0.9375rem] text-foreground-muted transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -115,11 +70,9 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-foreground-subtle">
-            © {new Date().getFullYear()} HUMANORA. All rights reserved.
-          </p>
-          <p className="text-xs text-foreground-subtle">AI drafts. Human impact.</p>
+        <div className="mt-16 flex flex-col gap-2 border-t border-border pt-6 text-sm text-foreground-subtle sm:flex-row sm:justify-between">
+          <p>© {new Date().getFullYear()} Humanora</p>
+          <p>Payments processed securely by Razorpay.</p>
         </div>
       </Container>
     </footer>

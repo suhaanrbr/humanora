@@ -1,6 +1,6 @@
 import { ComingSoon } from "@/components/dashboard/ComingSoon";
 
-export const metadata = { title: "Brand Voice — HUMANORA" };
+export const metadata = { title: "Brand Voice — Humanora" };
 
 export default function BrandVoicePage() {
   return (
