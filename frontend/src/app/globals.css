@@ -742,3 +742,15 @@ h4 {
 .tell-swatch-inflated { background-color: var(--color-brand-cyan); }
 .tell-swatch-hedge { background-color: var(--color-info); }
 .tell-swatch-triplet { background-color: var(--color-success); }
+
+/* Theme-matched imagery: render both variants, show the one that
+   matches the active palette (see components/landing/ProductShot.tsx). */
+.only-light {
+  display: none;
+}
+:root[data-theme="light"] .only-light {
+  display: block;
+}
+:root[data-theme="light"] .only-dark {
+  display: none;
+}

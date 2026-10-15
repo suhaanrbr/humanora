@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <>
       <Header />
-      <main className="py-20 sm:py-28">
+      <main id="main" className="py-20 sm:py-28">
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
             <p className="eyebrow pt-3 lg:col-span-3">Contact</p>

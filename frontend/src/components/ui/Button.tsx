@@ -27,7 +27,7 @@ export const buttonVariantStyles: Record<ButtonVariant, string> = {
     "bg-transparent text-foreground border border-border-strong hover:border-foreground/40 hover:bg-surface-hover",
   outline: "bg-transparent text-foreground border border-border-strong hover:bg-surface-hover",
   ghost: "text-foreground-muted hover:text-foreground hover:bg-surface",
-  destructive: "bg-danger text-white hover:brightness-110 active:brightness-95",
+  destructive: "bg-danger text-background hover:brightness-110 active:brightness-95",
 };
 
 export const buttonSizeStyles: Record<ButtonSize, string> = {

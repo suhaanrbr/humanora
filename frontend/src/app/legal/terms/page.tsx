@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Humanora",
+  title: "Terms of Service",
   description: "The terms governing use of Humanora.",
 };
 

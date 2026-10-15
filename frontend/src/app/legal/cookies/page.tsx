@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy — Humanora",
+  title: "Cookie Policy",
   description: "What Humanora currently stores in your browser.",
 };
 

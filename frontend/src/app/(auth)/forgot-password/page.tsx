@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/auth-session";
 import { ForgotPasswordFormPanel } from "@/components/auth/ForgotPasswordFormPanel";
 
-export const metadata = { title: "Reset password — Humanora" };
+export const metadata = { title: "Reset password" };
 
 /**
  * Same reasoning as /login (see page.tsx there): an already-authenticated

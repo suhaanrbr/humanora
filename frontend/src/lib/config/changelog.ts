@@ -13,6 +13,18 @@ export interface ChangelogEntry {
 export const changelog: ChangelogEntry[] = [
   {
     date: "2026-10-15",
+    title: "Easier to use with a keyboard and screen reader",
+    body: "A skip-to-content link, labelled form fields, a heading on every page, and stronger contrast on small labels and buttons, in both light and dark mode.",
+    tag: "Improved",
+  },
+  {
+    date: "2026-10-15",
+    title: "A tidier workspace",
+    body: "Dates now read “14 Oct 2026” everywhere, time saved shows minutes until it reaches an hour, the menu lists only tools you can use today, and a getting-started guide on your dashboard tracks your first steps.",
+    tag: "Improved",
+  },
+  {
+    date: "2026-10-15",
     title: "A free tells checker on the homepage",
     body: "Paste any paragraph and see throat-clearing, inflated vocabulary, hedging, reflex triplets and flat sentence rhythm highlighted as you type. It runs in your browser, with no account needed.",
     tag: "New",

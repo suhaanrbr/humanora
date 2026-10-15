@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/landing/SectionHeader";
+import { ProductShot } from "@/components/landing/ProductShot";
 import { PLANS } from "@/lib/config/plans";
 
 const maxWords = Math.round(PLANS.ultra.maxInputChars / 6).toLocaleString("en-IN");
@@ -39,6 +40,14 @@ export function Method() {
             </li>
           ))}
         </ol>
+
+        <ProductShot
+          name="write"
+          className="mt-16"
+          figure="Fig. 1"
+          alt="The Humanora Write workspace: an AI-drafted paragraph on the left, two rewritten variations on the right, a readability score, and a meaning check confirming every figure was preserved."
+          caption="Write, after a rewrite: the original beside two variations, a readability score, and the meaning check confirming 18%, £4.7 million and the citation survived. Shown with example content."
+        />
       </Container>
     </section>
   );

@@ -257,8 +257,9 @@ export function ProfileForm({ initialName }: { initialName: string }) {
   return (
     <Card className="p-6">
       <p className="mb-4 text-sm font-medium text-foreground">Profile</p>
-      <label className="mb-1.5 block text-xs text-foreground-subtle">Name</label>
+      <label htmlFor="account-name" className="mb-1.5 block text-xs text-foreground-subtle">Name</label>
       <input
+        id="account-name"
         value={name}
         onChange={(e) => {
           setName(e.target.value);
@@ -320,10 +321,12 @@ export function DangerZone() {
         </Button>
       ) : (
         <div className="mt-4">
-          <label className="mb-1.5 block text-xs text-foreground-subtle">
+          <label htmlFor="delete-confirm" className="mb-1.5 block text-xs text-foreground-subtle">
             Type <span className="font-mono font-semibold">DELETE</span> to confirm
           </label>
           <input
+            id="delete-confirm"
+            autoComplete="off"
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             className="focus-ring w-full max-w-xs rounded-md border border-danger/40 bg-background-elevated px-3.5 py-2.5 text-sm text-foreground"

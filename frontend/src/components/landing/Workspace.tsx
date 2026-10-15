@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/landing/SectionHeader";
+import { ProductShot } from "@/components/landing/ProductShot";
 
 const TOOLS = [
   {
@@ -38,6 +39,23 @@ export function Workspace() {
               <p className="mt-3 text-base leading-relaxed text-foreground-muted">{tool.body}</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8">
+          <ProductShot
+            name="voice"
+            figure="Fig. 2"
+            sizes="(min-width: 1024px) 600px, 100vw"
+            alt="A My Voice style profile: a plain-English summary, eight traits such as formality and rhythm with the detected value highlighted, and patterns Humanora noticed."
+            caption="My Voice: the style profile built from your samples. Tap any trait to correct it."
+          />
+          <ProductShot
+            name="library"
+            figure="Fig. 3"
+            sizes="(min-width: 1024px) 600px, 100vw"
+            alt="The Library: a searchable list of past rewrites and study sessions, each with its mode, project, word count and date."
+            caption="The Library: every rewrite and study session, searchable and filed by project."
+          />
         </div>
       </Container>
     </section>

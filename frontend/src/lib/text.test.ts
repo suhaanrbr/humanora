@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveTitle } from "@/lib/text";
+import { deriveTitle, formatTimeSaved } from "@/lib/text";
 
 describe("deriveTitle", () => {
   it("returns short text unchanged", () => {
@@ -20,5 +20,14 @@ describe("deriveTitle", () => {
 
   it("falls back to 'Untitled' for empty input", () => {
     expect(deriveTitle("   ")).toBe("Untitled");
+  });
+});
+
+describe("formatTimeSaved", () => {
+  it("shows minutes under an hour and hours above", () => {
+    expect(formatTimeSaved(0)).toBe("0 min");
+    expect(formatTimeSaved(0.2)).toBe("12 min");
+    expect(formatTimeSaved(1)).toBe("1 hr");
+    expect(formatTimeSaved(2.5)).toBe("2.5 hrs");
   });
 });

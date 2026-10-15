@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { listProjectsForUser } from "@/lib/db/projects";
 import { ProjectsWorkspace } from "@/components/dashboard/ProjectsWorkspace";
 
-export const metadata = { title: "Projects — Humanora" };
+export const metadata = { title: "Projects" };
 
 export default async function ProjectsPage() {
   const result = await getVerifiedSession();

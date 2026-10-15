@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/auth-session";
+import { formatTimeSaved } from "@/lib/text";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { getUserPlan } from "@/lib/db/entitlement";
@@ -7,7 +8,7 @@ import { getUsageSummary } from "@/lib/db/usage";
 import { getLifetimeStats, getDailyActivity, getHumanizeModeDistribution } from "@/lib/db/stats";
 import { ActivityChart } from "@/components/dashboard/ActivityChart";
 
-export const metadata = { title: "Analytics — Humanora" };
+export const metadata = { title: "Analytics" };
 
 /**
  * Every number here is derived directly from stored rows — lifetime
@@ -44,7 +45,7 @@ export default async function AnalyticsPage() {
         <StatCard label="Words humanized" value={lifetime.wordsHumanized.toLocaleString()} />
         <StatCard label="Documents created" value={lifetime.documentsCreated.toLocaleString()} />
         <StatCard label="Study sessions" value={lifetime.studySessions.toLocaleString()} />
-        <StatCard label="Time saved (est.)" value={`${lifetime.timeSavedHoursEstimate} hrs`} />
+        <StatCard label="Time saved (est.)" value={formatTimeSaved(lifetime.timeSavedHoursEstimate)} />
       </div>
 
       {hasAnyActivity ? (

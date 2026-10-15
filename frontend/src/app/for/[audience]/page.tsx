@@ -31,7 +31,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
   return (
     <>
       <Header />
-      <main>
+      <main id="main">
         <section className="pb-16 pt-14 sm:pb-24 sm:pt-20">
           <Container>
             <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-12">

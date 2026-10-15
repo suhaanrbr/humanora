@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { getRecentWork } from "@/lib/db/recentWork";
 import { HistoryWorkspace } from "@/components/dashboard/HistoryWorkspace";
 
-export const metadata = { title: "Library — Humanora" };
+export const metadata = { title: "Library" };
 
 /**
  * Library is now Humanora's real memory of a user's work — both

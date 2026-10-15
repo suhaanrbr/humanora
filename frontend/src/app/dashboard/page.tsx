@@ -18,27 +18,25 @@ import { QuickStart } from "@/components/dashboard/QuickStart";
 import { CountUp } from "@/components/dashboard/CountUp";
 import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
 import { WelcomeCards, type GuideStep } from "@/components/dashboard/WelcomeCards";
-import { formatDateTime } from "@/lib/formatDate";
-import { deriveTitle } from "@/lib/text";
+import { formatDate, formatDateTime } from "@/lib/formatDate";
+import { deriveTitle, timeSavedParts } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
 import { cn } from "@/lib/cn";
 import { getVoiceSnapshot } from "@/lib/db/voice";
 
-export const metadata = { title: "Dashboard — Humanora" };
+export const metadata = { title: "Dashboard" };
 
 // Real destinations only — no "Long Form Editor"/"Paraphrase Content"/
 // "Explain Like I'm 5" as their own routes, since those aren't separate
 // tools today (Study is one workspace with internal Summarize/Explain/
 // Notes tabs — see StudyWorkspace.tsx). AI Detector is real as of the
-// Master Completion phase (lib/ai/detector.ts) — no longer marked
-// `soon`. Chat with Document still is (no parsing/RAG pipeline exists).
+// Master Completion phase (lib/ai/detector.ts).
 const QUICK_ACTIONS = [
   { href: "/dashboard/humanize", title: "Humanize AI Text", description: "Rewrite a draft to sound like you.", icon: SparkIcon },
   { studyMode: "summarize", title: "Summarize Text", description: "Condense long material fast.", icon: SummarizeIcon },
   { studyMode: "explain", title: "Explain Like I'm 5", description: "Break a hard topic down simply.", icon: ExplainIcon },
   { studyMode: "notes", title: "Study Notes Generator", description: "Turn material into revision notes.", icon: NotesIcon },
   { href: "/dashboard/ai-detector", title: "AI Detector", description: "Check writing for AI patterns.", icon: DetectorIcon },
-  { href: "/dashboard/chat-with-docs", title: "Chat with Document", description: "Ask questions of an upload — in development.", icon: ChatIcon, soon: true },
 ] as const;
 
 export default async function DashboardPage() {
@@ -113,10 +111,10 @@ export default async function DashboardPage() {
             anchored to the hero so it reads as one composed panel. */}
         {lifetime.status === "fulfilled" ? (
           <div className="animate-rise-in grid grid-cols-2 divide-x divide-y divide-border border-b border-border xl:grid-cols-4 xl:divide-y-0">
-            <StatTile label="Words Humanized" value={lifetime.value.wordsHumanized} icon={SparkIcon} emphasize />
-            <StatTile label="Documents Created" value={lifetime.value.documentsCreated} icon={DocumentIcon} />
-            <StatTile label="Study Sessions" value={lifetime.value.studySessions} icon={StudyStatIcon} />
-            <StatTile label="Time Saved (est.)" value={lifetime.value.timeSavedHoursEstimate} suffix=" hrs" icon={ClockIcon} />
+            <StatTile label="Words humanized" value={lifetime.value.wordsHumanized} icon={SparkIcon} emphasize />
+            <StatTile label="Documents created" value={lifetime.value.documentsCreated} icon={DocumentIcon} />
+            <StatTile label="Study sessions" value={lifetime.value.studySessions} icon={StudyStatIcon} />
+            <StatTile label="Time saved (est.)" {...timeSavedParts(lifetime.value.timeSavedHoursEstimate)} icon={ClockIcon} />
           </div>
         ) : (
           <div className="mt-4">
@@ -322,7 +320,7 @@ export default async function DashboardPage() {
                     </div>
                     <p className="mt-2 text-xs text-foreground-subtle">
                       {billing.value.isExpired
-                        ? `Access ended ${billing.value.currentPeriodEnd?.toLocaleDateString()}.`
+                        ? `Access ended ${billing.value.currentPeriodEnd ? formatDate(billing.value.currentPeriodEnd) : ""}.`
                         : freeTrial.value.used
                           ? "Complimentary transformation used."
                           : "Complimentary transformation available."}
@@ -346,7 +344,7 @@ export default async function DashboardPage() {
                     </p>
                     {billing.value.currentPeriodEnd && (
                       <p className="mt-1 text-xs text-foreground-subtle">
-                        Access through {billing.value.currentPeriodEnd.toLocaleDateString()}
+                        Access through {formatDate(billing.value.currentPeriodEnd)}
                       </p>
                     )}
                   </>
@@ -591,13 +589,6 @@ function DetectorIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
       <path d="m20.5 20.5-4.3-4.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-function ChatIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M4 5.5h16v10H9l-4 3.5v-3.5H4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

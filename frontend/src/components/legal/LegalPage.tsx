@@ -20,7 +20,7 @@ export function LegalPage({ title, lastUpdated, children }: LegalPageProps) {
   return (
     <>
       <Header />
-      <main className="py-20 sm:py-28">
+      <main id="main" className="py-20 sm:py-28">
         <Container className="mx-auto max-w-2xl">
           <p className="eyebrow">Legal</p>
           <h1 className="mt-4 text-5xl leading-[1.05] text-foreground">{title}</h1>

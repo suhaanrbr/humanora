@@ -4,7 +4,7 @@ import { getUserPlan } from "@/lib/db/entitlement";
 import { getVoiceOverview } from "@/lib/db/voice";
 import { HumanizeWorkspace } from "@/components/dashboard/HumanizeWorkspace";
 
-export const metadata = { title: "Humanize — Humanora" };
+export const metadata = { title: "Humanize" };
 
 export default async function HumanizePage() {
   // Request-memoized — reuses the layout's session lookup, no extra DB call.
@@ -17,9 +17,12 @@ export default async function HumanizePage() {
   const [plan, voice] = await Promise.all([getUserPlan(userId), getVoiceOverview(userId)]);
 
   return (
-    <HumanizeWorkspace
-      plan={plan}
-      voiceProfiles={voice.profiles.filter((p) => p.ready).map((p) => ({ id: p.id, name: p.name, isDefault: p.isDefault }))}
-    />
+    <>
+      <h1 className="sr-only">Write</h1>
+      <HumanizeWorkspace
+        plan={plan}
+        voiceProfiles={voice.profiles.filter((p) => p.ready).map((p) => ({ id: p.id, name: p.name, isDefault: p.isDefault }))}
+      />
+    </>
   );
 }

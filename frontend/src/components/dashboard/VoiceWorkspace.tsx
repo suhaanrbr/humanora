@@ -139,7 +139,7 @@ export function VoiceWorkspace({
           >
             {p.name}
             {p.isDefault && (
-              <span className={cn("text-[10px] uppercase tracking-wide", activeId === p.id ? "text-white/70" : "text-foreground-subtle")}>
+              <span className={cn("text-[10px] uppercase tracking-wide", activeId === p.id ? "text-white" : "text-foreground-subtle")}>
                 Default
               </span>
             )}

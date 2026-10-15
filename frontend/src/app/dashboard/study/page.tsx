@@ -4,7 +4,7 @@ import { getUserPlan } from "@/lib/db/entitlement";
 import { StudyWorkspace, StudyUpsell } from "@/components/dashboard/StudyWorkspace";
 import { Container } from "@/components/ui/Container";
 
-export const metadata = { title: "Study — Humanora" };
+export const metadata = { title: "Study" };
 
 export default async function StudyPage() {
   const result = await getVerifiedSession();
@@ -19,5 +19,10 @@ export default async function StudyPage() {
     );
   }
 
-  return <StudyWorkspace plan={plan} />;
+  return (
+    <>
+      <h1 className="sr-only">Study</h1>
+      <StudyWorkspace plan={plan} />
+    </>
+  );
 }

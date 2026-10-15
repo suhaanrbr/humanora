@@ -5,29 +5,31 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // Humanora is set entirely in serif type — a writing product should look
-// like it respects writing. Newsreader (optical-size axis, built for
-// headlines) carries display type; Source Serif 4 carries body and UI
-// text, where its own optical sizing keeps small labels crisp. Code
-// samples use Courier Prime, a slab-serif monospace, so no sans-serif
-// face ships anywhere. All three are self-hosted via next/font.
+// like it respects writing. Newsreader carries display type; Source
+// Serif 4 carries body and UI text. Code samples use Courier Prime, a
+// slab-serif monospace, so no sans-serif face ships anywhere. All three
+// are self-hosted via next/font. Both serifs offer an optical-size
+// axis; it is deliberately left out because it nearly doubled the
+// preloaded font payload (~520 KB vs ~320 KB) for a refinement few
+// readers would notice, and it was the main drag on first paint.
 const newsreader = Newsreader({
   variable: "--font-newsreader",
   subsets: ["latin"],
   style: ["normal", "italic"],
-  axes: ["opsz"],
 });
 
 const sourceSerif = Source_Serif_4({
   variable: "--font-source-serif",
   subsets: ["latin"],
   style: ["normal", "italic"],
-  axes: ["opsz"],
 });
 
 const courierPrime = Courier_Prime({
   variable: "--font-courier-prime",
   subsets: ["latin"],
   weight: ["400", "700"],
+  // Only used for the odd code fragment; never worth a preload.
+  preload: false,
 });
 
 export const metadata: Metadata = {

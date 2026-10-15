@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <>
       <Header />
-      <main className="flex flex-1 items-center py-24">
+      <main id="main" className="flex flex-1 items-center py-24">
         <Container>
           <p className="eyebrow">Error 404</p>
           <h1 className="text-hero mt-6 max-w-3xl text-foreground">

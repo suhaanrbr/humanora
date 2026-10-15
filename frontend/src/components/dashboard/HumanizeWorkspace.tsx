@@ -393,7 +393,7 @@ export function HumanizeWorkspace({
       {voiceAvailable && activeVoice && (
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-brand-purple/30 bg-brand-purple/10 px-3 py-1.5 text-xs text-foreground">
           <SparkleIcon className="h-3.5 w-3.5 text-brand-purple" />
-          Writing in <span className="font-semibold">{activeVoice.name}</span>&apos;s voice
+          Voice: <span className="font-semibold">{activeVoice.name}</span>
           <button
             type="button"
             onClick={() => setVoiceProfileId("")}
@@ -449,7 +449,7 @@ export function HumanizeWorkspace({
               {state === "idle" ? "Your draft" : "Original"}
             </p>
             <span className="text-xs text-foreground-subtle">
-              {text.length}/{MAX_CHARS}
+              {text.length.toLocaleString("en-IN")} / {MAX_CHARS.toLocaleString("en-IN")} characters
             </span>
           </div>
           <div className="focus-within:ring-brand-purple/20 rounded-xl transition-shadow focus-within:ring-1">

@@ -14,9 +14,6 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "
  *     below) are real — a v1 grouping of existing content, and a real
  *     probabilistic AI-pattern analysis with persisted history,
  *     neither the fuller speculative feature floated in early planning.
- *     Templates/Integrations/Brand Voice still show real, minimal "in
- *     development" pages in the nav rather than fabricated data — see
- *     ComingSoon.tsx.
  */
 
 // ---------------------------------------------------------------------------

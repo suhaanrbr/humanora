@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalPage } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Humanora",
+  title: "Privacy Policy",
   description: "How Humanora handles the data and text you provide.",
 };
 

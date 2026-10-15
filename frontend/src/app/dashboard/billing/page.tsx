@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getVerifiedSession } from "@/lib/auth-session";
+import { formatDate } from "@/lib/formatDate";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -10,7 +11,7 @@ import { PLANS } from "@/lib/config/plans";
 import { BillingActions } from "@/components/dashboard/BillingActions";
 import { BackToHome } from "@/components/dashboard/BackToHome";
 
-export const metadata = { title: "Billing — Humanora" };
+export const metadata = { title: "Billing" };
 
 export default async function BillingPage() {
   const result = await getVerifiedSession();
@@ -47,12 +48,12 @@ export default async function BillingPage() {
 
         {billing.isExpired && (
           <p className="mt-3 text-xs text-warning">
-            Your {PLANS[billing.plan].name} access ended on {billing.currentPeriodEnd?.toLocaleDateString()}.
+            Your {PLANS[billing.plan].name} access ended on {billing.currentPeriodEnd ? formatDate(billing.currentPeriodEnd) : ""}.
           </p>
         )}
         {!isFreeOrExpired && billing.currentPeriodEnd && (
           <p className="mt-3 text-xs text-foreground-subtle">
-            Access valid through {billing.currentPeriodEnd.toLocaleDateString()}. Humanora doesn&apos;t auto-renew —
+            Access valid through {formatDate(billing.currentPeriodEnd)}. Humanora doesn&apos;t auto-renew —
             choose a plan again when this period ends to continue.
           </p>
         )}

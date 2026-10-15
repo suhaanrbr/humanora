@@ -8,11 +8,11 @@ describe("formatDate / formatDateTime", () => {
   const date = new Date("2026-03-05T14:30:00Z");
 
   it("formatDate is deterministic regardless of environment locale", () => {
-    expect(formatDate(date)).toBe("March 5, 2026");
+    expect(formatDate(date)).toBe("5 March 2026");
   });
 
   it("formatDateTime is deterministic regardless of environment locale", () => {
-    expect(formatDateTime(date)).toMatch(/^3\/5\/2026, \d{1,2}:\d{2} (AM|PM)$/);
+    expect(formatDateTime(date)).toMatch(/^5 Mar 2026, \d{1,2}:\d{2} (am|pm)$/);
   });
 
   it("accepts both Date objects and ISO strings", () => {

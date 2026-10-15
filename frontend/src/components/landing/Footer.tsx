@@ -62,7 +62,7 @@ export function Footer() {
 
           {footerColumns.map((column) => (
             <div key={column.heading} className="lg:col-span-2">
-              <h3 className="text-app-label font-sans text-foreground-subtle">{column.heading}</h3>
+              <h2 className="text-app-label font-sans text-foreground-subtle">{column.heading}</h2>
               <ul className="mt-4 flex flex-col gap-2.5">
                 {column.links.map((link) => (
                   <li key={link.label}>

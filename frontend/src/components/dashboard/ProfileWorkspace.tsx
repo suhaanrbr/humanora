@@ -9,7 +9,7 @@ import { BackToHome } from "@/components/dashboard/BackToHome";
 import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
 import { ProfileForm, DangerZone } from "@/components/dashboard/AccountSettings";
 import { formatDate, formatDateTime } from "@/lib/formatDate";
-import { deriveTitle } from "@/lib/text";
+import { deriveTitle, formatTimeSaved } from "@/lib/text";
 import { cn } from "@/lib/cn";
 
 interface RecentWorkItem {
@@ -116,10 +116,9 @@ export function ProfileWorkspace(props: {
             visually with real workspace actions. */}
         <Link
           href="/"
-          className="focus-ring press-feedback group inline-flex items-center gap-2 rounded-full border border-border-strong bg-line px-4 py-2 text-sm text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground"
+          className="focus-ring group mb-6 inline-flex items-center gap-2 rounded-sm text-sm text-foreground-subtle transition-colors hover:text-foreground"
         >
-          <HLogoIcon className="h-3.5 w-3.5 shrink-0 text-brand-purple" />
-          Back to humanora.com
+          Humanora website
           <span aria-hidden="true" className="text-foreground-subtle transition-transform group-hover:translate-x-0.5">
             →
           </span>
@@ -159,11 +158,10 @@ export function ProfileWorkspace(props: {
               className="focus-ring hover-lift relative hidden h-24 items-center justify-end gap-2 overflow-visible lg:flex"
               aria-label="Jump to My Voice"
             >
-              {props.voiceTraits.slice(0, 4).map((t, i) => (
+              {props.voiceTraits.slice(0, 4).map((t) => (
                 <span
                   key={t.label}
                   className="rounded-sm border border-border px-3 py-1.5 text-xs capitalize text-foreground-muted"
-                  style={{ transform: `translateY(${i % 2 === 0 ? "-6px" : "6px"})` }}
                 >
                   {t.value}
                 </span>
@@ -241,7 +239,7 @@ function OverviewTab(
           <Stat label="Words Humanized" value={props.lifetime.wordsHumanized.toLocaleString()} />
           <Stat label="Documents" value={props.lifetime.documentsCreated.toLocaleString()} />
           <Stat label="Study Sessions" value={props.lifetime.studySessions.toLocaleString()} />
-          <Stat label="Time Saved (est.)" value={`${props.lifetime.timeSavedHoursEstimate} hrs`} />
+          <Stat label="Time saved (est.)" value={formatTimeSaved(props.lifetime.timeSavedHoursEstimate)} />
         </div>
 
         <div>
@@ -291,16 +289,6 @@ function OverviewTab(
         </button>
       </div>
     </div>
-  );
-}
-
-function HLogoIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 200" fill="currentColor" className={className} aria-hidden="true">
-      <rect x="30" y="65" width="35" height="105" rx="6" />
-      <rect x="135" y="25" width="35" height="145" rx="6" />
-      <polygon points="65,95 135,60 135,90 65,125" />
-    </svg>
   );
 }
 

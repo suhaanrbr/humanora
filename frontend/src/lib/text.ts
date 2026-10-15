@@ -17,3 +17,15 @@ export function deriveTitle(inputText: string): string {
   const lastSpace = truncated.lastIndexOf(" ");
   return (lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated).trimEnd() + "…";
 }
+
+/** "Time saved" for display: minutes under an hour, so a new account
+ * sees "12 min" rather than a discouraging "0 hrs". */
+export function timeSavedParts(hours: number): { value: number; suffix: string } {
+  if (hours < 1) return { value: Math.round(hours * 60), suffix: " min" };
+  return { value: hours, suffix: hours === 1 ? " hr" : " hrs" };
+}
+
+export function formatTimeSaved(hours: number): string {
+  const { value, suffix } = timeSavedParts(hours);
+  return `${value}${suffix}`;
+}

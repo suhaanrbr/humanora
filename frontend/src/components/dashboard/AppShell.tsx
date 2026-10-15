@@ -23,14 +23,9 @@ interface NavEntry {
 // menu (see AccountMenu.tsx), not here — administration isn't a thing
 // a student "does" in the product, so it doesn't compete for space
 // with the five real capabilities below.
-// Two groups, not one flat list of twelve — a single undifferentiated
-// column is exactly what read as "admin panel." "Workspace" is the six
-// real, everyday destinations (Projects promoted here in the Connected
-// Workspace phase — it's a real, schema-backed grouping feature now,
-// not a placeholder); "Explore" is where the still-"Coming soon" nav
-// entries live (see ComingSoon.tsx) plus Analytics — grouping them
-// separately keeps the always-real workspace from being diluted by
-// placeholders, without hiding what's coming.
+// Two groups: "Workspace" holds the everyday destinations; "Tools" the
+// occasional ones. Only shipped features appear here — nothing that
+// leads to a "coming soon" screen.
 const WORKSPACE_ENTRIES: NavEntry[] = [
   { href: "/dashboard", label: "Home", icon: HomeIcon },
   { href: "/dashboard/humanize", label: "Write", icon: WriteIcon },
@@ -39,22 +34,14 @@ const WORKSPACE_ENTRIES: NavEntry[] = [
   { href: "/dashboard/history", label: "Library", icon: LibraryIcon },
   { href: "/dashboard/projects", label: "Projects", icon: ProjectsIcon },
 ];
-const EXPLORE_ENTRIES: NavEntry[] = [
-  { href: "/dashboard/templates", label: "Templates", icon: TemplatesIcon },
+const TOOL_ENTRIES: NavEntry[] = [
   { href: "/dashboard/ai-detector", label: "AI Detector", icon: DetectorIcon },
-  { href: "/dashboard/chat-with-docs", label: "Chat with Docs", icon: ChatIcon },
-  { href: "/dashboard/brand-voice", label: "Brand Voice", icon: BrandVoiceIcon },
-  { href: "/dashboard/integrations", label: "Integrations", icon: IntegrationsIcon },
   { href: "/dashboard/analytics", label: "Analytics", icon: AnalyticsIcon },
 ];
-const NAV_ENTRIES: NavEntry[] = [...WORKSPACE_ENTRIES, ...EXPLORE_ENTRIES];
+const NAV_ENTRIES: NavEntry[] = [...WORKSPACE_ENTRIES, ...TOOL_ENTRIES];
 
-// Mobile keeps only the original five real, everyday destinations — the
-// ones a thumb reaches for constantly. The newer nav entries (Projects
-// through Analytics) are mostly "coming soon" placeholders today (see
-// ComingSoon.tsx) and, even once real, are lower-frequency than Write/
-// Study/My Voice/Library; they stay one tap away via the desktop/tablet
-// rail rather than crowding a bottom bar built for five items.
+// Mobile's bottom bar keeps the four destinations a thumb reaches for
+// constantly; everything else is one tap away via the command palette.
 const MOBILE_NAV_ENTRIES = NAV_ENTRIES.filter((e) =>
   ["/dashboard", "/dashboard/humanize", "/dashboard/study", "/dashboard/voice"].includes(e.href)
 );
@@ -87,6 +74,12 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-screen">
+      <a
+        href="#main"
+        className="sr-only z-[60] rounded-md bg-foreground px-4 py-2 text-background focus:not-sr-only focus:fixed focus:left-4 focus:top-3"
+      >
+        Skip to content
+      </a>
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
 
       {/* Desktop/tablet: persistent left rail, one step lighter than the
@@ -125,7 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-2.5 py-4 lg:px-3.5">
           <NavGroup label="Workspace" entries={WORKSPACE_ENTRIES} isActive={isActive} />
-          <NavGroup label="Explore" entries={EXPLORE_ENTRIES} isActive={isActive} />
+          <NavGroup label="Tools" entries={TOOL_ENTRIES} isActive={isActive} />
         </div>
 
         {/* A direct sign-out control, not a dropdown — the dropdown
@@ -191,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <main className="relative z-10 pb-24 pt-8 sm:pt-10 md:ml-[76px] md:pb-14 lg:ml-64">{children}</main>
+      <main id="main" className="relative z-10 pb-24 pt-8 sm:pt-10 md:ml-[76px] md:pb-14 lg:ml-64">{children}</main>
     </div>
   );
 }
@@ -281,45 +274,11 @@ function ProjectsIcon({ className }: { className?: string }) {
     </svg>
   );
 }
-function TemplatesIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <rect x="4" y="4" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="13" y="4" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="4" y="13" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="13" y="13" width="7" height="7" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-    </svg>
-  );
-}
 function DetectorIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.6" />
       <path d="m20.5 20.5-4.3-4.3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-function ChatIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M4 5.5h16v10H9l-4 3.5v-3.5H4Z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function BrandVoiceIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M8 4h8l3 4-3 4H8l-3-4Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M12 12v8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-function IntegrationsIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <rect x="3.5" y="9.5" width="6" height="6" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-      <rect x="14.5" y="9.5" width="6" height="6" rx="1.3" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M9.5 12.5h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
 }

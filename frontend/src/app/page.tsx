@@ -27,7 +27,7 @@ export default function Home() {
     <>
       <StructuredData />
       <Header />
-      <main>
+      <main id="main">
         <Hero />
         <Tells />
         <Method />
