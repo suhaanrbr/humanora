@@ -17,6 +17,7 @@ import { RecentWorkTabs } from "@/components/dashboard/RecentWorkTabs";
 import { QuickStart } from "@/components/dashboard/QuickStart";
 import { CountUp } from "@/components/dashboard/CountUp";
 import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
+import { WelcomeCards, type GuideStep } from "@/components/dashboard/WelcomeCards";
 import { formatDateTime } from "@/lib/formatDate";
 import { deriveTitle } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
@@ -64,6 +65,37 @@ export default async function DashboardPage() {
 
   const mostRecent = recentWork.status === "fulfilled" ? recentWork.value[0] : null;
 
+  // Getting-started steps, each ticked off by the account's real data.
+  // A data source that failed to load counts as "not done" rather than
+  // hiding the step.
+  const stats = lifetime.status === "fulfilled" ? lifetime.value : null;
+  const guideSteps: GuideStep[] = [
+    {
+      title: "Run your first rewrite",
+      body: "Paste a draft into Write and pick a mode.",
+      href: "/dashboard/humanize",
+      done: (stats?.wordsHumanized ?? 0) > 0,
+    },
+    {
+      title: "Teach Humanora your voice",
+      body: "Add a few samples of your own writing to build a style profile.",
+      href: "/dashboard/voice",
+      done: voiceSnapshot.status === "fulfilled" && Boolean(voiceSnapshot.value.summary),
+    },
+    {
+      title: "Turn a reading into notes",
+      body: plan === "free" ? "Summaries, explanations and revision notes, on any paid plan." : "Summarize, explain, or make revision notes in Study.",
+      href: "/dashboard/study",
+      done: (stats?.studySessions ?? 0) > 0,
+    },
+    {
+      title: "Start a project",
+      body: "Keep the work for one course, client or deadline together.",
+      href: "/dashboard/projects",
+      done: projects.status === "fulfilled" && projects.value.length > 0,
+    },
+  ];
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -97,6 +129,8 @@ export default async function DashboardPage() {
           available, or this month's usage running high), never a
           fabricated "recommendation." Renders at most one line, and
           nothing at all when neither condition is real. */}
+      <WelcomeCards steps={guideSteps} />
+
       {usage.status === "fulfilled" && freeTrial.status === "fulfilled" && (
         <NudgeBanner plan={plan} freeTrialUsed={freeTrial.value.used} usage={usage.value} />
       )}

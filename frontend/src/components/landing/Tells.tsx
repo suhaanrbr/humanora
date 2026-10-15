@@ -1,5 +1,6 @@
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/landing/SectionHeader";
+import { TellsLab } from "@/components/landing/TellsLab";
 
 const TELLS = [
   {
@@ -64,10 +65,21 @@ export function Tells() {
           ))}
         </ol>
 
+        <div id="try" className="mt-20 scroll-mt-20">
+          <div className="mb-6 flex flex-col gap-2 lg:ml-[25%] lg:pl-10">
+            <h3 className="text-3xl leading-tight text-foreground">Try it on your own writing.</h3>
+            <p className="max-w-2xl text-base text-foreground-muted">
+              Paste a paragraph and watch the marks appear as you type. Free, no account, and it never
+              leaves your browser.
+            </p>
+          </div>
+          <TellsLab />
+        </div>
+
         <p className="mt-10 max-w-2xl text-base leading-relaxed text-foreground-subtle lg:ml-[25%] lg:pl-10">
           A note on detectors: no tool can honestly promise to get past every AI detector, and we
-          don&apos;t. What Humanora promises is better writing. Clearer, more varied, and more like
-          you.
+          don&apos;t. What Humanora promises is better writing, in a voice that&apos;s recognisably
+          yours.
         </p>
       </Container>
     </section>

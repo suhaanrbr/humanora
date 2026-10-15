@@ -708,3 +708,37 @@ h4 {
 .btn-glass-edge {
   position: relative;
 }
+
+/* ==========================================================================
+   Tells highlighter (components/landing/TellsLab.tsx). One color per
+   kind of tell, drawn from the theme's own tokens so it reads in both
+   palettes: a tinted wash plus a solid underline, like a marker pass.
+   ========================================================================== */
+.tell {
+  border-radius: 2px;
+  padding: 0 1px;
+  color: var(--color-foreground);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.tell-filler {
+  background-color: color-mix(in srgb, var(--color-brand-purple) 16%, transparent);
+  text-decoration-color: var(--color-brand-purple);
+}
+.tell-inflated {
+  background-color: color-mix(in srgb, var(--color-brand-cyan) 18%, transparent);
+  text-decoration-color: var(--color-brand-cyan);
+}
+.tell-hedge {
+  background-color: color-mix(in srgb, var(--color-info) 18%, transparent);
+  text-decoration-color: var(--color-info);
+}
+.tell-triplet {
+  background-color: color-mix(in srgb, var(--color-success) 16%, transparent);
+  text-decoration-color: var(--color-success);
+}
+.tell-swatch-filler { background-color: var(--color-brand-purple); }
+.tell-swatch-inflated { background-color: var(--color-brand-cyan); }
+.tell-swatch-hedge { background-color: var(--color-info); }
+.tell-swatch-triplet { background-color: var(--color-success); }

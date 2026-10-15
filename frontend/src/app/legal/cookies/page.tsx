@@ -10,9 +10,8 @@ export default function CookiePolicyPage() {
   return (
     <LegalPage title="Cookie Policy" lastUpdated="Draft — not yet finalized">
       <p>
-        Humanora keeps browser storage deliberately minimal at this
-        stage. This page will be updated if that changes — for example,
-        if analytics or authentication are introduced.
+        Humanora keeps browser storage deliberately minimal. This page
+        lists everything it currently stores.
       </p>
 
       <section>
@@ -24,6 +23,14 @@ export default function CookiePolicyPage() {
             using the workspace, a temporary draft of unsaved text in your
             browser&apos;s <code className="font-mono text-xs">sessionStorage</code>,
             cleared automatically when you close the tab.
+          </li>
+          <li>
+            <strong className="text-foreground">Display preferences</strong> in
+            your browser&apos;s <code className="font-mono text-xs">localStorage</code>:
+            whether you chose light or dark mode, and whether you dismissed the
+            getting-started guide in your dashboard. These never leave your
+            device and you can clear them at any time from your browser
+            settings.
           </li>
         </ul>
       </section>
@@ -40,10 +47,9 @@ export default function CookiePolicyPage() {
       <section>
         <h2 className="mt-4 text-2xl text-foreground">Future changes</h2>
         <p>
-          If Humanora later introduces accounts, session cookies will be
-          required to keep you signed in, and this page will describe
-          them specifically — including their name, purpose, and
-          duration — before that feature launches.
+          If Humanora ever introduces analytics or any other new kind of
+          browser storage, this page will describe it specifically,
+          including its name, purpose and duration, before it is used.
         </p>
       </section>
     </LegalPage>

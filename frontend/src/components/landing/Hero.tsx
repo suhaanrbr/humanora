@@ -32,10 +32,10 @@ export function Hero() {
                 Start writing free
               </ButtonLink>
               <Link
-                href="#how-it-works"
+                href="#try"
                 className="focus-ring group inline-flex items-center gap-2 rounded-sm text-base text-foreground underline decoration-border-strong underline-offset-[6px] transition-colors hover:decoration-foreground"
               >
-                See how it works
+                Check your own text
                 <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
                   →
                 </span>

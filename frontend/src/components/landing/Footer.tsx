@@ -19,6 +19,15 @@ const footerColumns: FooterColumn[] = [
       { label: "My Voice", href: "/#my-voice" },
       { label: "Meaning check", href: "/#meaning" },
       { label: "Pricing", href: "/#pricing" },
+      { label: "Changelog", href: "/changelog" },
+    ],
+  },
+  {
+    heading: "For",
+    links: [
+      { label: "Students", href: "/for/students" },
+      { label: "Professionals", href: "/for/professionals" },
+      { label: "Writers", href: "/for/writers" },
     ],
   },
   {
@@ -26,7 +35,7 @@ const footerColumns: FooterColumn[] = [
     links: [
       { label: "About", href: "/about" },
       ...(CONTACT_EMAIL ? [{ label: "Contact", href: "/contact" }] : []),
-      { label: "Principles", href: "/#principles" },
+      { label: "Trust and privacy", href: "/trust" },
     ],
   },
   {
@@ -44,7 +53,7 @@ export function Footer() {
     <footer className="border-t border-border">
       <Container className="py-16">
         <div className="grid grid-cols-2 gap-x-8 gap-y-12 lg:grid-cols-12">
-          <div className="col-span-2 lg:col-span-6">
+          <div className="col-span-2 lg:col-span-4">
             <Logo size="md" />
             <p className="font-display mt-5 max-w-sm text-xl italic leading-snug text-foreground-muted">
               Write with AI. Sound like yourself.

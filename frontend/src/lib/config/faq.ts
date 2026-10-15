@@ -34,3 +34,35 @@ export const pricingFaq: FAQItem[] = [
     answer: "Yes — every account gets one complimentary humanization, up to 200 characters, with no credit card required. It's a one-time trial, not a monthly allowance.",
   },
 ];
+
+/** Questions people ask before they sign up. Shown on the homepage. */
+export const productFaq: FAQItem[] = [
+  {
+    question: "Will Humanora's rewrites get past AI detectors or Turnitin?",
+    answer: "No one can honestly promise that. Detectors are inconsistent and regularly flag human writing as well as missing machine writing. Humanora is built to make writing better: clearer, more varied and closer to your own voice. That is a different goal from beating a particular detector.",
+  },
+  {
+    question: "Can I use it for coursework?",
+    answer: "That depends on your institution. Many allow AI help with drafting or editing and some don't, so check your course's policy. Where AI assistance is allowed, Humanora helps the final text read like your own writing.",
+  },
+  {
+    question: "Will it change my facts or citations?",
+    answer: "It's designed not to. After every rewrite, a meaning check compares figures, dates, links and direct quotations against your original and flags anything that changed. Treat it as a safety net and read anything important before you send it.",
+  },
+  {
+    question: "How is this different from asking a chatbot to rewrite something?",
+    answer: "You don't have to write prompts. The editing instructions that target AI tells are built in, and you choose one of six writing modes. My Voice keeps a profile of your style between sessions, every result is checked for changed facts, and everything is saved to your Library.",
+  },
+  {
+    question: "Is my writing used to train AI?",
+    answer: "Humanora doesn't use your writing to train any model. To produce a result, your text is sent to our AI provider, which processes it under its own terms. Our trust page explains exactly what is stored and how to delete it.",
+  },
+  {
+    question: "Which languages does it support?",
+    answer: "Humanora is built and tested for English. Other languages may partly work, but we don't support them yet.",
+  },
+  {
+    question: "Can I try it before paying?",
+    answer: "Yes, in two ways. The tells checker on this page is free and needs no account. Every new account also gets one free rewrite of up to 200 characters, with no card required.",
+  },
+];

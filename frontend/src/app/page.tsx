@@ -9,6 +9,7 @@ import { Workspace } from "@/components/landing/Workspace";
 import { Audiences } from "@/components/landing/Audiences";
 import { Pricing } from "@/components/landing/Pricing";
 import { Principles } from "@/components/landing/Principles";
+import { Faq } from "@/components/landing/Faq";
 import { FinalCta } from "@/components/landing/FinalCta";
 import { Footer } from "@/components/landing/Footer";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -37,6 +38,7 @@ export default function Home() {
         <Audiences />
         <Pricing />
         <Principles />
+        <Faq />
         <FinalCta />
       </main>
       <Footer />
