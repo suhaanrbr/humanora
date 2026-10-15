@@ -103,9 +103,23 @@ function ProofSheet() {
         <p className="font-display mt-3 text-[1.375rem] leading-snug text-foreground">
           Our Q3 performance was strong: revenue rose 18% to £4.7 million [4]. The team earned it.
         </p>
-        <p className="mt-4 text-sm text-foreground-subtle">
-          Meaning check: 3 of 3 figures preserved · 37 words → 16
-        </p>
+        <dl className="mt-5 grid grid-cols-2 divide-x divide-border border-t border-border pt-4 text-sm">
+          <div className="pr-4">
+            <dt className="text-foreground-subtle">Meaning check</dt>
+            <dd className="mt-1 flex items-start gap-1.5 font-semibold text-success">
+              <CheckIcon className="mt-[0.2em] h-3.5 w-3.5 shrink-0" />
+              3 of 3 figures kept
+            </dd>
+          </div>
+          <div className="pl-4">
+            <dt className="text-foreground-subtle">Length</dt>
+            <dd className="mt-1 font-semibold text-foreground">
+              <span className="tabular-nums">37</span>
+              <span className="mx-1.5 text-foreground-subtle" aria-label="to">→</span>
+              <span className="tabular-nums">16</span> words
+            </dd>
+          </div>
+        </dl>
       </figcaption>
     </figure>
   );
@@ -121,6 +135,14 @@ function DocumentIcon({ className }: { className?: string }) {
         strokeLinejoin="round"
       />
       <path d="M13.5 3.5V8h4.5M8.5 12.5h7M8.5 16h5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <path d="m4 10.5 4 4 8-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
