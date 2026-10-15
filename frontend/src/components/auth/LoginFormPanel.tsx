@@ -169,10 +169,10 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
         </Link>
       </p>
 
-      <div className="mt-6 flex items-center justify-center gap-1.5 text-xs tracking-wide text-foreground-subtle">
-        <LockIcon className="h-3 w-3" />
+      <p className="mt-6 text-balance text-center text-xs leading-relaxed tracking-wide text-foreground-subtle">
+        <LockIcon className="mr-1.5 inline-block h-3.5 w-3.5 align-[-0.2em] text-foreground-muted" />
         Secure sign-in — your writing is never shared or sold.
-      </div>
+      </p>
     </div>
     </div>
   );
@@ -198,9 +198,13 @@ function AlertIcon({ className }: { className?: string }) {
 
 function LockIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true">
+      <path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        fillRule="evenodd"
+        fill="currentColor"
+        d="M4 7h8a1.5 1.5 0 0 1 1.5 1.5v4.5A1.5 1.5 0 0 1 12 14.5H4A1.5 1.5 0 0 1 2.5 13V8.5A1.5 1.5 0 0 1 4 7Zm4 2.25a1 1 0 0 0-.55 1.84V12a.55.55 0 0 0 1.1 0v-.91A1 1 0 0 0 8 9.25Z"
+      />
     </svg>
   );
 }
