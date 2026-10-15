@@ -24,7 +24,7 @@ export function ActivityChart({ data }: { data: DailyActivity[] }) {
           return (
             <g key={d.date}>
               {total === 0 ? (
-                <rect x={x} y={39} width={barWidth} height={0.6} rx={0.3} className="fill-white/10" />
+                <rect x={x} y={39} width={barWidth} height={0.6} rx={0.3} className="fill-line" />
               ) : (
                 <>
                   <rect

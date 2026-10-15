@@ -116,7 +116,7 @@ export function ProfileWorkspace(props: {
             visually with real workspace actions. */}
         <Link
           href="/"
-          className="focus-ring press-feedback group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.03] px-4 py-2 text-sm text-foreground-muted backdrop-blur-sm transition-colors hover:border-brand-purple/35 hover:text-foreground"
+          className="focus-ring press-feedback group inline-flex items-center gap-2 rounded-full border border-border-strong bg-line px-4 py-2 text-sm text-foreground-muted transition-colors hover:border-border-strong hover:text-foreground"
         >
           <HLogoIcon className="h-3.5 w-3.5 shrink-0 text-brand-purple" />
           Back to humanora.com
@@ -182,7 +182,7 @@ export function ProfileWorkspace(props: {
             onClick={() => setTab(t.id)}
             className={cn(
               "focus-ring press-feedback shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              tab === t.id ? "bg-brand-gradient text-white shadow-glow-sm" : "text-foreground-muted hover:bg-white/[0.04] hover:text-foreground"
+              tab === t.id ? "bg-brand-gradient text-white shadow-glow-sm" : "text-foreground-muted hover:bg-surface-hover hover:text-foreground"
             )}
           >
             {t.label}
@@ -237,7 +237,7 @@ function OverviewTab(
         )}
 
         {/* Lifetime — a strip, not a grid of stat cards. */}
-        <div className="glass-panel grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl sm:grid-cols-4 sm:divide-y-0">
+        <div className="glass-panel grid grid-cols-2 divide-x divide-y divide-border rounded-2xl sm:grid-cols-4 sm:divide-y-0">
           <Stat label="Words Humanized" value={props.lifetime.wordsHumanized.toLocaleString()} />
           <Stat label="Documents" value={props.lifetime.documentsCreated.toLocaleString()} />
           <Stat label="Study Sessions" value={props.lifetime.studySessions.toLocaleString()} />
@@ -414,7 +414,7 @@ function WritingTab(props: { modeUsage: ModeUsage[]; scans: ScanSummary[]; recen
             {props.modeUsage.map((m) => (
               <div key={m.mode} className="flex items-center gap-3">
                 <span className="w-24 shrink-0 truncate text-xs capitalize text-foreground-subtle">{m.mode}</span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-line">
                   <div className="bg-brand-gradient h-full rounded-full" style={{ width: `${(m.count / maxCount) * 100}%` }} />
                 </div>
                 <span className="w-8 shrink-0 text-right text-xs text-foreground-subtle">{m.count}</span>
@@ -512,7 +512,7 @@ function ActivityTab({ recentWork }: { recentWork: RecentWorkItem[] }) {
         {recentWork.map((item, i) => (
           <li key={`${item.kind}-${item.id}`} className="relative flex gap-4 pl-0.5">
             {i < recentWork.length - 1 && (
-              <span aria-hidden="true" className="absolute left-[5px] top-4 h-[calc(100%+0.75rem)] w-px bg-white/[0.08]" />
+              <span aria-hidden="true" className="absolute left-[5px] top-4 h-[calc(100%+0.75rem)] w-px bg-line" />
             )}
             <span
               aria-hidden="true"

@@ -81,6 +81,60 @@
   color-scheme: dark;
 }
 
+/* ---- Light: "Paper & Ink" ----
+   The same system printed the other way round: warm paper for the
+   page, deep navy ink for type (never flat black), and the editor's red
+   darkened until it clears WCAG AA as body-size text on paper. Brass
+   becomes a deep ochre for the same reason. Every text token below is
+   checked against --color-background and --color-surface. */
+:root[data-theme="light"] {
+  --color-background: #f6f2ea;
+  --color-background-elevated: #fbf8f3;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f1ece2;
+  --color-surface-hover: #efe9dd;
+  --color-surface-active: #e6dfd0;
+  --color-border: rgba(22, 35, 58, 0.12);
+  --color-border-strong: rgba(22, 35, 58, 0.24);
+  --color-line: rgba(22, 35, 58, 0.1);
+  --color-grid-dot: rgba(22, 35, 58, 0.06);
+
+  --color-foreground: #16233a;
+  --color-foreground-muted: #43506a;
+  --color-foreground-subtle: #636b80;
+
+  --color-brand-indigo: #a63b25;
+  --color-brand-purple: #b5432b;
+  --color-brand-violet: #b5432b;
+  --color-brand-pink: #c65a3d;
+  --color-brand-cyan: #84601d;
+
+  --color-success: #2c7442;
+  --color-warning: #94600f;
+  --color-danger: #bf3329;
+  --color-info: #2b5a84;
+
+  --color-accent-amber: #84601d;
+  --color-surface-warm: #16233a;
+  --color-surface-warm-foreground: #f6f2ea;
+
+  --shadow-glow-sm: 0 1px 2px rgba(22, 35, 58, 0.08);
+  --shadow-glow-md: 0 14px 34px -18px rgba(22, 35, 58, 0.25);
+  --shadow-glow-lg: 0 24px 60px -24px rgba(22, 35, 58, 0.3);
+  --shadow-card: 0 1px 2px rgba(22, 35, 58, 0.04);
+  --shadow-elevation-raised: 0 1px 2px rgba(22, 35, 58, 0.08);
+  --shadow-elevation-floating: 0 16px 40px -16px rgba(22, 35, 58, 0.22);
+  --shadow-elevation-modal: 0 28px 70px -20px rgba(22, 35, 58, 0.3);
+
+  --color-border-subtle: rgba(22, 35, 58, 0.07);
+  --color-border-interactive: rgba(181, 67, 43, 0.35);
+  --color-border-selected: rgba(181, 67, 43, 0.6);
+  --color-border-ai: rgba(132, 96, 29, 0.4);
+  --color-border-danger: rgba(191, 51, 41, 0.4);
+
+  color-scheme: light;
+}
+
 @theme inline {
   --color-background: var(--color-background);
   --color-background-elevated: var(--color-background-elevated);
@@ -459,7 +513,7 @@ h4 {
   transition: border-color 150ms, box-shadow 150ms;
 }
 .login-field:hover {
-  border-color: rgba(236, 229, 216, 0.3) !important;
+  border-color: var(--color-foreground-subtle) !important;
 }
 .login-field:focus {
   border-color: var(--color-brand-purple) !important;

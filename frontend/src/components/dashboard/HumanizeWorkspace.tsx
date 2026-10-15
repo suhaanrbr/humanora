@@ -255,7 +255,7 @@ export function HumanizeWorkspace({
 
           <span className="h-4 w-px bg-border" aria-hidden="true" />
 
-          <div className="inline-flex items-center gap-1 rounded-lg border border-white/[0.06] bg-black/20 p-1 text-xs">
+          <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-background p-1 text-xs">
             {strengths.map((s) => (
               <button
                 key={s.value}

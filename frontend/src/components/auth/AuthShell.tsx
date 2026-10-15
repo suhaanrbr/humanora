@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { AuthPanelTransition } from "@/components/auth/AuthPanelTransition";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import type { ReactNode } from "react";
 
 /**
@@ -41,12 +42,13 @@ export function AuthShell({ children }: { children: ReactNode }) {
       </aside>
 
       <main className="flex flex-1 flex-col">
-        <div className="flex h-16 items-center px-6 sm:px-10 lg:hidden">
-          <Link href="/" className="focus-ring rounded-sm" aria-label="Humanora home">
+        <div className="flex h-16 items-center justify-between px-6 sm:px-10 lg:justify-end">
+          <Link href="/" className="focus-ring rounded-sm lg:hidden" aria-label="Humanora home">
             <Logo size="sm" />
           </Link>
+          <ThemeToggle />
         </div>
-        <div className="flex flex-1 [align-items:safe_center] justify-center px-5 pb-12 pt-4 sm:px-10 lg:py-16">
+        <div className="flex flex-1 [align-items:safe_center] justify-center px-5 pb-12 pt-4 sm:px-10 lg:pb-16">
           <AuthPanelTransition>{children}</AuthPanelTransition>
         </div>
       </main>

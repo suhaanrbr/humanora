@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Newsreader, Source_Serif_4, Courier_Prime } from "next/font/google";
 import { SITE_URL, SITE_NAME, SITE_TAGLINE, SITE_DESCRIPTION } from "@/lib/config/site";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // Humanora is set entirely in serif type — a writing product should look
@@ -59,20 +60,21 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-// Humanora is dark-mode only by deliberate product decision — there is
-// no theme toggle and no Light/System option anywhere in the app.
-// globals.css's `:root` (with no data-theme attribute at all) already
-// resolves to the same dark palette that `:root[data-theme="dark"]`
-// does, so simply never setting the attribute keeps every page dark,
-// with no init script, no flash-of-wrong-theme concern, and no
-// hydration-mismatch risk to guard against.
+// Two palettes (globals.css): dark "ink" and light "paper". The inline
+// script in <head> sets <html data-theme> before first paint from the
+// visitor's saved choice or their OS preference; suppressHydrationWarning
+// covers that one attribute, which the server can't know in advance.
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${newsreader.variable} ${sourceSerif.variable} ${courierPrime.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

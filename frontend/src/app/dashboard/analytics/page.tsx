@@ -40,7 +40,7 @@ export default async function AnalyticsPage() {
         <p className="mt-1 text-sm text-foreground-muted">Your lifetime activity and this month&apos;s usage.</p>
       </div>
 
-      <div className="glass-panel grid grid-cols-2 divide-x divide-y divide-white/[0.06] rounded-2xl">
+      <div className="glass-panel grid grid-cols-2 divide-x divide-y divide-border rounded-2xl">
         <StatCard label="Words humanized" value={lifetime.wordsHumanized.toLocaleString()} />
         <StatCard label="Documents created" value={lifetime.documentsCreated.toLocaleString()} />
         <StatCard label="Study sessions" value={lifetime.studySessions.toLocaleString()} />

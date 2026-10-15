@@ -47,7 +47,7 @@ export function RecentWorkTabs({ items }: { items: RecentWorkItem[] }) {
                 ? "cursor-not-allowed text-foreground-subtle/50"
                 : tab === t.key
                   ? "bg-brand-gradient cursor-default text-white shadow-glow-sm"
-                  : "cursor-pointer text-foreground-muted hover:bg-white/[0.05] hover:text-foreground"
+                  : "cursor-pointer text-foreground-muted hover:bg-surface-hover hover:text-foreground"
             )}
           >
             {t.label}

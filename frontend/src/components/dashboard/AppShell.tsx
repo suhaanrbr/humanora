@@ -4,6 +4,7 @@ import { useState, type ReactElement, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo, LogoMark } from "@/components/brand/Logo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { CommandPalette, CommandTrigger, SearchIcon } from "@/components/dashboard/CommandPalette";
 import { useSignOut } from "@/lib/useSignOut";
@@ -137,7 +138,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             away via CommandPalette, so this slot only needs the one
             action that has to be a single, unambiguous, always-
             reachable click: log out. */}
-        <div className="border-t border-border p-3">
+        <div className="flex flex-col gap-1 border-t border-border p-3">
+          <ThemeToggle showLabel className="hidden justify-start px-4 lg:inline-flex" />
+          <ThemeToggle className="mx-auto lg:hidden" />
           <button
             type="button"
             onClick={() => handleSignOut()}
@@ -159,7 +162,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="min-w-0 flex-1">
           <CommandTrigger onOpen={() => setPaletteOpen(true)} />
         </div>
-        <div className="shrink-0">
+        <div className="flex shrink-0 items-center gap-1">
+          <ThemeToggle />
           <AccountMenu showAppLinks={false} />
         </div>
       </header>

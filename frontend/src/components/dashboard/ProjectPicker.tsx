@@ -98,7 +98,7 @@ export function ProjectPicker({
                   type="button"
                   disabled={saving}
                   onClick={() => assign(null, null)}
-                  className="focus-ring press-feedback cursor-pointer rounded-md px-2.5 py-1.5 text-left text-xs text-foreground-subtle hover:bg-white/[0.05] hover:text-foreground"
+                  className="focus-ring press-feedback cursor-pointer rounded-md px-2.5 py-1.5 text-left text-xs text-foreground-subtle hover:bg-surface-hover hover:text-foreground"
                 >
                   Remove from project
                 </button>
@@ -110,7 +110,7 @@ export function ProjectPicker({
                   disabled={saving}
                   onClick={() => assign(p.id, p.name)}
                   className={cn(
-                    "focus-ring press-feedback cursor-pointer truncate rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-white/[0.05]",
+                    "focus-ring press-feedback cursor-pointer truncate rounded-md px-2.5 py-1.5 text-left text-xs hover:bg-surface-hover",
                     p.id === currentProjectId ? "text-brand-purple" : "text-foreground-muted hover:text-foreground"
                   )}
                 >

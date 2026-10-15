@@ -22,7 +22,7 @@ export const buttonBaseStyles =
 export const buttonVariantStyles: Record<ButtonVariant, string> = {
   // Paper on ink: the highest-contrast thing on any screen, so the one
   // action that matters never needs color or a glow to be found.
-  primary: "bg-foreground text-background hover:bg-[#fffaf0] active:bg-foreground/90",
+  primary: "bg-foreground text-background hover:bg-foreground/88 active:bg-foreground/80",
   secondary:
     "bg-transparent text-foreground border border-border-strong hover:border-foreground/40 hover:bg-surface-hover",
   outline: "bg-transparent text-foreground border border-border-strong hover:bg-surface-hover",
