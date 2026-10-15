@@ -46,4 +46,3 @@ next-env.d.ts
 # committed. Disable generation entirely via `agentRules: false` in
 # next.config.ts if these become a recurring nuisance.
 /AGENTS.md
-/CLAUDE.md

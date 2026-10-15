@@ -295,7 +295,7 @@ Do not tightly couple the application to one AI provider.
 
 No model API key should ever be exposed in frontend code.
 
-**IMPORTANT:** The Claude Pro subscription used to build HUMANORA is separate from HUMANORA eventually needing an AI model to serve customers. Do not configure a production AI provider yet.
+**IMPORTANT:** The tooling used to build HUMANORA is separate from the AI model HUMANORA will eventually need to serve customers. Do not configure a production AI provider yet.
 
 ---
 
