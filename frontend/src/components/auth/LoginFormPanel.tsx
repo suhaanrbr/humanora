@@ -65,7 +65,14 @@ export function LoginFormPanel({ googleEnabled }: { googleEnabled: boolean }) {
     setLoading(true);
     setError("");
 
-    const { error: signInError } = await signIn.email({ email, password });
+    let signInError: { message?: string } | null;
+    try {
+      ({ error: signInError } = await signIn.email({ email, password }));
+    } catch {
+      // A network failure rejects rather than returning an error — without
+      // this the button would spin forever.
+      signInError = { message: "Couldn't reach the server. Check your connection and try again." };
+    }
 
     if (signInError) {
       setError(signInError.message ?? "Couldn't log in. Check your email and password.");
