@@ -18,6 +18,8 @@ import { QuickStart } from "@/components/dashboard/QuickStart";
 import { CountUp } from "@/components/dashboard/CountUp";
 import { StudyModeLink } from "@/components/dashboard/StudyModeLink";
 import { WelcomeCards, type GuideStep } from "@/components/dashboard/WelcomeCards";
+import { TipsTicker } from "@/components/dashboard/TipsTicker";
+import { ToolCarousel } from "@/components/dashboard/ToolCarousel";
 import { formatDate, formatDateTime } from "@/lib/formatDate";
 import { deriveTitle, timeSavedParts } from "@/lib/text";
 import { PLANS } from "@/lib/config/plans";
@@ -121,6 +123,7 @@ export default async function DashboardPage() {
             <ErrorState message="Couldn't load your stats right now." />
           </div>
         )}
+        <TipsTicker />
       </div>
 
       {/* Contextual nudge — real account state only (free trial still
@@ -175,6 +178,8 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
+
+      <ToolCarousel plan={plan} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:gap-12 xl:grid-cols-[minmax(0,1fr)_22rem]">
         {/* Main column: recent work */}

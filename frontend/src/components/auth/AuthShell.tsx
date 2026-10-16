@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { AuthPanelTransition } from "@/components/auth/AuthPanelTransition";
+import { AuthExamples } from "@/components/auth/AuthExamples";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import type { ReactNode } from "react";
 
@@ -11,8 +12,8 @@ import type { ReactNode } from "react";
  * `children` (the form panel) changes when a visitor switches between
  * them.
  *
- * Desktop: a quiet editorial column on the left (the wordmark, one
- * worked edit, the copyright line) and the form on the right. Below lg,
+ * Desktop: a quiet editorial column on the left (the wordmark, a slow
+ * carousel of worked edits, the copyright line) and the form on the right. Below lg,
  * the left column collapses to the wordmark above the form.
  */
 export function AuthShell({ children }: { children: ReactNode }) {
@@ -23,20 +24,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <Logo size="md" />
         </Link>
 
-        <figure className="max-w-md">
-          <p className="text-lg leading-relaxed">
-            <span className="mark-strike">
-              It is important to note that the results of the study were very significant in nature.
-            </span>
-          </p>
-          <p className="font-display mt-5 text-[2.5rem] leading-[1.1] text-foreground">
-            The results were significant.
-          </p>
-          <figcaption className="mt-8 border-t border-border pt-5 text-[0.9375rem] leading-relaxed text-foreground-muted">
-            Same finding, a quarter of the words. Humanora edits AI-assisted drafts into writing that
-            sounds like you, and keeps every fact where you left it.
-          </figcaption>
-        </figure>
+        <AuthExamples />
 
         <p className="text-sm text-foreground-subtle">&copy; {new Date().getFullYear()} Humanora</p>
       </aside>

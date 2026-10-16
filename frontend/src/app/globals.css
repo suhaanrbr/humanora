@@ -754,3 +754,83 @@ h4 {
 :root[data-theme="light"] .only-dark {
   display: none;
 }
+
+/* ==========================================================================
+   Marquee — a continuously scrolling ticker (see components/ui/Marquee.tsx).
+   Two identical tracks side by side, each sliding its own width, so the
+   loop never shows a seam. Pauses under the pointer or keyboard focus;
+   reduced-motion readers get a still, scrollable row instead.
+   ========================================================================== */
+.marquee {
+  --marquee-duration: 40s;
+  --marquee-gap: 2.5rem;
+  display: flex;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+.marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--marquee-gap);
+  min-width: 100%;
+  padding-right: var(--marquee-gap);
+}
+@keyframes marquee-scroll {
+  to {
+    transform: translateX(-100%);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .marquee-track {
+    animation: marquee-scroll var(--marquee-duration) linear infinite;
+  }
+  .marquee[data-reverse] .marquee-track {
+    animation-direction: reverse;
+  }
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .marquee-track + .marquee-track {
+    display: none;
+  }
+}
+
+/* A small editor's-red diamond between ticker items. */
+.ticker-sep {
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  flex-shrink: 0;
+  transform: rotate(45deg);
+  background-color: var(--color-brand-purple);
+  opacity: 0.8;
+}
+
+/* Carousel (components/ui/Carousel.tsx): a native scroll-snap track, so
+   touch, trackpad and keyboard scrolling all work without a library. */
+.carousel-track {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track {
+    scroll-behavior: auto;
+  }
+}
+.carousel-progress {
+  transform-origin: left;
+  transition: transform var(--motion-duration-normal) var(--motion-ease-standard);
+}
