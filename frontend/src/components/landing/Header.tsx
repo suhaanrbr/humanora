@@ -97,7 +97,7 @@ export function Header() {
                   Log in
                 </Link>
                 <ButtonLink href="/signup" variant="primary" size="sm">
-                  Start writing
+                  Get Started
                 </ButtonLink>
               </>
             )}
@@ -157,7 +157,7 @@ export function Header() {
                     className="w-full"
                     onClick={() => setMenuOpen(false)}
                   >
-                    Start writing
+                    Get Started
                   </ButtonLink>
                   <ButtonLink
                     href="/login"
