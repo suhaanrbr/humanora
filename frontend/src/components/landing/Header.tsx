@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/ButtonLink";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { AccountMenu } from "@/components/landing/AccountMenu";
 import { useSession } from "@/lib/auth-client";
 import { useSignOut } from "@/lib/useSignOut";
@@ -84,7 +84,6 @@ export function Header() {
           </nav>
 
           <div className="hidden items-center gap-5 lg:flex">
-            <ThemeToggle />
             {isPending ? (
               <div className="h-9 w-24" aria-hidden="true" />
             ) : session ? (
@@ -104,18 +103,16 @@ export function Header() {
             )}
           </div>
 
-          <div className="flex items-center gap-1 lg:hidden">
-            <ThemeToggle />
-            <button
-              type="button"
-              className="focus-ring inline-flex h-10 items-center gap-2 rounded-sm px-1 text-[0.9375rem] text-foreground-muted hover:text-foreground"
-              aria-expanded={menuOpen}
-              aria-controls="mobile-nav"
-              onClick={() => setMenuOpen((open) => !open)}
-            >
-              {menuOpen ? "Close" : "Menu"}
-            </button>
-          </div>
+          <button
+            type="button"
+            className="focus-ring -mr-2 inline-flex h-11 w-11 items-center justify-center rounded-md text-foreground transition-colors hover:bg-surface-hover lg:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <MenuIcon open={menuOpen} className="h-5 w-5" />
+          </button>
         </div>
 
         <div
@@ -174,6 +171,7 @@ export function Header() {
                 </>
               )}
             </div>
+            <ThemeSwitcher showLabels className="mt-6 border-t border-border pt-5" />
           </nav>
         </div>
       </header>
@@ -195,5 +193,28 @@ function MobileSignOut({ onDone }: { onDone: () => void }) {
     >
       {signingOut ? "Signing out…" : "Log out"}
     </button>
+  );
+}
+
+/** Three bars that fold into a cross while the menu is open. */
+function MenuIcon({ open, className }: { open: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <path
+        d={open ? "M5 5l10 10" : "M3 6h14"}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        className="transition-[d] duration-200"
+      />
+      {!open && <path d="M3 10h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />}
+      <path
+        d={open ? "M15 5L5 15" : "M3 14h14"}
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        className="transition-[d] duration-200"
+      />
+    </svg>
   );
 }

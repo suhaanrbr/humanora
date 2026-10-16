@@ -44,9 +44,9 @@ export function AnnouncementBar() {
         <span className="hidden shrink-0 rounded-sm bg-brand-indigo px-1.5 py-0.5 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-white sm:inline">
           New
         </span>
-        <p className="truncate text-center">
-          <span className="sm:hidden">Six new AI tools are here. </span>
-          <span className="hidden sm:inline">
+        <p className="text-balance text-center leading-snug">
+          <span className="xl:hidden">Six new AI tools are here. </span>
+          <span className="hidden xl:inline">
             Grammar Checker, Paraphraser, Summarizer, Quiz Generator, Fact Checker and Citation Generator are now in Humanora.{" "}
           </span>
           <Link href="/tools" className="focus-ring rounded-sm font-semibold underline underline-offset-4">

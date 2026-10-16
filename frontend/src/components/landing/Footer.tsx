@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { Container } from "@/components/ui/Container";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { CONTACT_EMAIL } from "@/lib/config/site";
 
 interface FooterColumn {
@@ -80,9 +81,13 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col gap-2 border-t border-border pt-6 text-sm text-foreground-subtle sm:flex-row sm:justify-between">
-          <p>© {new Date().getFullYear()} Humanora</p>
-          <p>Payments processed securely by Razorpay.</p>
+        <div className="mt-16 flex flex-col gap-5 border-t border-border pt-6 text-sm text-foreground-subtle md:flex-row md:items-center md:justify-between">
+          <p>
+            © {new Date().getFullYear()} Humanora
+            <span className="mx-2 text-border-strong" aria-hidden="true">·</span>
+            Payments processed securely by Razorpay.
+          </p>
+          <ThemeSwitcher className="md:justify-end" />
         </div>
       </Container>
     </footer>

@@ -172,7 +172,7 @@ export function Carousel({
         <div className="mt-5 flex items-center gap-4">
           {controlsLead}
           {indicator === "dots" ? (
-            <div className="flex items-center gap-1.5">
+            <div className="-mx-1 flex items-center">
               {slides.map((_, i) => (
                 <button
                   key={i}
@@ -180,7 +180,7 @@ export function Carousel({
                   onClick={() => goTo(i)}
                   aria-label={`Go to slide ${i + 1}`}
                   aria-current={i === active ? "true" : undefined}
-                  className="focus-ring group grid h-6 place-items-center rounded-sm px-0.5"
+                  className="focus-ring group grid h-6 min-w-6 place-items-center rounded-sm"
                 >
                   <span
                     className={cn(

@@ -3,10 +3,10 @@
 import { useDeferredValue, useMemo, useState, type ReactNode } from "react";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 import { analyzeTells, TELL_LABELS, type TellKind, type TellsReport } from "@/lib/tells";
+import { TELLS_SAMPLES } from "@/lib/config/tellsSamples";
 import { cn } from "@/lib/cn";
 
-const SAMPLE =
-  "In today's fast-paced digital landscape, it is important to note that effective communication plays a crucial role in success. Teams must leverage robust tools to foster collaboration. A clear, concise, and compelling message can unlock new opportunities. Ultimately, the right approach depends on a variety of factors.";
+const SAMPLE = TELLS_SAMPLES[0].text;
 
 const KINDS: TellKind[] = ["filler", "inflated", "hedge", "triplet"];
 const MAX_CHARS = 5000;
@@ -28,18 +28,37 @@ export function TellsLab() {
         <div className="flex flex-col border-b border-border lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between border-b border-border px-5 py-3 text-sm text-foreground-subtle">
             <label htmlFor="tells-input">Your text</label>
-            <div className="flex items-center gap-4">
-              {text !== SAMPLE && (
-                <button type="button" onClick={() => setText(SAMPLE)} className="focus-ring rounded-sm hover:text-foreground">
-                  Use sample
+            {text && (
+              <button type="button" onClick={() => setText("")} className="focus-ring rounded-sm hover:text-foreground">
+                Clear
+              </button>
+            )}
+          </div>
+          {/* One-click samples, so nobody has to go find a draft first.
+              The last one is human-written: the checker staying quiet on
+              it is the point. */}
+          <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto border-b border-border px-5 py-2.5">
+            <span className="shrink-0 text-sm text-foreground-subtle">Try:</span>
+            {TELLS_SAMPLES.map((sample) => {
+              const active = text === sample.text;
+              return (
+                <button
+                  key={sample.id}
+                  type="button"
+                  onClick={() => setText(sample.text)}
+                  aria-pressed={active}
+                  className={cn(
+                    "focus-ring inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] transition-colors",
+                    active
+                      ? "border-brand-purple/50 bg-brand-purple/10 text-foreground"
+                      : "border-border text-foreground-muted hover:border-border-strong hover:text-foreground"
+                  )}
+                >
+                  {sample.human && <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />}
+                  {sample.label}
                 </button>
-              )}
-              {text && (
-                <button type="button" onClick={() => setText("")} className="focus-ring rounded-sm hover:text-foreground">
-                  Clear
-                </button>
-              )}
-            </div>
+              );
+            })}
           </div>
           <textarea
             id="tells-input"
@@ -62,6 +81,13 @@ export function TellsLab() {
           <div className="min-h-[260px] flex-1 whitespace-pre-wrap px-5 py-4 text-[1.0625rem] leading-[1.9] text-foreground-muted">
             {report.words === 0 ? (
               <span className="text-foreground-subtle">Marks will appear here as you type.</span>
+            ) : total === 0 && report.words >= 20 ? (
+              <>
+                <Highlighted text={deferred} report={report} />
+                <span className="mt-4 flex items-center gap-2 text-sm text-success">
+                  <span aria-hidden="true">✓</span> Nothing an editor would mark here. This reads like a person wrote it.
+                </span>
+              </>
             ) : (
               <Highlighted text={deferred} report={report} />
             )}

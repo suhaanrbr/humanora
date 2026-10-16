@@ -161,8 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="min-w-0 flex-1">
           <CommandTrigger onOpen={() => setPaletteOpen(true)} />
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <ThemeToggle />
+        <div className="flex shrink-0 items-center">
           <AccountMenu showAppLinks={false} />
         </div>
       </header>

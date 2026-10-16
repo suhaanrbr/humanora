@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSession } from "@/lib/auth-client";
 import { useSignOut } from "@/lib/useSignOut";
+import { ThemeSwitcher } from "@/components/ui/ThemeSwitcher";
 import { cn } from "@/lib/cn";
 
 const links = [
@@ -83,7 +84,7 @@ export function AccountMenu({
       {open && (
         <div
           className={cn(
-            "pearl-glass absolute w-56 rounded-lg p-2 shadow-glow-sm",
+            "pearl-glass absolute z-50 w-64 rounded-lg p-2 shadow-glow-sm",
             dropUp ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
           )}
         >
@@ -136,6 +137,7 @@ export function AccountMenu({
               Settings
             </Link>
           </div>
+          <ThemeSwitcher label="Theme" className="border-t border-border px-3 py-2.5" />
           <div className="border-t border-border pt-1.5">
             <button
               type="button"
